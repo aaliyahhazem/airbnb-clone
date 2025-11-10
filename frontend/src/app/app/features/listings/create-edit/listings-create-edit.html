@@ -1,0 +1,74 @@
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">{{ editMode ? 'Edit Listing' : 'Add Listing' }}</h2>
+    <button class="btn btn-outline-secondary" (click)="goBack()">Back</button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="row g-3">
+    <!-- Title -->
+    <div class="col-md-6">
+      <label class="form-label">Title</label>
+      <input type="text" class="form-control" formControlName="title" [class.is-invalid]="isInvalid('title')">
+      <div class="invalid-feedback">Title is required.</div>
+    </div>
+
+    <!-- Location -->
+    <div class="col-md-6">
+      <label class="form-label">Location</label>
+      <input type="text" class="form-control" formControlName="location" [class.is-invalid]="isInvalid('location')">
+      <div class="invalid-feedback">Location is required.</div>
+    </div>
+
+    <!-- Price -->
+    <div class="col-md-4">
+      <label class="form-label">Price</label>
+      <input type="number" class="form-control" formControlName="price" min="1" [class.is-invalid]="isInvalid('price')">
+      <div class="invalid-feedback">Price must be at least 1.</div>
+    </div>
+
+    <!-- Rating -->
+    <div class="col-md-4">
+      <label class="form-label">Rating (0–5)</label>
+      <input type="number" class="form-control" formControlName="rating" min="0" max="5">
+    </div>
+
+    <!-- Date -->
+    <div class="col-md-4">
+      <label class="form-label">Available Date</label>
+      <input type="date" class="form-control" formControlName="dateAvailable">
+    </div>
+
+    <!-- Description -->
+    <div class="col-12">
+      <label class="form-label">Description</label>
+      <textarea rows="3" class="form-control" formControlName="description"></textarea>
+    </div>
+
+    <!-- Image upload -->
+    <div class="col-md-6">
+      <label class="form-label d-block">Image</label>
+      <input type="file" class="form-control" accept="image/*" (change)="onFileChange($event)">
+      <small class="text-muted">Temporary client preview; will switch to API upload later.</small>
+    </div>
+
+    <div class="col-md-6" *ngIf="imagePreview">
+      <label class="form-label d-block">Preview</label>
+      <img [src]="imagePreview" class="img-fluid rounded border" alt="Preview">
+    </div>
+
+    <div class="col-12 d-flex gap-2 mt-2">
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+        {{ editMode ? 'Update' : 'Create' }}
+      </button>
+
+      <button type="button" class="btn btn-outline-secondary" (click)="form.reset()">Reset</button>
+
+      <button *ngIf="editMode && currentId"
+              type="button"
+              class="btn btn-outline-danger ms-auto"
+              (click)="onDelete()">
+        Delete
+      </button>
+    </div>
+  </form>
+</div>

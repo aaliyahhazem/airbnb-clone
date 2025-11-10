@@ -1,0 +1,45 @@
+<div class="container py-4" *ngIf="listing; else notFound">
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <img
+        [src]="listing.imageUrl || 'https://via.placeholder.com/1000x600?text=Listing'"
+        class="img-fluid rounded border w-100"
+        alt="Listing image"
+      />
+    </div>
+
+    <div class="col-lg-6">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h2 class="mb-0">{{ listing.title }}</h2>
+        <a class="btn btn-outline-primary" [routerLink]="['/listings/edit', listing.id]">Edit</a>
+      </div>
+
+      <div class="text-muted mb-3">
+        <span class="me-3">📍 {{ listing.location }}</span>
+        <span>⭐ {{ listing.rating || 0 }}/5</span>
+      </div>
+
+      <h4 class="text-primary mb-3">${{ listing.price }}</h4>
+
+      <div class="mb-2">
+        <strong>Available:</strong> {{ listing.dateAvailable || '—' }}
+      </div>
+
+      <p class="mt-3">{{ listing.description }}</p>
+
+      <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-secondary" (click)="goBack()">Back</button>
+        <a class="btn btn-success" [routerLink]="['/booking/create', listing.id]">Book now</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #notFound>
+  <div class="container py-5">
+    <div class="alert alert-warning">
+      Listing was not found.
+      <a class="alert-link" [routerLink]="['/listings']">Go back to listings</a>.
+    </div>
+  </div>
+</ng-template>
