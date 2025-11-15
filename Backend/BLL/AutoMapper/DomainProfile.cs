@@ -1,4 +1,8 @@
 ﻿
+using AutoMapper;
+using BLL.ModelVM.Notification;
+using DAL.Entities;
+
 namespace BLL.AutoMapper
 {
     internal class DomainProfile : Profile

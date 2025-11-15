@@ -2,7 +2,21 @@
 {
     public interface IListingImageRepository : IGenericRepository<ListingImage>
     {
-        Task<IEnumerable<ListingImage>> GetImagesByListingIdAsync(int listingId);      // All images of a listing
-        Task DeleteImagesByListingIdAsync(int listingId);                              // Delete all images for a listing
+        //AddImagesToListAsync
+        Task<List<ListingImage>> AddImagesToListAsync(int listingId, string imgPath ,string CreatedBy);
+        //DeleteImagesFromListAsync
+        Task<bool> DeleteImagesFromListAsync(int listingId,int listingImageId, string DeletedBy);
+
+        //get All Images By ListingId for view details
+        Task<List<ListingImage>> GetAllImagesByListingIdAsync(int listingId);
+
+        //update Image in listing
+        Task<ListingImage> UpdateImageInListingAsync(int listingId, int listingImageId, string newImageUrl, string UpdatedBy);
+        
+
+
+
+
+
     }
 }

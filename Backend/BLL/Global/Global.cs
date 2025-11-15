@@ -12,3 +12,5 @@ global using DAL.Repo.Abstraction;
 global using BLL.AutoMapper;
 global using BLL.Services.Impelementation;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.AspNetCore.Http;
+global using System.ComponentModel.DataAnnotations;

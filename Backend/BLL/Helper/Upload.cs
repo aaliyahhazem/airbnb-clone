@@ -1,0 +1,67 @@
+﻿using Microsoft.AspNetCore.Http;
+
+namespace BLL.Helper
+{
+    public static class Upload
+    {
+        public static string UploadFile(string FolderName, IFormFile File)
+        {
+
+            try
+            {
+                //catch the folder Path and the file name in server
+                // 1 ) Get Directory
+                string FolderPath = Directory.GetCurrentDirectory() + "/wwwroot/" + FolderName;
+
+
+                //2) Get File Name
+                string FileName = Guid.NewGuid() + Path.GetFileName(File.FileName);
+                //Guid => Word contain from 36 character
+
+                // 3) Merge Path with File Name
+                string FinalPath = Path.Combine(FolderPath, FileName);
+                //combine put /
+
+                //4) Save File As Streams "Data Overtime"
+                using (var Stream = new FileStream(FinalPath, FileMode.Create))
+                {
+                    File.CopyTo(Stream);
+                }
+
+                return FileName;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+
+        }
+
+
+        public static string RemoveFile(string folderName, string fileName)
+        {
+            try
+            {
+
+                // Combine the correct path to the file
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", folderName, fileName);
+
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                    return "File Deleted Successfully";
+                }
+
+                return "File Not Found";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+
+
+
+    }
+}
