@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
+﻿
 namespace BLL.ModelVM.ListingVM
 {
     public class UpdateListingVM

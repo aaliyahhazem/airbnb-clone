@@ -1,12 +1,4 @@
 ﻿
-
-using BLL.Helper;
-using BLL.ModelVM.LIstingVM;
-using BLL.Rsponse;
-using BLL.Services.Abstractions;
-using DAL.Entities;
-using DAL.Repo.Abstraction;
-
 namespace BLL.Services.Impelementation
 {
     class ListingService /*: IListingService*/

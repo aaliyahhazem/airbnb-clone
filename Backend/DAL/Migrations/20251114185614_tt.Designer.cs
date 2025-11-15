@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251110111816_CustomIdentityTableNames")]
-    partial class CustomIdentityTableNames
+    [Migration("20251114185614_tt")]
+    partial class tt
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -267,6 +267,9 @@ namespace DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
+
+                    b.Property<bool>("IsSentViaFCM")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
                         .IsRequired()

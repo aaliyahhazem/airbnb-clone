@@ -1,10 +1,10 @@
+
 using BLL.AutoMapper;
+using BLL.Common;
 using DAL.Common;
 using DAL.Database;
 using DAL.Entities;
 using DAL.Enum;
-using DAL.Repo.Abstraction;
-using DAL.Repo.Implementation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,30 +27,17 @@ namespace PL
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
             })
-            .AddEntityFrameworkStores<AppDbContext>()
+            .AddEntityFrameworkStores<AppDbContext>();
 
-            .AddDefaultTokenProviders();
-            //----->Abdelrahman Mohamed Hamed
-            // Repositories
-            //builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            //builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            //builder.Services.AddScoped<IUserRepository, UserRepository>();
-            //builder.Services.AddScoped<IListingRepository, ListingRepository>();
-            //builder.Services.AddScoped<IBookingRepository, BookingRepository>();
-            //builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
-            //builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
-            //builder.Services.AddScoped<IMessageRepository, MessageRepository>();
-            //builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-            //builder.Services.AddScoped<IListingImageRepository, ListingImageRepository>();
-            //builder.Services.AddScoped<IAmenityRepository, AmenityRepository>();
-            //builder.Services.AddScoped<IKeywordRepository, KeywordRepository>();
-
-            builder.Services.AddBussinesInDAL(); //Modular Data Access Layer
-
+            // add modular in program
+            builder.Services.AddBuissinesInBLL();
+            builder.Services.AddBuissinesInDAL();
             builder.Services.AddAutoMapper(cfg => cfg.AddProfile<ListingProfile>());//AutoMapperForListing BLL
 
-            // End of Abdelrahman Mohamed Hamed
+
+
+
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
