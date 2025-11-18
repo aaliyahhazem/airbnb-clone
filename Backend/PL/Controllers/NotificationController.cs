@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.SignalR;
 using PL.Hubs;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PL.Controllers
 {
-    [Route("api/[controller]")] 
+    [Route("api/[controller]")]
     [ApiController]
-   // [Authorize]   // Require JWT
+    [Authorize]
     public class NotificationController : ControllerBase
     {
         private readonly INotificationService _notificationService;
@@ -24,7 +25,9 @@ namespace PL.Controllers
         // Helper to read user id from token
         private Guid GetUserId()
         {
-            //return Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+            var sub = User.FindFirst("sub")?.Value;
+            if (!string.IsNullOrWhiteSpace(sub) && Guid.TryParse(sub, out var uid)) return uid;
+            // fallback for dev
             return Guid.Parse("70188af8-4575-49d8-5822-08de25168bf9");
         }
         //--------------------------- GET ALL ------------------------------
@@ -132,7 +135,7 @@ namespace PL.Controllers
 
         // --------------------------- SEND PENDING (Cron / Background Job) --
         [HttpPost("send-pending")]
-        [AllowAnonymous] 
+        [AllowAnonymous]
         public async Task<IActionResult> SendPending()
         {
             var result = await _notificationService.SendPendingNotificationsAsync();

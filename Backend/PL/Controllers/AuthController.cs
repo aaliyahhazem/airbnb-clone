@@ -1,6 +1,5 @@
-using BLL.ModelVM.Response;
-using BLL.Services.Abstractions;
-using Microsoft.AspNetCore.Authorization;
+
+using DAL.Enum;
 using Microsoft.AspNetCore.Mvc;
 
 namespace PL.Controllers
@@ -15,8 +14,8 @@ namespace PL.Controllers
  {
  _identityService = identityService;
  }
-
- [HttpPost("register")]
+        [Authorize(Roles = nameof(UserRole.Admin))]
+        [HttpPost("register")]
  public async Task<IActionResult> Register([FromBody] RegisterDto dto)
  {
  var res = await _identityService.RegisterAsync(dto.Email, dto.Password, dto.FullName, dto.FirebaseUid, dto.Role);
@@ -67,6 +66,34 @@ namespace PL.Controllers
  if (!res.Success) return BadRequest(res);
  return Ok(res);
  }
+
+ [HttpPost("token")]
+ public IActionResult Token([FromBody] TokenRequestDto dto)
+ {
+ if (dto == null) return BadRequest("Request body is required.");
+
+ if (!Guid.TryParse(dto.UserId, out var userId))
+ return BadRequest("Invalid UserId GUID.");
+
+ Guid? orderId = null;
+ if (!string.IsNullOrWhiteSpace(dto.OrderId))
+ {
+ if (Guid.TryParse(dto.OrderId, out var o)) orderId = o;
+ else return BadRequest("Invalid OrderId GUID.");
+ }
+
+ Guid? listingId = null;
+ if (!string.IsNullOrWhiteSpace(dto.ListingId))
+ {
+ if (Guid.TryParse(dto.ListingId, out var l)) listingId = l;
+ else return BadRequest("Invalid ListingId GUID.");
+ }
+
+ var role = string.IsNullOrWhiteSpace(dto.Role) ? "Guest" : dto.Role;
+
+ var token = _identityService.GenerateToken(userId, role, orderId, listingId);
+ return Ok(new { token });
+ }
  }
 
  // DTOs
@@ -76,4 +103,5 @@ namespace PL.Controllers
  public record ResetPasswordDto(string Email, string Token, string NewPassword);
  public record OAuthDto(string Provider, string ExternalToken);
  public record FaceDto(string FaceData);
+ public record TokenRequestDto(string UserId, string Role, string? OrderId, string? ListingId);
 }

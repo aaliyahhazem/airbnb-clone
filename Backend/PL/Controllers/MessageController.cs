@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using PL.Hubs;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PL.Controllers
 {
  [Route("api/[controller]")]
  [ApiController]
+ [Authorize]
  public class MessageController : ControllerBase
  {
  private readonly IMessageService _messageService;
@@ -22,7 +24,9 @@ namespace PL.Controllers
 
  private Guid GetUserId()
  {
- // return Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+ var sub = User.FindFirst("sub")?.Value;
+ if (!string.IsNullOrWhiteSpace(sub) && Guid.TryParse(sub, out var uid)) return uid;
+ // fallback for dev
  return Guid.Parse("729a642d-9885-40b2-2817-08de255a2d0a");
  }
 

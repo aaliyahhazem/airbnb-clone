@@ -16,6 +16,10 @@
             services.AddScoped<IAdminService, AdminService>();
             
             services.AddAutoMapper(x => x.AddProfile(new DomainProfile()));
+            // Token service
+            services.AddSingleton<ITokenService, TokenService>();
+            // Ensure IdentityService is registered with token service injected
+            services.AddScoped<IIdentityService, IdentityService>();
             return services;
         }
     }

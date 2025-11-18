@@ -10,5 +10,6 @@ namespace BLL.Services.Abstractions
  Task<Response<bool>> ResetPasswordAsync(string email, string token, string newPassword);
  Task<Response<string>> OAuthLoginAsync(string provider, string externalToken);
  Task<Response<bool>> VerifyFaceIdAsync(Guid userId, string faceData);
+ string GenerateToken(Guid userId, string role, Guid? orderId = null, Guid? listingId = null);
  }
 }

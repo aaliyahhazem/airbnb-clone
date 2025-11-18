@@ -77,6 +77,20 @@ namespace PL
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.FromMinutes(2)
                     };
+                    // Allow SignalR to read token from querystring for hubs
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/notificationsHub") || path.StartsWithSegments("/messagesHub")))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
             }
 

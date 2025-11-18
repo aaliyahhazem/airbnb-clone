@@ -12,43 +12,52 @@ namespace BLL.Services.Impelementation
  private readonly UserManager<User> _userManager;
  private readonly SignInManager<User> _signInManager;
  private readonly RoleManager<IdentityRole<Guid>> _roleManager;
- 
- public IdentityService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole<Guid>> roleManager)
+ private readonly ITokenService _tokenService;
+
+ public IdentityService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole<Guid>> roleManager, ITokenService tokenService)
  {
  _userManager = userManager;
  _signInManager = signInManager;
  _roleManager = roleManager;
+ _tokenService = tokenService;
  }
- 
+
  public async Task<Response<string>> RegisterAsync(string email, string password, string fullName, string? firebaseUid = null, string role = "Guest")
  {
  var existing = await _userManager.FindByEmailAsync(email);
  if (existing != null) return Response<string>.FailResponse("Email already registered");
- 
+
  var user = User.Create(fullName, Enum.Parse<DAL.Enum.UserRole>(role));
  user.Email = email;
  user.UserName = email;
  var result = await _userManager.CreateAsync(user, password);
  if (!result.Succeeded) return Response<string>.FailResponse(string.Join(";", result.Errors.Select(e => e.Description)));
- 
+
  if (!await _roleManager.RoleExistsAsync(role))
  await _roleManager.CreateAsync(new IdentityRole<Guid>(role));
- 
+
  await _userManager.AddToRoleAsync(user, role);
- return Response<string>.SuccessResponse(user.Id.ToString());
+
+ // generate token for the new user
+ var token = _tokenService.GenerateToken(user.Id, role);
+ return Response<string>.SuccessResponse(token);
  }
- 
+
  public async Task<Response<string>> LoginAsync(string email, string password)
  {
  var user = await _userManager.FindByEmailAsync(email);
  if (user == null) return Response<string>.FailResponse("Invalid credentials");
  var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
  if (!result.Succeeded) return Response<string>.FailResponse("Invalid credentials");
- 
- // For simplicity return user id as token placeholder
- return Response<string>.SuccessResponse(user.Id.ToString());
+
+ // determine role
+ var roles = await _userManager.GetRolesAsync(user);
+ var role = roles.FirstOrDefault() ?? "Guest";
+
+ var token = _tokenService.GenerateToken(user.Id, role);
+ return Response<string>.SuccessResponse(token);
  }
- 
+
  public async Task<Response<bool>> SendPasswordResetAsync(string email)
  {
  var user = await _userManager.FindByEmailAsync(email);
@@ -57,7 +66,7 @@ namespace BLL.Services.Impelementation
  // TODO: send email with token
  return Response<bool>.SuccessResponse(true);
  }
- 
+
  public async Task<Response<bool>> ResetPasswordAsync(string email, string token, string newPassword)
  {
  var user = await _userManager.FindByEmailAsync(email);
@@ -66,7 +75,7 @@ namespace BLL.Services.Impelementation
  if (!result.Succeeded) return Response<bool>.FailResponse(string.Join(";", result.Errors.Select(e=>e.Description)));
  return Response<bool>.SuccessResponse(true);
  }
- 
+
  public async Task<Response<string>> OAuthLoginAsync(string provider, string externalToken)
  {
  // Very simplified: in real app validate token with provider
@@ -81,9 +90,13 @@ namespace BLL.Services.Impelementation
  await _userManager.CreateAsync(user);
  await _userManager.AddToRoleAsync(user, "Guest");
  }
- return Response<string>.SuccessResponse(user.Id.ToString());
+
+ var roles = await _userManager.GetRolesAsync(user);
+ var role = roles.FirstOrDefault() ?? "Guest";
+ var token = _tokenService.GenerateToken(user.Id, role);
+ return Response<string>.SuccessResponse(token);
  }
- 
+
  public async Task<Response<bool>> VerifyFaceIdAsync(Guid userId, string faceData)
  {
  // placeholder for face id verification
@@ -91,6 +104,11 @@ namespace BLL.Services.Impelementation
  if (user == null) return Response<bool>.FailResponse("User not found");
  // pretend verification succeeded
  return Response<bool>.SuccessResponse(true);
+ }
+
+ public string GenerateToken(Guid userId, string role, Guid? orderId = null, Guid? listingId = null)
+ {
+ return _tokenService.GenerateToken(userId, role, orderId, listingId);
  }
  }
 }
