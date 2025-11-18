@@ -20,7 +20,7 @@
 
         private Booking() { }
 
-        // Create a booking
+        // CreateImage a booking
         internal static Booking Create(
             int listingId,
             Guid guestId,

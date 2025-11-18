@@ -10,7 +10,7 @@
 
         private Amenity() { }
 
-        //Create a new amenity
+        //CreateImage a new amenity
         public static Amenity Create(string name)
         {
             return new Amenity

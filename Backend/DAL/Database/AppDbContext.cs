@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
-
-namespace DAL.Database
+﻿namespace DAL.Database
 {
     public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     {
@@ -29,10 +26,8 @@ namespace DAL.Database
             builder.Entity<IdentityUserLogin<Guid>>().ToTable("UserLogins");
             builder.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
             builder.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens");
-            //abdelrahman mohamed hamed (admin queries to include deleted rows)Calls IgnoreQueryFilters().
             builder.Entity<Listing>().HasQueryFilter(l => !l.IsDeleted);
             builder.Entity<ListingImage>().HasQueryFilter(li => !li.IsDeleted);
-            //end abdelrahman mohamed hamed
             // Apply all entity configurations
             builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }

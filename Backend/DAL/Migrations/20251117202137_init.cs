@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class tt : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -104,35 +104,6 @@ namespace DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Listings",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
-                    PricePerNight = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Location = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Latitude = table.Column<decimal>(type: "decimal(9,6)", nullable: false),
-                    Longitude = table.Column<decimal>(type: "decimal(9,6)", nullable: false),
-                    MaxGuests = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    IsPromoted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    PromotionEndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Listings", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Listings_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Messages",
                 columns: table => new
                 {
@@ -171,7 +142,13 @@ namespace DAL.Migrations
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false, defaultValue: "System"),
                     IsRead = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     IsSentViaFCM = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    DeletedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -288,16 +265,34 @@ namespace DAL.Migrations
                 {
                     table.PrimaryKey("PK_Bookings", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Bookings_Listings_ListingId",
-                        column: x => x.ListingId,
-                        principalTable: "Listings",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_Bookings_Users_GuestId",
                         column: x => x.GuestId,
                         principalTable: "Users",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    BookingId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TransactionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Success"),
+                    PaidAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Payments_Bookings_BookingId",
+                        column: x => x.BookingId,
+                        principalTable: "Bookings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -316,12 +311,6 @@ namespace DAL.Migrations
                         principalTable: "Amenities",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ListingAmenities_Listings_ListingsId",
-                        column: x => x.ListingsId,
-                        principalTable: "Listings",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -330,16 +319,70 @@ namespace DAL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    ImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     ListingId = table.Column<int>(type: "int", nullable: false),
-                    ImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    CreatedBy = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    UpdatedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    DeletedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ListingImages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Listings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
+                    PricePerNight = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Location = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Latitude = table.Column<double>(type: "float", nullable: false),
+                    Longitude = table.Column<double>(type: "float", nullable: false),
+                    MaxGuests = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    IsPromoted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    PromotionEndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MainImageId = table.Column<int>(type: "int", nullable: true),
+                    Tags = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsReviewed = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    IsApproved = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    SubmittedForReviewAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ReviewedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ReviewNotes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ReviewedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    UpdatedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    DeletedOn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Listings", x => x.Id);
+                    table.CheckConstraint("CK_Listing_Latitude", "[Latitude] >= -90 AND [Latitude] <= 90");
+                    table.CheckConstraint("CK_Listing_Longitude", "[Longitude] >= -180 AND [Longitude] <= 180");
+                    table.CheckConstraint("CK_Listing_MaxGuests", "[MaxGuests] > 0");
+                    table.CheckConstraint("CK_Listing_Price", "[PricePerNight] > 0");
                     table.ForeignKey(
-                        name: "FK_ListingImages_Listings_ListingId",
-                        column: x => x.ListingId,
-                        principalTable: "Listings",
+                        name: "FK_Listings_ListingImages_MainImageId",
+                        column: x => x.MainImageId,
+                        principalTable: "ListingImages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Listings_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -364,30 +407,6 @@ namespace DAL.Migrations
                         name: "FK_ListingKeywords_Listings_ListingsId",
                         column: x => x.ListingsId,
                         principalTable: "Listings",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Payments",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    BookingId = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PaymentMethod = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    TransactionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Success"),
-                    PaidAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Payments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Payments_Bookings_BookingId",
-                        column: x => x.BookingId,
-                        principalTable: "Bookings",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -442,9 +461,9 @@ namespace DAL.Migrations
                 column: "ListingsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ListingImages_ListingId",
+                name: "IX_ListingImages_ListingId_IsDeleted",
                 table: "ListingImages",
-                column: "ListingId");
+                columns: new[] { "ListingId", "IsDeleted" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ListingKeywords_ListingsId",
@@ -452,9 +471,39 @@ namespace DAL.Migrations
                 column: "ListingsId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Listings_CreatedAt",
+                table: "Listings",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Listings_IsPromoted",
+                table: "Listings",
+                column: "IsPromoted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Listings_Location",
+                table: "Listings",
+                column: "Location");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Listings_MainImageId",
+                table: "Listings",
+                column: "MainImageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Listings_PricePerNight",
+                table: "Listings",
+                column: "PricePerNight");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Listings_UserId",
                 table: "Listings",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Listings_UserId_IsDeleted",
+                table: "Listings",
+                columns: new[] { "UserId", "IsDeleted" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_ReceiverId",
@@ -544,16 +593,41 @@ namespace DAL.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Bookings_Listings_ListingId",
+                table: "Bookings",
+                column: "ListingId",
+                principalTable: "Listings",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_ListingAmenities_Listings_ListingsId",
+                table: "ListingAmenities",
+                column: "ListingsId",
+                principalTable: "Listings",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_ListingImages_Listings_ListingId",
+                table: "ListingImages",
+                column: "ListingId",
+                principalTable: "Listings",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "ListingAmenities");
+            migrationBuilder.DropForeignKey(
+                name: "FK_ListingImages_Listings_ListingId",
+                table: "ListingImages");
 
             migrationBuilder.DropTable(
-                name: "ListingImages");
+                name: "ListingAmenities");
 
             migrationBuilder.DropTable(
                 name: "ListingKeywords");
@@ -599,6 +673,9 @@ namespace DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Listings");
+
+            migrationBuilder.DropTable(
+                name: "ListingImages");
 
             migrationBuilder.DropTable(
                 name: "Users");

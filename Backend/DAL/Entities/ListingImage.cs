@@ -1,5 +1,4 @@
-﻿
-namespace DAL.Entities
+﻿namespace DAL.Entities
 {
     public class ListingImage
     {
@@ -10,44 +9,46 @@ namespace DAL.Entities
         public int ListingId { get; private set; }
         public Listing Listing { get; private set; } = null!;
 
-        #region Auditing & soft-delete
+        // Auditing & soft-delete
         public DateTime CreatedAt { get; private set; }
         public string CreatedBy { get; private set; } = null!;
         public string? UpdatedBy { get; private set; }
         public DateTime? UpdatedOn { get; private set; }
-
         public string? DeletedBy { get; private set; }
         public DateTime? DeletedOn { get; private set; }
-
         public bool IsDeleted { get; private set; }
-        #endregion
 
-        //  concurrency token
-        public byte[]? RowVersion { get; private set; }
 
+        // Private constructor for EF
         protected ListingImage() { }
 
-        // Create a new listing image
-        public static ListingImage Create(int listingId, string imageUrl, string? createdBy = null)
+        // Factory method
+        public static ListingImage CreateImage(Listing listing, string imageUrl, string createdBy)
         {
-            return new ListingImage
+            if (listing == null) throw new ArgumentNullException(nameof(listing));
+            if (string.IsNullOrWhiteSpace(imageUrl)) throw new ArgumentException("image url must be provided", nameof(imageUrl));
+
+            var li = new ListingImage
             {
-                ListingId = listingId,
+                Listing = listing,                 // navigation set
+                                                   // DO NOT set ListingId here
                 ImageUrl = imageUrl,
+                CreatedBy = createdBy,
                 CreatedAt = DateTime.UtcNow,
-                CreatedBy = createdBy ?? "System",
                 IsDeleted = false
             };
+            return li;
         }
 
-        // Update existing image
-        public bool Update(string imageUrl, string? updatedBy)
+        // Update image
+        public bool UpdateImage(string imageUrl, string updatedBy)
         {
-            if (IsDeleted) return false;
+            if (IsDeleted)
+                return false;
+
 
             var changed = false;
-
-            if (!string.IsNullOrWhiteSpace(imageUrl) && ImageUrl != imageUrl)
+            if (ImageUrl != imageUrl)
             {
                 ImageUrl = imageUrl;
                 changed = true;
@@ -55,20 +56,23 @@ namespace DAL.Entities
 
             if (changed)
             {
-                UpdatedBy = updatedBy ?? "System";
+                UpdatedBy = updatedBy;
                 UpdatedOn = DateTime.UtcNow;
             }
 
             return changed;
         }
 
-        // Soft delete image
-        public void SoftDelete(string? deletedBy)
+        // Soft delete
+        public bool SoftDelete(string deletedBy)
         {
-            if (IsDeleted) return;
+            if (IsDeleted)
+                return false;
+
             IsDeleted = true;
+            DeletedBy = deletedBy;
             DeletedOn = DateTime.UtcNow;
-            DeletedBy = deletedBy ?? "System";
+            return true;
         }
     }
 }

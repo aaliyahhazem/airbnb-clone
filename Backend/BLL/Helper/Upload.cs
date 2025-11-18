@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
-namespace BLL.Helper
+﻿namespace BLL.Helper
 {
     public static class Upload
     {

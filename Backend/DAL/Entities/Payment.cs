@@ -15,7 +15,7 @@
 
         private Payment() { }
 
-        // Create a payment
+        // CreateImage a payment
         internal static Payment Create(
             int bookingId,
             decimal amount,

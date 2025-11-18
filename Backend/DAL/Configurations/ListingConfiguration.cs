@@ -1,10 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Text.Json;
-using DAL.Entities;
-using System.Collections.Generic;
-using System.Linq;
+
 
 namespace DAL.Configurations
 {
@@ -97,12 +93,6 @@ namespace DAL.Configurations
             builder.Property(l => l.IsApproved)
                 .HasDefaultValue(false);
 
-            //builder.Property(l => l.Priority)
-            //    .HasDefaultValue(0);
-
-            // Concurrency token (RowVersion)
-            builder.Property(l => l.RowVersion)
-                .IsRowVersion();
             // Relationships
             builder.HasOne(l => l.User)
                 .WithMany(u => u.Listings)
@@ -116,9 +106,10 @@ namespace DAL.Configurations
 
             // optional explicit main image FK
             builder.HasOne(l => l.MainImage)
-                   .WithMany()
-                   .HasForeignKey(l => l.MainImageId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                    .WithMany()
+                    .HasForeignKey(l => l.MainImageId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
 
             // Indexes
             builder.HasIndex(l => l.Location);

@@ -26,7 +26,7 @@ namespace DAL.Entities
 
         private Notification() { }
 
-        // Create a notification
+        // CreateImage a notification
         internal static Notification Create(
             Guid userId,
             string title,

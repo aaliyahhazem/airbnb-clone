@@ -1,8 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using DAL.Entities;
-
-namespace DAL.Configurations
+﻿namespace DAL.Configurations
 {
     public class ListingImageConfiguration : IEntityTypeConfiguration<ListingImage>
     {
@@ -34,9 +30,6 @@ namespace DAL.Configurations
             builder.Property(li => li.IsDeleted)
                    .HasDefaultValue(false);
 
-            // Concurrency token (RowVersion)
-            builder.Property(li => li.RowVersion)
-                   .IsRowVersion();
 
             // Relationship: Listing -> Images
             builder.HasOne(li => li.Listing)

@@ -15,7 +15,7 @@
 
         private Message() { }
 
-        // Create a new message
+        // CreateImage a new message
         internal static Message Create(
             Guid senderId,
             Guid receiverId,

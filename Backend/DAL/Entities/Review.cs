@@ -15,7 +15,7 @@
 
         private Review() { }
 
-        // Create a review
+        // CreateImage a review
         internal static Review Create(
             int bookingId,
             Guid guestId,

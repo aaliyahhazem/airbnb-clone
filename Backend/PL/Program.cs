@@ -1,10 +1,3 @@
-using BLL.Common;
-using DAL.Common;
-using DAL.Database;
-using DAL.Entities;
-using DAL.Enum;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 using BLL.AutoMapper;
 using BLL.Common;
@@ -27,25 +20,20 @@ namespace PL
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Configure Identity integration (creates all authentication tables)
+            // Identity
             builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {
-                // optional basic config (you can change later)
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
             })
             .AddEntityFrameworkStores<AppDbContext>();
 
+            // AutoMapper
+            builder.Services.AddAutoMapper(cfg => cfg.AddProfile<DomainProfile>());
 
-            // add modular in program
-            builder.Services.AddBuissinesInBLL();
-            builder.Services.AddBuissinesInDAL();
-            builder.Services.AddAutoMapper(cfg => cfg.AddProfile<ListingProfile>());//AutoMapperForListing BLL
-
-
-
-
-
+            // Register DAL + BLL services (either inline or via extension methods)
+            builder.Services.AddBuissinesInDAL(); // implement in DAL — registers repos & UoW
+            builder.Services.AddBuissinesInBLL(); // implement in BLL — registers services
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -54,6 +42,7 @@ namespace PL
             var app = builder.Build();
             app.UseStaticFiles();
 
+            // seed database (ensure this runs after app is built so DI scope is available)
             await AppDbInitializer.SeedAsync(app);
 
             if (app.Environment.IsDevelopment())
@@ -87,8 +76,15 @@ namespace PL
             string[] roles = { "Admin", "Host", "Guest" };
             foreach (var roleName in roles)
             {
-                if (!await roleManager.RoleExistsAsync(roleName))
-                    await roleManager.CreateAsync(new IdentityRole<Guid>(roleName));
+                try
+                {
+                    if (!await roleManager.RoleExistsAsync(roleName))
+                        await roleManager.CreateAsync(new IdentityRole<Guid>(roleName));
+                }
+                catch
+                {
+                    // ignore seed role errors (optional: log)
+                }
             }
 
             // Admin user
@@ -96,101 +92,141 @@ namespace PL
             var admin = await userManager.FindByEmailAsync(adminEmail);
             if (admin == null)
             {
-                // Create Admin user
-                admin = User.Create(
-                    fullName: "System Admin",
-                    role: UserRole.Admin
-                );
-
-                admin = User.Create("System Admin", UserRole.Admin);
-
-
-                // Set Identity fields manually
-                admin.Email = adminEmail;
-                admin.UserName = adminEmail;
-                admin.NormalizedEmail = adminEmail.ToUpper();
-                admin.NormalizedUserName = adminEmail.ToUpper();
-
-                var result = await userManager.CreateAsync(admin, "Admin@123");
-                if (result.Succeeded)
+                try
                 {
-                    await userManager.AddToRoleAsync(admin, "Admin");
+                    admin = User.Create(
+                        fullName: "System Admin",
+                        role: DAL.Enum.UserRole.Admin
+                    );
+
+                    // Identity fields
+                    admin.Email = adminEmail;
+                    admin.UserName = adminEmail;
+                    admin.NormalizedEmail = adminEmail.ToUpperInvariant();
+                    admin.NormalizedUserName = adminEmail.ToUpperInvariant();
+
+                    var result = await userManager.CreateAsync(admin, "Admin@123");
+                    if (result.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(admin, "Admin");
+                    }
+                    // else ignore for seed
+                }
+                catch
+                {
+                    // ignore seed user errors (optional: log)
                 }
             }
 
-            // Sample Amenities
-            if (!context.Amenities.Any())
+            // Seed Amenities
+            try
             {
-                var wifi = Amenity.Create("Wi-Fi");
-                var pool = Amenity.Create("Pool");
-                var ac = Amenity.Create("Air Conditioning");
+                if (!context.Amenities.Any())
+                {
+                    var wifi = Amenity.Create("Wi-Fi");
+                    var pool = Amenity.Create("Pool");
+                    var ac = Amenity.Create("Air Conditioning");
 
-                context.Amenities.AddRange(wifi, pool, ac);
+                    context.Amenities.AddRange(wifi, pool, ac);
+                }
             }
+            catch { /* ignore */ }
 
-            // Sample Keywords
-            if (!context.Keywords.Any())
+            // Seed Keywords
+            try
             {
-                var beach = Keyword.Create("Beach");
-                var luxury = Keyword.Create("Luxury");
+                if (!context.Keywords.Any())
+                {
+                    var beach = Keyword.Create("Beach");
+                    var luxury = Keyword.Create("Luxury");
 
-                context.Keywords.AddRange(beach, luxury);
+                    context.Keywords.AddRange(beach, luxury);
+                }
             }
+            catch { /* ignore */ }
 
             await context.SaveChangesAsync();
 
-            // Sample Listings
+            // Sample Listings - create in safe two-step way to avoid FK circular insert issues
             if (!context.Listings.Any())
             {
-                var adminId = admin.Id;
+                // fetch admin id (if null, skip)
+                var adminId = admin?.Id ?? Guid.Empty;
+                if (adminId == Guid.Empty) return;
 
-                // Retrieve amenities & keywords from context
-                var wifiAmenity = context.Amenities.First(a => a.Name == "Wi-Fi");
-                var poolAmenity = context.Amenities.First(a => a.Name == "Pool");
-                var acAmenity = context.Amenities.First(a => a.Name == "Air Conditioning");
+                // get reference entities (no AsNoTracking because we'll attach them)
+                var wifiAmenity = context.Amenities.FirstOrDefault(a => a.Name == "Wi-Fi");
+                var poolAmenity = context.Amenities.FirstOrDefault(a => a.Name == "Pool");
+                var acAmenity = context.Amenities.FirstOrDefault(a => a.Name == "Air Conditioning");
 
-                var beachKeyword = context.Keywords.First(k => k.Word == "Beach");
-                var luxuryKeyword = context.Keywords.First(k => k.Word == "Luxury");
+                var beachKeyword = context.Keywords.FirstOrDefault(k => k.Word == "Beach");
+                var luxuryKeyword = context.Keywords.FirstOrDefault(k => k.Word == "Luxury");
 
-                // Listing 1
-                var listing1 = Listing.Create(
-                    title: "Beach Villa",
-                    description: "Luxury villa near the beach.",
-                    pricePerNight: 250,
-                    location: "California",
-                    latitude: 34.0195,
-                    longitude: -118.4912,
-                    maxGuests: 6,
-                    userId: adminId,
-                    tags: new List<string> { "beach", "villa", "luxury" },//
-                    createdBy: "System Admin"//
+                // Use a transaction to keep seed atomic-ish
+                using var tx = await context.Database.BeginTransactionAsync();
+                try
+                {
+                    // 1) create listing without setting main image id
+                    var listing = Listing.Create(
+                        title: "City Apartment",
+                        description: "Modern apartment...",
+                        pricePerNight: 120m,
+                        location: "New York",
+                        latitude: 40.7128,
+                        longitude: -74.0060,
+                        maxGuests: 4,
+                        tags: new List<string> { "city", "apartment" },
+                        userId: adminId,
+                        createdBy: "System Admin",
+                        mainImageUrl: null // create images separately
+                    );
 
-                );
-                listing1.Amenities.Add(wifiAmenity);
-                listing1.Amenities.Add(poolAmenity);
-                listing1.Keywords.Add(beachKeyword);
-                listing1.Images.Add(ListingImage.Create(listing1.Id, "https://example.com/beach-villa.jpg"));
+                    context.Listings.Add(listing);
+                    await context.SaveChangesAsync(); // listing.Id assigned
 
-                // Listing 2
-                var listing2 = Listing.Create(
-                    title: "City Apartment",
-                    description: "Modern apartment in the city center.",
-                    pricePerNight: 120,
-                    location: "New York",
-                    latitude: 40.7128,
-                    longitude: -74.0060,
-                    maxGuests: 4,
-                    userId: adminId,
-                    tags: new List<string> { "city", "apartment", "modern" },//
-                    createdBy: "System Admin"//
-                );
-                listing2.Amenities.Add(wifiAmenity);
-                listing2.Amenities.Add(acAmenity);
-                listing2.Keywords.Add(luxuryKeyword);
-                listing2.Images.Add(ListingImage.Create(listing2.Id, "https://example.com/city-apartment.jpg"));
+                    // 2) create image and persist
+                    var img = ListingImage.CreateImage(listing, "https://example.com/city.jpg", "System Admin");
+                    context.ListingImages.Add(img);
+                    await context.SaveChangesAsync(); // img.Id assigned
 
-                context.Listings.AddRange(listing1, listing2);
-                await context.SaveChangesAsync();
+                    // 3) set main image now that img.Id exists, and persist
+                    listing.SetMainImage(img.Id, "System Admin");
+                    await context.SaveChangesAsync();
+                    // ---- Listing 2 (City Apartment) ----
+                    var listing2 = Listing.Create(
+                        title: "City Apartment",
+                        description: "Modern apartment in the city center.",
+                        pricePerNight: 120m,
+                        location: "New York",
+                        latitude: 40.7128,
+                        longitude: -74.0060,
+                        maxGuests: 4,
+                        tags: new List<string> { "city", "apartment", "modern" },
+                        userId: adminId,
+                        createdBy: "System Admin",
+                        mainImageUrl: string.Empty
+                    );
+
+                    if (wifiAmenity != null) listing2.Amenities.Add(wifiAmenity);
+                    if (acAmenity != null) listing2.Amenities.Add(acAmenity);
+                    if (luxuryKeyword != null) listing2.Keywords.Add(luxuryKeyword);
+
+                    context.Listings.Add(listing2);
+                    await context.SaveChangesAsync();
+
+                    var img2 = ListingImage.CreateImage(listing2, "https://example.com/city-apartment.jpg", "System Admin");
+                    context.ListingImages.Add(img2);
+                    await context.SaveChangesAsync();
+
+                    listing2.SetMainImage(img2, "System Admin");
+                    await context.SaveChangesAsync();
+
+                    await tx.CommitAsync();
+                }
+                catch
+                {
+                    try { await tx.RollbackAsync(); } catch { /* ignore */ }
+                }
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿namespace DAL.Repo.Implementation
+﻿
+namespace DAL.Repo.Implementation
 {
     public class UserRepository : GenericRepository<User>, IUserRepository
     {
@@ -33,6 +34,17 @@
                 user.SetActive(false);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<User?> GetByIdAsyncForlisting(Guid id, CancellationToken ct = default)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
+            if (user != null)
+            {
+                return user;
+            }
+            return null;
+
         }
     }
 }

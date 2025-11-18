@@ -1,7 +1,6 @@
-﻿
-namespace BLL.ModelVM.LIstingVM
+﻿namespace BLL.ModelVM.ListingVM
 {
-    public class ListingVM
+    public class ListingDetailVM
     {
         public int Id { get; set; }
         public string Title { get; set; } = null!;
@@ -11,13 +10,10 @@ namespace BLL.ModelVM.LIstingVM
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public int MaxGuests { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public List<string> Tags { get; set; } = new();
+        public string? MainImageUrl { get; set; }
+        public List<ListingImageVM> Images { get; set; } = new();
         public bool IsPromoted { get; set; }
-        public DateTime? PromotionEndDate { get; set; }
-        public IReadOnlyList<ListingImageVM> Images { get; set; } = new List<ListingImageVM>();
-        public IReadOnlyList<string> Tags { get; set; } = Array.Empty<string>();
-        public string CreatedBy { get; set; } = null!;
         public bool IsApproved { get; set; }
-        public bool IsReviewed { get; set; }
     }
 }

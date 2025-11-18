@@ -12,7 +12,7 @@ namespace BLL.Services.Impelementation
             _mapper = mapper;
         }
 
-        // Create
+        // CreateImage
         public async Task<Response<CreateNotificationVM>> CreateAsync(CreateNotificationVM model)
         {
             try

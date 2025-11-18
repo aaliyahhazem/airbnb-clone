@@ -10,7 +10,7 @@
 
         private Keyword() { }
 
-        // Create a new keyword
+        // CreateImage a new keyword
         public static Keyword Create(string word)
         {
             return new Keyword
