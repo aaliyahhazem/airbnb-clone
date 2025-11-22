@@ -1,23 +1,35 @@
-﻿namespace DAL.Repo.Implementation
+﻿using DAL.Repo.Implementation;
+
+public class AmenityRepository : GenericRepository<Amenity>, IAmenityRepository
 {
-    public class AmenityRepository : GenericRepository<Amenity>, IAmenityRepository
+    private readonly AppDbContext _context;
+
+    public AmenityRepository(AppDbContext context) : base(context)
     {
-        public AmenityRepository(AppDbContext context) : base(context) { }
+        _context = context;
+    }
 
-        public async Task<IEnumerable<Listing>> GetListingsWithAmenityAsync(int amenityId)
-        {
-            var amenity = await _context.Amenities
-                .Include(a => a.Listings)
-                .FirstOrDefaultAsync(a => a.Id == amenityId);
+    public async Task<Amenity?> GetAmenityWithListingAsync(int keywordId)
+    {
+        return await _context.Amenities
+            .Include(k => k.Listing)
+            .FirstOrDefaultAsync(k => k.Id == keywordId);
+    }
 
-            return amenity?.Listings ?? new List<Listing>();
-        }
+    public async Task<IEnumerable<Amenity>> SearchAmenitiesAsync(string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return Enumerable.Empty<Amenity>();
 
-        public async Task<IEnumerable<Amenity>> SearchAmenitiesAsync(string searchTerm)
-        {
-            return await _context.Amenities
-                .Where(a => a.Name.Contains(searchTerm))
-                .ToListAsync();
-        }
+        return await _context.Amenities
+            .Where(k => EF.Functions.Like(k.Word, $"%{searchTerm}%"))
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Amenity>> GetByListingIdAsync(int listingId)
+    {
+        return await _context.Amenities
+            .Where(k => k.ListingId == listingId)
+            .ToListAsync();
     }
 }

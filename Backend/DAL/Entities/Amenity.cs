@@ -3,26 +3,32 @@
     public class Amenity
     {
         public int Id { get; private set; }
-        public string Name { get; private set; } = null!;
+        public string Word { get; private set; } = null!;
 
-        // Relationships
-        public ICollection<Listing> Listings { get; private set; } = new List<Listing>();
+        // FK -> Listing (one-to-many)
+        public int ListingId { get; private set; }
+        public Listing Listing { get; private set; } = null!;
 
         private Amenity() { }
 
-        //CreateImage a new amenity
-        public static Amenity Create(string name)
+        // Factory
+        public static Amenity Create(string word, Listing listing)
         {
-            return new Amenity
+            if (listing == null) throw new ArgumentNullException(nameof(listing));
+            if (string.IsNullOrWhiteSpace(word)) throw new ArgumentException("Amenity cannot be empty.", nameof(word));
+
+            var kw = new Amenity
             {
-                Name = name
+                Word = word.Trim(),
+                Listing = listing
+                // ListingId will be set by EF when saved (or you can set it to listing.Id if you prefer)
             };
+            return kw;
         }
 
-        // Update existing amenity
-        internal void Update(string name)
+        internal void Update(string word)
         {
-            Name = name;
+            Word = word?.Trim() ?? Word;
         }
     }
 }

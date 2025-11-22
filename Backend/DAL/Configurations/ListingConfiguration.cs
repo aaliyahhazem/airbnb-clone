@@ -55,22 +55,7 @@ namespace DAL.Configurations
             builder.Property(l => l.PromotionEndDate)
                 .IsRequired(false);
 
-            // Tags JSON conversion + ValueComparer so EF detects list changes
-            var tagsComparer = new ValueComparer<List<string>>(
-                (a, b) => a.SequenceEqual(b),
-                a => a.Aggregate(0, (h, s) => HashCode.Combine(h, s == null ? 0 : s.GetHashCode())),
-                a => a.ToList()
-            );
-
-            builder.Property(l => l.Tags)
-                .HasConversion(
-                    v => JsonSerializer.Serialize(v, new JsonSerializerOptions()),
-                    v => string.IsNullOrEmpty(v) ? new List<string>() : JsonSerializer.Deserialize<List<string>>(v, new JsonSerializerOptions())!
-                )
-                .HasColumnType("nvarchar(max)")
-                .IsRequired(false)
-                .Metadata.SetValueComparer(tagsComparer);
-
+         
             // Auditing
             builder.Property(l => l.CreatedBy)
                 .HasMaxLength(150)
@@ -104,11 +89,17 @@ namespace DAL.Configurations
                 .HasForeignKey(b => b.ListingId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+
             // optional explicit main image FK
             builder.HasOne(l => l.MainImage)
                     .WithMany()
                     .HasForeignKey(l => l.MainImageId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(l => l.Amenities)
+                    .WithOne(k => k.Listing)
+                    .HasForeignKey(k => k.ListingId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
 
             // Indexes

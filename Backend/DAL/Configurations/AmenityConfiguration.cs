@@ -1,19 +1,21 @@
-﻿namespace DAL.Configurations
+﻿public class AmenityConfiguration : IEntityTypeConfiguration<Amenity>
 {
-    public class AmenityConfiguration : IEntityTypeConfiguration<Amenity>
+    public void Configure(EntityTypeBuilder<Amenity> builder)
     {
-        public void Configure(EntityTypeBuilder<Amenity> builder)
-        {
-            builder.HasKey(a => a.Id);
+        builder.HasKey(k => k.Id);
 
-            builder.Property(a => a.Name)
-                .IsRequired()
-                .HasMaxLength(100);
+        builder.Property(k => k.Word)
+               .IsRequired()
+               .HasMaxLength(200);
 
-            // Relationships
-            builder.HasMany(a => a.Listings)
-                .WithMany(l => l.Amenities)
-                .UsingEntity(j => j.ToTable("ListingAmenities"));
-        }
+        // One-to-many: each Amenity belongs to one Listing
+        builder.HasOne(k => k.Listing)
+               .WithMany(l => l.Amenities)
+               .HasForeignKey(k => k.ListingId)
+               .IsRequired()
+               .OnDelete(DeleteBehavior.Cascade);
+
+        // Optional: index for faster lookups by ListingId
+        builder.HasIndex(k => k.ListingId);
     }
 }

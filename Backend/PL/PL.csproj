@@ -33,4 +33,55 @@
     <Folder Include="wwwroot\tmp\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\listings\075e5ccf-0ba4-4257-9178-d5c6f20cb1ae2.jpg" />
+    <None Include="wwwroot\listings\1.jpg" />
+    <None Include="wwwroot\listings\16366044-5b35-4110-827b-ac10efb818a41.jpg" />
+    <None Include="wwwroot\listings\1c1114f8-da2e-40e4-aae4-e2294b04a54cGemini_Generated_Image_ajldi1ajldi1ajld.png" />
+    <None Include="wwwroot\listings\1d9c839b-13cc-43c1-bb20-3fa6b0d1b9c42.jpg" />
+    <None Include="wwwroot\listings\1ff8b0c6-1d3c-4ee3-990e-208f29ada48a2.jpg" />
+    <None Include="wwwroot\listings\2.jpg" />
+    <None Include="wwwroot\listings\2ebf9722-c517-404e-896a-a996d6e191971.jpg" />
+    <None Include="wwwroot\listings\3a6b0b94-4f6a-4186-b5ec-162c296382fc2.jpg" />
+    <None Include="wwwroot\listings\463877a7-0936-4d88-973e-db887b2b82221.jpg" />
+    <None Include="wwwroot\listings\4aa99dc1-fc56-44ef-ac16-f1a4fbe274952.jpg" />
+    <None Include="wwwroot\listings\4f492015-12a1-4e2f-b034-e69b351297b91.jpg" />
+    <None Include="wwwroot\listings\5b7634e3-aad5-495b-9a0d-45ec853539531.jpg" />
+    <None Include="wwwroot\listings\60f1478b-e9b6-462f-8011-e63b15e67ce91.jpg" />
+    <None Include="wwwroot\listings\69823c8b-61a8-4096-8933-ce493a5ef03b1.jpg" />
+    <None Include="wwwroot\listings\6dd7947e-621c-4c7e-a718-751a9210ad4c1.jpg" />
+    <None Include="wwwroot\listings\6fd1154e-8980-432f-8302-7ed2130180551.jpg" />
+    <None Include="wwwroot\listings\76647b1a-1ea3-4da5-a973-fb4a27c729601.jpg" />
+    <None Include="wwwroot\listings\78afc9ea-9916-421a-a230-3168983fe01f2.jpg" />
+    <None Include="wwwroot\listings\7d421815-7251-4b1b-85ed-79e0fd0ed50f1.jpg" />
+    <None Include="wwwroot\listings\81892918-0bf5-402d-a2c2-0ec3face048b1.jpg" />
+    <None Include="wwwroot\listings\877cf4c0-cea3-4548-a6fa-3e74698c6b292.jpg" />
+    <None Include="wwwroot\listings\88d401e8-2430-406d-bfb0-34f2c9ce822a1.jpg" />
+    <None Include="wwwroot\listings\93341f3d-f6e0-4cf8-9802-5d47d9e42adf1.jpg" />
+    <None Include="wwwroot\listings\95d5e544-1abf-4f9f-807c-54762a6dcd172.jpg" />
+    <None Include="wwwroot\listings\9a10188c-9193-4927-bfbe-4925ebf8b0ae1.jpg" />
+    <None Include="wwwroot\listings\9cabb03c-e6dc-4d50-bf53-6e743371a5f61.jpg" />
+    <None Include="wwwroot\listings\a5d3183f-b453-4591-b91f-6ae05f7420981.jpg" />
+    <None Include="wwwroot\listings\b32b73dd-0111-4ef8-a592-448a2cd755042.jpg" />
+    <None Include="wwwroot\listings\b74ddbbf-f34b-479d-9939-4295e423cd7d1.jpg" />
+    <None Include="wwwroot\listings\bc901b0e-0ff9-4a60-a274-b381cab84c732.jpg" />
+    <None Include="wwwroot\listings\c00cf98d-060b-4e6f-a269-8f549717dc0f2.jpg" />
+    <None Include="wwwroot\listings\c437c23d-82dd-417b-9007-aa0555c0061c2.jpg" />
+    <None Include="wwwroot\listings\c48ca1fc-871d-41d8-8a5a-a0667f9751f72.jpg" />
+    <None Include="wwwroot\listings\c4d3b8ac-4dfe-4038-8170-6199231d98871.jpg" />
+    <None Include="wwwroot\listings\c4f600ef-c202-40f2-94bd-2b89c34babb22.jpg" />
+    <None Include="wwwroot\listings\cc463051-73a4-41f1-8e01-319a3fc92f871.jpg" />
+    <None Include="wwwroot\listings\cc6ebd9c-1292-4f89-8000-09d575f9e4ee1.jpg" />
+    <None Include="wwwroot\listings\cfc8e777-8522-4c62-a1c3-92ba436502042.jpg" />
+    <None Include="wwwroot\listings\d4da2f4c-228f-4476-aebf-c83f3ec0886e2.jpg" />
+    <None Include="wwwroot\listings\d7782486-2792-4a8e-8756-f0c35595ee4f2.jpg" />
+    <None Include="wwwroot\listings\dc4cff8d-f36c-44a6-ab30-1319e7c955b22.jpg" />
+    <None Include="wwwroot\listings\e59202dd-15af-4081-990a-a1ccf1232a942.jpg" />
+    <None Include="wwwroot\listings\e8e2b51b-d554-40c2-a8b1-10478f5d9a542.jpg" />
+    <None Include="wwwroot\listings\ea35b5ae-4fd7-4cf1-bcc6-6f95062958031.jpg" />
+    <None Include="wwwroot\listings\ee968a24-8cda-43dc-bedc-cf1ae750a0ab2.jpg" />
+    <None Include="wwwroot\listings\f1555731-ba6e-44e5-ae46-fb29b4630c822.jpg" />
+    <None Include="wwwroot\listings\f388fe50-cf76-4e4d-a9fe-a9f136f2fe08Gemini_Generated_Image_ajldi1ajldi1ajld.png" />
+  </ItemGroup>
+
 </Project>

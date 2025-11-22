@@ -22,7 +22,6 @@
         public ICollection<Booking> Bookings { get; private set; } = new List<Booking>();
         public ICollection<Review> Reviews { get; private set; } = new List<Review>();
         public ICollection<Amenity> Amenities { get; private set; } = new List<Amenity>();
-        public ICollection<Keyword> Keywords { get; private set; } = new List<Keyword>();
         public ICollection<ListingImage> Images { get; private set; } = new List<ListingImage>();
 
 
@@ -30,7 +29,7 @@
         public int? MainImageId { get; private set; }
         public ListingImage? MainImage { get; private set; }
 
-        public List<string> Tags { get; private set; } = new List<string>();
+        //public List<string> Tags { get; private set; } = new List<string>();
 
         // Approval Workflow
         public bool IsReviewed { get; private set; }
@@ -55,19 +54,19 @@
 
         // Factory method for creating new listing
         public static Listing Create(
-            string title,
-            string description,
-            decimal pricePerNight,
-            string location,
-            double latitude,
-            double longitude,
-            int maxGuests,
-            List<string> tags,
-            Guid userId,
-            string createdBy,
-            string mainImageUrl,
-            bool isPromoted = false,
-            DateTime? promotionEndDate = null)
+     string title,
+     string description,
+     decimal pricePerNight,
+     string location,
+     double latitude,
+     double longitude,
+     int maxGuests,
+     Guid userId,
+     string createdBy,
+     string mainImageUrl,
+     //bool isPromoted = false,
+     //DateTime? promotionEndDate = null,
+     List<string>? keywordNames = null)     // optional keyword names
         {
             var listing = new Listing
             {
@@ -78,10 +77,9 @@
                 Latitude = latitude,
                 Longitude = longitude,
                 MaxGuests = maxGuests,
-                Tags = tags ?? new List<string>(),
                 UserId = userId,
-                IsPromoted = isPromoted,
-                PromotionEndDate = promotionEndDate,
+                //IsPromoted = isPromoted,
+                //PromotionEndDate = promotionEndDate,
 
                 // Approval workflow - new listings need review
                 IsReviewed = false,
@@ -93,6 +91,19 @@
                 CreatedAt = DateTime.UtcNow,
                 IsDeleted = false
             };
+
+            // Attach keywords owned by this listing
+            if (keywordNames != null)
+            {
+                foreach (var name in keywordNames
+                             .Where(n => !string.IsNullOrWhiteSpace(n))
+                             .Select(n => n.Trim()))
+                {
+                    var kw = Amenity.Create(name, listing);
+                    listing.Amenities.Add(kw);
+                }
+            }
+
             if (!string.IsNullOrWhiteSpace(mainImageUrl))
             {
                 var mainImage = ListingImage.CreateImage(listing, mainImageUrl, createdBy);
@@ -113,18 +124,18 @@
         }
 
         internal bool Update(
-            string title,
-            string description,
-            decimal pricePerNight,
-            string location,
-            double latitude,
-            double longitude,
-            int maxGuests,
-            string updatedBy,
-            bool isPromoted,
-            DateTime? promotionEndDate,
-            List<string>? tags,
-            string? newMainImageUrl = null) 
+    string title,
+    string description,
+    decimal pricePerNight,
+    string location,
+    double latitude,
+    double longitude,
+    int maxGuests,
+    string updatedBy,
+    //bool isPromoted,
+    //DateTime? promotionEndDate,
+    IEnumerable<string>? keywordNames = null,
+    string? newMainImageUrl = null)
         {
             if (IsDeleted)
                 return false;
@@ -136,15 +147,29 @@
             Latitude = latitude;
             Longitude = longitude;
             MaxGuests = maxGuests;
-            IsPromoted = isPromoted;
-            PromotionEndDate = promotionEndDate;
-            Tags = tags ?? new List<string>();
+            //IsPromoted = isPromoted;
+            //PromotionEndDate = promotionEndDate;
+
+            // Replace keywords: easiest approach — clear then add new owned keywords
+            if (keywordNames != null)
+            {
+                // Remove existing keywords (they will be deleted on SaveChanges if tracked)
+                // We clear the collection so EF removes them from the database on SaveChanges (cascade)
+                Amenities.Clear();
+
+                foreach (var name in keywordNames
+                             .Where(n => !string.IsNullOrWhiteSpace(n))
+                             .Select(n => n.Trim()))
+                {
+                    var kw = Amenity.Create(name, this);
+                    Amenities.Add(kw);
+                }
+            }
 
             if (!string.IsNullOrWhiteSpace(newMainImageUrl))
             {
                 var newMainImage = ListingImage.CreateImage(this, newMainImageUrl, updatedBy);
                 Images.Add(newMainImage);
-                // Use the reference overload so it works before/after persistence
                 SetMainImage(newMainImage, updatedBy);
             }
 
@@ -158,7 +183,6 @@
 
             return true;
         }
-
         // Mark for re-review when host makes changes
         internal void MarkForReReview()
         {
@@ -177,6 +201,8 @@
         {
             if (IsDeleted)
                 throw new InvalidOperationException("Cannot approve a deleted listing.");
+            if (IsReviewed && IsApproved)
+                throw new InvalidOperationException("Listing is already approved.");
 
             IsReviewed = true;
             IsApproved = true;
@@ -192,6 +218,9 @@
         {
             if (IsDeleted)
                 throw new InvalidOperationException("Cannot reject a deleted listing.");
+            if(!IsApproved)
+                throw new InvalidOperationException("listing is already rejected.");
+
 
             IsReviewed = true;
             IsApproved = false;
@@ -206,7 +235,7 @@
         internal bool SoftDelete(string deletedBy)
         {
             if (IsDeleted)
-                return false;
+                throw new InvalidOperationException("listing is already deleted.");
 
             IsDeleted = true;
             DeletedBy = deletedBy;
@@ -238,6 +267,9 @@
         {
             if (IsDeleted)
                 throw new InvalidOperationException("Cannot promote a deleted listing.");
+            if(promotionEndDate < DateTime.Now)
+                throw new InvalidOperationException("Cannot put the old Date");
+
 
             IsPromoted = isPromoted;
             PromotionEndDate = promotionEndDate;

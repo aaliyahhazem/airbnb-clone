@@ -23,12 +23,12 @@
         [Required, Range(1, 50)]
         public int MaxGuests { get; set; }
 
-        public List<string>? Tags { get; set; } = new();
+        public List<string>? Amenities { get; set; }   // e.g. ["beach","family"]
 
         // images to upload on create (first image -> main image)
         public List<IFormFile>? Images { get; set; }
-        public bool IsPromoted { get; set; }
-        public DateTime? PromotionEndDate { get; set; }
+        //public bool IsPromoted { get; set; }
+        //public DateTime? PromotionEndDate { get; set; }
 
     }
 }

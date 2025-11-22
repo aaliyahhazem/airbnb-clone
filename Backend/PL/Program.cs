@@ -2,16 +2,12 @@ using BLL.Common;
 using DAL.Common;
 using DAL.Database;
 using DAL.Entities;
-using DAL.Enum;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using PL.Hubs;
-using BLL.AutoMapper;
 
 
 namespace PL
@@ -34,15 +30,16 @@ namespace PL
                 });
             });
 
-            
+
 
             // DbContext
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Identity
+            // Configure Identity integration (creates all authentication tables)
             builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {
+                // optional basic config (you can change later)
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
             })
@@ -56,7 +53,7 @@ namespace PL
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             });
-            
+
             // Configure JWT validation
             var jwtKey = builder.Configuration["Jwt:Key"];
             var jwtIssuer = builder.Configuration["Jwt:Issuer"];
@@ -121,16 +118,19 @@ namespace PL
             builder.Services.AddBuissinesInBLL();
             // safe-guard: ensure IAdminRepository is registered (some extension variants may not register it)
             builder.Services.AddScoped<DAL.Repo.Abstraction.IAdminRepository, DAL.Repo.Implementation.AdminRepository>();
-            builder.Services.AddAutoMapper(cfg => cfg.AddProfile<ListingProfile>());//AutoMapperForListing BLL
 
-            
 
-            
+
+
 
 
 
 
             builder.Services.AddControllers();
+
+            //signalR
+            builder.Services.AddSignalR();
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -140,7 +140,6 @@ namespace PL
 
             app.UseStaticFiles();
 
-            // seed database (ensure this runs after app is built so DI scope is available)
             await AppDbInitializer.SeedAsync(app);
 
             if (app.Environment.IsDevelopment())
@@ -160,7 +159,7 @@ namespace PL
             //signal R
             app.MapHub<NotificationHub>("/notificationsHub");
             app.MapHub<MessageHub>("/messagesHub");
-           
+
 
             app.Run();
         }
@@ -221,33 +220,10 @@ namespace PL
                 }
             }
 
+            
+
             // Seed Amenities
-            try
-            {
-                if (!context.Amenities.Any())
-                {
-                    var wifi = Amenity.Create("Wi-Fi");
-                    var pool = Amenity.Create("Pool");
-                    var ac = Amenity.Create("Air Conditioning");
-
-                    context.Amenities.AddRange(wifi, pool, ac);
-                }
-            }
-            catch { /* ignore */ }
-
-            // Seed Keywords
-            try
-            {
-                if (!context.Keywords.Any())
-                {
-                    var beach = Keyword.Create("Beach");
-                    var luxury = Keyword.Create("Luxury");
-
-                    context.Keywords.AddRange(beach, luxury);
-                }
-            }
-            catch { /* ignore */ }
-
+         
             await context.SaveChangesAsync();
 
             // Sample Listings - create in safe two-step way to avoid FK circular insert issues
@@ -258,12 +234,12 @@ namespace PL
                 if (adminId == Guid.Empty) return;
 
                 // get reference entities (no AsNoTracking because we'll attach them)
-                var wifiAmenity = context.Amenities.FirstOrDefault(a => a.Name == "Wi-Fi");
-                var poolAmenity = context.Amenities.FirstOrDefault(a => a.Name == "Pool");
-                var acAmenity = context.Amenities.FirstOrDefault(a => a.Name == "Air Conditioning");
+                var wifiAmenity = context.Amenities.FirstOrDefault(a => a.Word == "Wi-Fi");
+                var poolAmenity = context.Amenities.FirstOrDefault(a => a.Word == "Pool");
+                var acAmenity = context.Amenities.FirstOrDefault(a => a.Word == "Air Conditioning");
 
-                var beachKeyword = context.Keywords.FirstOrDefault(k => k.Word == "Beach");
-                var luxuryKeyword = context.Keywords.FirstOrDefault(k => k.Word == "Luxury");
+                var beachAmenity = context.Amenities.FirstOrDefault(k => k.Word == "Beach");
+                var luxuryAmenity = context.Amenities.FirstOrDefault(k => k.Word == "Luxury");
 
                 // Use a transaction to keep seed atomic-ish
                 using var tx = await context.Database.BeginTransactionAsync();
@@ -278,7 +254,6 @@ namespace PL
                         latitude: 40.7128,
                         longitude: -74.0060,
                         maxGuests: 4,
-                        tags: new List<string> { "city", "apartment" },
                         userId: adminId,
                         createdBy: "System Admin",
                         mainImageUrl: null // create images separately
@@ -304,15 +279,27 @@ namespace PL
                         latitude: 40.7128,
                         longitude: -74.0060,
                         maxGuests: 4,
-                        tags: new List<string> { "city", "apartment", "modern" },
                         userId: adminId,
                         createdBy: "System Admin",
                         mainImageUrl: string.Empty
+                        
                     );
 
+                    // Seed Amenities
+                    try
+                    {
+                        if (!context.Amenities.Any())
+                        {
+                            var wifi = Amenity.Create("Wi-Fi" , listing);
+                            var pool = Amenity.Create("Pool" , listing2);
+
+                            context.Amenities.AddRange(wifi, pool);
+                        }
+                    }
+                    catch { /* ignore */ }
                     if (wifiAmenity != null) listing2.Amenities.Add(wifiAmenity);
                     if (acAmenity != null) listing2.Amenities.Add(acAmenity);
-                    if (luxuryKeyword != null) listing2.Keywords.Add(luxuryKeyword);
+                    if (luxuryAmenity != null) listing2.Amenities.Add(luxuryAmenity);
 
                     context.Listings.Add(listing2);
                     await context.SaveChangesAsync();

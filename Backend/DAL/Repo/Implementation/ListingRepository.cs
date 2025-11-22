@@ -1,4 +1,5 @@
-﻿namespace DAL.Repo.Implementation
+﻿
+namespace DAL.Repo.Implementation
 {
     public class ListingRepository : GenericRepository<Listing>, IListingRepository
     {
@@ -9,7 +10,6 @@
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        /// Resolve the user's full name from Users table (fallback to Guid string).
         private async Task<string> GetFullNameAsync(Guid userId, CancellationToken ct = default)
         {
             var name = await _context.Users
@@ -20,56 +20,47 @@
             return string.IsNullOrWhiteSpace(name) ? userId.ToString() : name;
         }
 
-        /// Create a listing aggregate with optional main image and additional images. Returns created Id.
         public async Task<int> CreateAsync(
             Listing listing,
             string mainImageUrl,
             List<string>? additionalImageUrls,
+            List<string>? keywordNames,
             Guid hostId,
             CancellationToken ct = default)
         {
-            try
+            if (listing == null) throw new ArgumentNullException(nameof(listing));
+            if (hostId == Guid.Empty) throw new ArgumentException(nameof(hostId));
+
+            var hostFullName = await GetFullNameAsync(hostId, ct);
+
+            var newListing = Listing.Create(
+                title: listing.Title,
+                description: listing.Description,
+                pricePerNight: listing.PricePerNight,
+                location: listing.Location,
+                latitude: listing.Latitude,
+                longitude: listing.Longitude,
+                maxGuests: listing.MaxGuests,
+                userId: hostId,
+                createdBy: hostFullName,
+                mainImageUrl: mainImageUrl,
+                keywordNames: keywordNames
+            );
+
+            if (additionalImageUrls?.Any() == true)
             {
-                if (listing == null) throw new ArgumentNullException(nameof(listing));
-                if (hostId == Guid.Empty) throw new ArgumentException(nameof(hostId));
-
-                var hostFullName = await GetFullNameAsync(hostId, ct) ?? hostId.ToString();
-
-                var newListing = Listing.Create(
-                    title: listing.Title,
-                    description: listing.Description,
-                    pricePerNight: listing.PricePerNight,
-                    location: listing.Location,
-                    latitude: listing.Latitude,
-                    longitude: listing.Longitude,
-                    maxGuests: listing.MaxGuests,
-                    tags: listing.Tags ?? new List<string>(),
-                    userId: hostId,
-                    createdBy: hostFullName,
-                    mainImageUrl: mainImageUrl,
-                    isPromoted: listing.IsPromoted,
-                    promotionEndDate: listing.PromotionEndDate
-                );
-
-                if (additionalImageUrls?.Any() == true)
+                foreach (var url in additionalImageUrls.Where(u => !string.IsNullOrWhiteSpace(u)))
                 {
-                    foreach (var url in additionalImageUrls.Where(u => !string.IsNullOrWhiteSpace(u)))
-                    {
-                        newListing.AddImage(url!, hostFullName);
-                    }
+                    newListing.AddImage(url!, hostFullName);
                 }
+            }
 
-                await _context.Listings.AddAsync(newListing, ct);
-                await _context.SaveChangesAsync(ct);
-                return newListing.Id;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error creating listing in repository.", ex);
-            }
+            await _context.Listings.AddAsync(newListing, ct);
+            await _context.SaveChangesAsync(ct);
+
+            return newListing.Id;
         }
 
-        /// Update listing (owner only). Uses domain Update and image add/remove operations.
         public async Task<bool> UpdateAsync(
             int listingId,
             Guid hostId,
@@ -77,16 +68,18 @@
             string? newMainImageUrl,
             List<string>? newAdditionalImages,
             List<int>? imagesToRemove,
+            List<string>? keywordNames,
             CancellationToken ct = default)
         {
             try
             {
-                if (updatedListing == null) throw new ArgumentNullException(nameof(updatedListing));
+                if (hostId == Guid.Empty) throw new ArgumentException(nameof(hostId));
 
-                var hostFullName = await GetFullNameAsync(hostId, ct) ?? hostId.ToString();
+                var hostFullName = await GetFullNameAsync(hostId, ct);
 
                 var entity = await _context.Listings
                     .Include(l => l.Images)
+                    .Include(l => l.Amenities)
                     .IgnoreQueryFilters()
                     .FirstOrDefaultAsync(l => l.Id == listingId, ct);
 
@@ -103,6 +96,16 @@
                     }
                 }
 
+                if (keywordNames != null)
+                {
+                    entity.Amenities.Clear();
+                    foreach (var name in keywordNames.Where(n => !string.IsNullOrWhiteSpace(n)).Select(n => n.Trim()))
+                    {
+                        var kw = Amenity.Create(name, entity);
+                        entity.Amenities.Add(kw);
+                    }
+                }
+
                 var updated = entity.Update(
                     updatedListing.Title,
                     updatedListing.Description,
@@ -112,9 +115,7 @@
                     updatedListing.Longitude,
                     updatedListing.MaxGuests,
                     hostFullName,
-                    updatedListing.IsPromoted,
-                    updatedListing.PromotionEndDate,
-                    updatedListing.Tags
+                    keywordNames
                 );
 
                 if (!updated) return false;
@@ -122,9 +123,7 @@
                 if (newAdditionalImages?.Any() == true)
                 {
                     foreach (var url in newAdditionalImages.Where(u => !string.IsNullOrWhiteSpace(u)))
-                    {
                         entity.AddImage(url!, hostFullName);
-                    }
                 }
 
                 if (!string.IsNullOrWhiteSpace(newMainImageUrl))
@@ -149,12 +148,11 @@
             }
         }
 
-        /// Owner-only soft-delete of listing.
         public async Task<bool> DeleteAsync(int listingId, Guid hostId, CancellationToken ct = default)
         {
             try
             {
-                var hostFullName = await GetFullNameAsync(hostId, ct) ?? hostId.ToString();
+                var hostFullName = await GetFullNameAsync(hostId, ct);
 
                 var entity = await _context.Listings.FirstOrDefaultAsync(l => l.Id == listingId, ct);
                 if (entity == null) return false;
@@ -172,23 +170,69 @@
             }
         }
 
-        /// Public user view: only approved & not deleted listings.
-        /// Returns (items, totalCount).
         public async Task<(IEnumerable<Listing> Listings, int TotalCount)> GetUserViewAsync(
-            Expression<Func<Listing, bool>>? filter = null,
+            ListingFilterDto? filter = null,
             int page = 1,
             int pageSize = 10,
             CancellationToken ct = default)
         {
+            const int MaxPageSize = 100;
             try
             {
+                page = Math.Max(1, page);
+                pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
+
                 var query = _context.Listings
                     .Where(l => !l.IsDeleted && l.IsApproved)
                     .Include(l => l.MainImage)
                     .Include(l => l.Images.Where(img => !img.IsDeleted))
+                    .Include(l => l.Amenities)
                     .AsQueryable();
 
-                if (filter != null) query = query.Where(filter);
+                if (filter != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(filter.Location))
+                    {
+                        var loc = filter.Location.Trim();
+                        query = query.Where(l => l.Location != null && l.Location.Contains(loc));
+                    }
+
+                    if (filter.MinPrice.HasValue)
+                    {
+                        var min = filter.MinPrice.Value;
+                        query = query.Where(l => l.PricePerNight >= min);
+                    }
+
+                    if (filter.MaxPrice.HasValue)
+                    {
+                        var max = filter.MaxPrice.Value;
+                        query = query.Where(l => l.PricePerNight <= max);
+                    }
+
+                    if (filter.Rooms.HasValue)
+                    {
+                        var rooms = filter.Rooms.Value;
+                        query = query.Where(l => l.MaxGuests == rooms);
+                    }
+
+                   
+
+                    if (!string.IsNullOrWhiteSpace(filter.Amenity))
+                    {
+                        var kw = filter.Amenity.Trim();
+                        query = query.Where(l =>
+                            (l.Title != null && l.Title.Contains(kw)) ||
+                            (l.Description != null && l.Description.Contains(kw)) ||
+                            l.Amenities.Any(k => k.Word != null && k.Word.Contains(kw))
+                        );
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(filter.TitleContains))
+                    {
+                        var t = filter.TitleContains.Trim();
+                        query = query.Where(l => l.Title != null && l.Title.Contains(t));
+                    }
+                }
 
                 var totalCount = await query.CountAsync(ct);
 
@@ -198,6 +242,7 @@
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .AsNoTracking()
+                    .AsSplitQuery()
                     .ToListAsync(ct);
 
                 return (items, totalCount);
@@ -208,7 +253,6 @@
             }
         }
 
-        /// Host view: listings owned by host (not deleted).
         public async Task<(IEnumerable<Listing> Listings, int TotalCount)> GetHostViewAsync(
             Guid hostId,
             Expression<Func<Listing, bool>>? filter = null,
@@ -218,24 +262,34 @@
         {
             try
             {
-                var query = _context.Listings
-                    .Where(l => !l.IsDeleted && l.UserId == hostId)
+                if (page <= 0) page = 1;
+                if (pageSize <= 0) pageSize = 10;
+
+                var baseQuery = _context.Listings
+                    .Where(l => !l.IsDeleted && l.UserId == hostId);
+
+                if (filter != null) baseQuery = baseQuery.Where(filter);
+
+                var totalCount = await baseQuery.CountAsync(ct);
+
+                if (totalCount == 0)
+                    return (Enumerable.Empty<Listing>(), 0);
+
+                var pageQuery = baseQuery
+                    .OrderByDescending(l => l.IsPromoted)
+                    .ThenByDescending(l => l.CreatedAt)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize);
+
+                var items = await pageQuery
+                    .AsSplitQuery()
                     .Include(l => l.MainImage)
                     .Include(l => l.Images.Where(img => !img.IsDeleted))
-                    .AsQueryable();
-
-                if (filter != null) query = query.Where(filter);
-
-                var totalCount = await query.CountAsync(ct);
-
-                var items = await query
-                    .OrderByDescending(l => l.CreatedAt)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
+                    .Include(l => l.Amenities)
                     .AsNoTracking()
                     .ToListAsync(ct);
 
-                return (Listings: items,TotalCount: totalCount);
+                return (items, totalCount);
             }
             catch (Exception ex)
             {
@@ -243,7 +297,6 @@
             }
         }
 
-        /// Admin view with optional includeDeleted flag.
         public async Task<(IEnumerable<Listing> Listings, int TotalCount)> GetAdminViewAsync(
             Expression<Func<Listing, bool>>? filter = null,
             int page = 1,
@@ -261,7 +314,8 @@
                 query = query
                     .Include(l => l.MainImage)
                     .Include(l => l.Images.Where(img => !img.IsDeleted))
-                    .Include(l => l.User);
+                    .Include(l => l.User)
+                    .Include(l => l.Amenities);
 
                 if (filter != null) query = query.Where(filter);
 
@@ -282,7 +336,6 @@
             }
         }
 
-        /// Listings awaiting review (IsReviewed == false).
         public async Task<(IEnumerable<Listing> Listings, int TotalCount)> GetPendingApprovalsAsync(
             Expression<Func<Listing, bool>>? filter = null,
             int page = 1,
@@ -296,6 +349,7 @@
                     .Include(l => l.MainImage)
                     .Include(l => l.Images.Where(img => !img.IsDeleted))
                     .Include(l => l.User)
+                    .Include(l => l.Amenities)
                     .AsQueryable();
 
                 if (filter != null) query = query.Where(filter);
@@ -317,7 +371,6 @@
             }
         }
 
-        /// Admin approves a listing (sets Reviewed/Approved and audit fields).
         public async Task<bool> ApproveAsync(int id, Guid approverUserId, CancellationToken ct = default)
         {
             try
@@ -337,7 +390,6 @@
             }
         }
 
-        /// Admin rejects a listing (sets Reviewed=false and audit fields).
         public async Task<bool> RejectAsync(int id, Guid approverUserId, string? note = null, CancellationToken ct = default)
         {
             try
@@ -357,7 +409,6 @@
             }
         }
 
-        /// Returns true if given userId owns the listing.
         public async Task<bool> IsOwnerAsync(int listingId, Guid userId, CancellationToken ct = default)
         {
             try
@@ -370,15 +421,16 @@
             }
         }
 
-        /// Get listing by id (includes images/user, excludes deleted).
         public async Task<Listing?> GetListingByIdAsync(int id, CancellationToken ct = default)
         {
             try
             {
                 return await _context.Listings
+                    .Include(l => l.Amenities)
                     .Include(l => l.Images.Where(img => !img.IsDeleted))
                     .Include(l => l.MainImage)
                     .Include(l => l.User)
+                    .AsNoTracking()
                     .FirstOrDefaultAsync(l => l.Id == id && !l.IsDeleted, ct);
             }
             catch (Exception ex)
@@ -387,13 +439,19 @@
             }
         }
 
-        /// Promote listing: set promoted flag and end date.
         public async Task<bool> PromoteAsync(int id, DateTime promotionEndDate, Guid performedByUserId, CancellationToken ct = default)
         {
             try
             {
                 var listing = await _context.Listings.IgnoreQueryFilters().FirstOrDefaultAsync(l => l.Id == id, ct);
-                if (listing == null) return false;
+                if (listing == null)
+                    throw new InvalidOperationException("Listing not found.");
+
+                if (listing.IsPromoted)
+                    throw new InvalidOperationException($"Listing is already promoted until {listing.PromotionEndDate}.");
+
+                if (promotionEndDate < DateTime.UtcNow)
+                    throw new InvalidOperationException("Promotion end date must be in the future.");
 
                 var performer = await GetFullNameAsync(performedByUserId, ct);
                 listing.SetPromotion(true, promotionEndDate, performer);
@@ -407,12 +465,14 @@
             }
         }
 
-        /// Set main image for listing (caller should ensure permission). Uses domain SetMainImage.
         public async Task<bool> SetMainImageAsync(int listingId, int imageId, string performedBy, CancellationToken ct = default)
         {
             try
             {
-                var listing = await _context.Listings.Include(l => l.Images).FirstOrDefaultAsync(l => l.Id == listingId && !l.IsDeleted, ct);
+                var listing = await _context.Listings
+                    .Include(l => l.Images)
+                    .FirstOrDefaultAsync(l => l.Id == listingId && !l.IsDeleted, ct);
+
                 if (listing == null) return false;
 
                 var img = listing.Images.FirstOrDefault(i => i.Id == imageId && !i.IsDeleted);

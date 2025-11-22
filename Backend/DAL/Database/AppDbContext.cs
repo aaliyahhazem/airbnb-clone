@@ -12,7 +12,6 @@
         public DbSet<Notification> Notifications { get; set; } = null!;
         public DbSet<ListingImage> ListingImages { get; set; } = null!;
         public DbSet<Amenity> Amenities { get; set; } = null!;
-        public DbSet<Keyword> Keywords { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -1,6 +1,4 @@
-﻿
-
-
+﻿using Microsoft.Extensions.Http;
 
 namespace BLL.Common
 {
@@ -22,6 +20,8 @@ namespace BLL.Common
             services.AddScoped<IListingService, ListingService>();
             services.AddScoped<IListingImageService, ListingImageService>();
 
+            services.AddScoped<IMapService, MapService>();
+            services.AddHttpClient<IGeocodingService, NominatimGeocodingService>();
             services.AddAutoMapper(x => x.AddProfile(new DomainProfile()));
             // Token service
             services.AddSingleton<ITokenService, TokenService>();

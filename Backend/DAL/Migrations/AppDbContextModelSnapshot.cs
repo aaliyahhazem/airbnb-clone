@@ -22,21 +22,6 @@ namespace DAL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("AmenityListing", b =>
-                {
-                    b.Property<int>("AmenitiesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ListingsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AmenitiesId", "ListingsId");
-
-                    b.HasIndex("ListingsId");
-
-                    b.ToTable("ListingAmenities", (string)null);
-                });
-
             modelBuilder.Entity("DAL.Entities.Amenity", b =>
                 {
                     b.Property<int>("Id")
@@ -45,12 +30,17 @@ namespace DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Name")
+                    b.Property<int>("ListingId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Word")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ListingId");
 
                     b.ToTable("Amenities");
                 });
@@ -104,24 +94,6 @@ namespace DAL.Migrations
                     b.HasIndex("ListingId");
 
                     b.ToTable("Bookings");
-                });
-
-            modelBuilder.Entity("DAL.Entities.Keyword", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Word")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Keywords");
                 });
 
             modelBuilder.Entity("DAL.Entities.Listing", b =>
@@ -194,19 +166,20 @@ namespace DAL.Migrations
                     b.Property<decimal>("PricePerNight")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("Priority")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("PromotionEndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<string>("Tags")
+                    b.Property<string>("ReviewNotes")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReviewedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("SubmittedForReviewAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -288,11 +261,6 @@ namespace DAL.Migrations
 
                     b.Property<int>("ListingId")
                         .HasColumnType("int");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
 
                     b.Property<string>("UpdatedBy")
                         .HasMaxLength(150)
@@ -601,21 +569,6 @@ namespace DAL.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("KeywordListing", b =>
-                {
-                    b.Property<int>("KeywordsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ListingsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("KeywordsId", "ListingsId");
-
-                    b.HasIndex("ListingsId");
-
-                    b.ToTable("ListingKeywords", (string)null);
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
                 {
                     b.Property<Guid>("Id")
@@ -747,19 +700,15 @@ namespace DAL.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("AmenityListing", b =>
+            modelBuilder.Entity("DAL.Entities.Amenity", b =>
                 {
-                    b.HasOne("DAL.Entities.Amenity", null)
-                        .WithMany()
-                        .HasForeignKey("AmenitiesId")
+                    b.HasOne("DAL.Entities.Listing", "Listing")
+                        .WithMany("Amenities")
+                        .HasForeignKey("ListingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DAL.Entities.Listing", null)
-                        .WithMany()
-                        .HasForeignKey("ListingsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Listing");
                 });
 
             modelBuilder.Entity("DAL.Entities.Booking", b =>
@@ -874,21 +823,6 @@ namespace DAL.Migrations
                     b.Navigation("Guest");
                 });
 
-            modelBuilder.Entity("KeywordListing", b =>
-                {
-                    b.HasOne("DAL.Entities.Keyword", null)
-                        .WithMany()
-                        .HasForeignKey("KeywordsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DAL.Entities.Listing", null)
-                        .WithMany()
-                        .HasForeignKey("ListingsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -949,6 +883,8 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("DAL.Entities.Listing", b =>
                 {
+                    b.Navigation("Amenities");
+
                     b.Navigation("Bookings");
 
                     b.Navigation("Images");
