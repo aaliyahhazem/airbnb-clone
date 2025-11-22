@@ -11,7 +11,11 @@ namespace BLL.AutoMapper
             // messages
             CreateMap<Message, GetMessageVM>().ReverseMap();
             CreateMap<Message, CreateMessageVM>().ReverseMap();
-        } 
+            // reviews
+            CreateMap<Review, CreateReviewVM>().ReverseMap();
+            // booking
+            CreateMap<Booking, CreateBookingVM>().ReverseMap();
+        }
 
     }
 }

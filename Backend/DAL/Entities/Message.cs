@@ -16,7 +16,7 @@
         private Message() { }
 
         // Create a new message
-        public static Message Create(
+        internal static Message Create(
             Guid senderId,
             Guid receiverId,
             string content,

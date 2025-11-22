@@ -1,44 +1,14 @@
-
-
-
 namespace PL.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class BookingController : ControllerBase
+    public class BookingController : BaseController
     {
         private readonly IBookingService _bookingService;
 
         public BookingController(IBookingService bookingService)
         {
             _bookingService = bookingService;
-        }
-
-        // Helper to read user id from multiple possible claim names
-        private Guid? GetUserIdFromClaims()
-        {
-            var possible = new[]
-            {
-                 ClaimTypes.NameIdentifier,
-                 "sub",
-                 JwtRegisteredClaimNames.Sub,
-                 "id",
-                 "uid"
-            };
-
-            foreach (var name in possible)
-            {
-                var claim = User.FindFirst(name)?.Value;
-                if (!string.IsNullOrEmpty(claim) && Guid.TryParse(claim, out var g))
-                    return g;
-            }
-
-            // sometimes NameIdentifier is numeric or string id used by Identity; try Name
-            var nameClaim = User.Identity?.Name;
-            if (!string.IsNullOrEmpty(nameClaim) && Guid.TryParse(nameClaim, out var byName))
-                return byName;
-
-            return null;
         }
 
         [HttpPost]

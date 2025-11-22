@@ -10,6 +10,17 @@
                 .FirstOrDefaultAsync(u => u.Email!.ToLower() == email.ToLower());
         }
 
+        public async Task<User?> GetByUserNameAsync(string userName)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.UserName!.ToLower() == userName.ToLower());
+        }
+
+        public async Task<User?> GetByIdAsync(Guid id)
+        {
+            return await _context.Users.FindAsync(id);
+        }
+
         public async Task<IEnumerable<User>> GetActiveUsersAsync()
         {
             return await _context.Users

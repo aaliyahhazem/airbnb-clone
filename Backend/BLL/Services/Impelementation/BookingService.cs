@@ -1,4 +1,5 @@
 
+
 namespace BLL.Services.Impelementation
 {
     public class BookingService : IBookingService
@@ -24,6 +25,10 @@ namespace BLL.Services.Impelementation
                 if (listing == null) return Response<GetBookingVM>.FailResponse("Listing not found");
                 if (model.CheckOutDate <= model.CheckInDate) return Response<GetBookingVM>.FailResponse("Invalid dates");
 
+                // ensure guest exists
+                var guest = await _uow.Users.GetByIdAsync(guestId);
+                if (guest == null) return Response<GetBookingVM>.FailResponse("Guest not found");
+
                 // check availability: any overlapping active booking?
                 var existing = (await _uow.Bookings.GetBookingsByListingAsync(model.ListingId))
                 .Where(b => b.BookingStatus == BookingStatus.Active && !(model.CheckOutDate <= b.CheckInDate || model.CheckInDate >= b.CheckOutDate));
@@ -38,8 +43,8 @@ namespace BLL.Services.Impelementation
                 // Use unit of work transaction to ensure atomicity between booking and payment
                 await _uow.ExecuteInTransactionAsync(async () =>
                 {
-                    var bookingEntity = Booking.Create(model.ListingId, guestId, model.CheckInDate, model.CheckOutDate, total);
-                    await _uow.Bookings.AddAsync(bookingEntity);
+                    var bookingEntity = await _uow.Bookings.CreateAsync(model.ListingId, guestId, model.CheckInDate, model.CheckOutDate, total);
+                    // Save changes to get booking id populated
                     await _uow.SaveChangesAsync();
 
                     // initiate payment (this may call external gateway). Here we just create payment record via payment service
@@ -76,7 +81,7 @@ namespace BLL.Services.Impelementation
                 booking.Update(booking.CheckInDate, booking.CheckOutDate, booking.TotalPrice, booking.PaymentStatus, BookingStatus.Cancelled);
                 _uow.Bookings.Update(booking);
                 await _uow.SaveChangesAsync();
-
+                 
                 // if paid -> refund
                 if (booking.Payment != null && booking.Payment.Status == PaymentStatus.Success)
                 {

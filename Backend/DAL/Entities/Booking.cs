@@ -21,7 +21,7 @@
         private Booking() { }
 
         // Create a booking
-        public static Booking Create(
+        internal static Booking Create(
             int listingId,
             Guid guestId,
             DateTime checkInDate,

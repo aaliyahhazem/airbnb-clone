@@ -1,12 +1,11 @@
-﻿
-
-using DAL.Enum;
+﻿using DAL.Enum;
 
 namespace BLL.ModelVM.Notification
 {
     public class CreateNotificationVM
     {
         public int? Id { get; set; }
+        // Server will set this from token; clients should not provide it.
         public Guid UserId { get; set; }
         public string Title { get; set; } = null!;
         public string Body { get; set; } = null!;

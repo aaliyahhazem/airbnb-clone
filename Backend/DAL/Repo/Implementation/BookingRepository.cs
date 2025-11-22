@@ -24,5 +24,13 @@
                 .Where(b => b.BookingStatus == BookingStatus.Active)
                 .ToListAsync();
         }
+
+        public async Task<Booking> CreateAsync(int listingId, Guid guestId, DateTime checkInDate, DateTime checkOutDate, decimal totalPrice)
+        {
+            var entity = Booking.Create(listingId, guestId, checkInDate, checkOutDate, totalPrice);
+            await _context.Bookings.AddAsync(entity);
+            // Do not call SaveChanges here so caller can control transaction
+            return entity;
+        }
     }
 }

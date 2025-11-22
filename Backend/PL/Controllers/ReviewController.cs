@@ -1,12 +1,8 @@
-
-
-
-
 namespace PL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReviewController : ControllerBase
+    public class ReviewController : BaseController
     {
         private readonly IReviewService _reviewService;
         public ReviewController(IReviewService reviewService)
@@ -15,10 +11,13 @@ namespace PL.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Guest")] // guest creates review
+        [Authorize(Roles = "Guest,Admin")] // guest creates review
         public async Task<IActionResult> Create([FromBody] CreateReviewVM model)
         {
-            var res = await _reviewService.CreateReviewAsync(model);
+            var uid = GetUserIdFromClaims();
+            if (uid == null) return Unauthorized(BLL.ModelVM.Response.Response<ReviewVM>.FailResponse("Invalid or missing user identifier."));
+
+            var res = await _reviewService.CreateReviewAsync(model, uid.Value);
             if (res.IsHaveErrorOrNo) return BadRequest(res);
             return Ok(res);
         }

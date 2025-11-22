@@ -1,4 +1,3 @@
-
 namespace BLL.Services.Impelementation
 {
     public class MessageService : IMessageService
@@ -11,18 +10,18 @@ namespace BLL.Services.Impelementation
             _mapper = mapper;
         }
 
-        public async Task<Response<CreateMessageVM>> CreateAsync(CreateMessageVM model)
+        public async Task<Response<CreateMessageVM>> CreateAsync(CreateMessageVM model, Guid senderId)
         {
             try
             {
-                var entity = DAL.Entities.Message.Create(model.SenderId, model.ReceiverId, model.Content, DateTime.UtcNow, false);
-                await _uow.Messages.AddAsync(entity);
-                await _uow.SaveChangesAsync();
-                return new Response<CreateMessageVM>(model, null, false);
+                var entity = await _uow.Messages.CreateAsync(senderId, model.ReceiverId, model.Content, DateTime.UtcNow, false);
+                // map back to vm
+                var mapped = _mapper.Map<CreateMessageVM>(entity);
+                return Response<CreateMessageVM>.SuccessResponse(mapped);
             }
             catch (Exception ex)
             {
-                return new Response<CreateMessageVM>(null, ex.Message, true);
+                return Response<CreateMessageVM>.FailResponse(ex.Message);
             }
         }
 

@@ -1,10 +1,10 @@
-
+using System.Globalization;
 
 namespace PL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseController
     {
         private readonly IIdentityService _identityService;
 
@@ -12,11 +12,11 @@ namespace PL.Controllers
         {
             _identityService = identityService;
         }
-        [Authorize(Roles = nameof(UserRole.Admin))]
+        //any user regester as a guest
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterVM vm)
         {
-            var res = await _identityService.RegisterAsync(vm.Email, vm.Password, vm.FullName, vm.FirebaseUid, vm.Role);
+            var res = await _identityService.RegisterAsync(vm.Email, vm.Password, vm.FullName, vm.UserName, vm.FirebaseUid, "Guest");
             if (!res.Success) return BadRequest(res);
             return Ok(res);
         }
@@ -28,6 +28,8 @@ namespace PL.Controllers
             if (!res.Success) return Unauthorized(res);
             return Ok(res);
         }
+
+
 
         [HttpPost("send-password-reset")]
         public async Task<IActionResult> SendPasswordReset([FromBody] EmailVM vm)
@@ -57,11 +59,33 @@ namespace PL.Controllers
         [HttpPost("verify-face")]
         public async Task<IActionResult> VerifyFace([FromBody] FaceVM vm)
         {
-            var sub = User.FindFirst("sub")?.Value;
-            if (string.IsNullOrWhiteSpace(sub)) return Unauthorized();
-            var userId = Guid.Parse(sub);
-            var res = await _identityService.VerifyFaceIdAsync(userId, vm.FaceData);
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return Unauthorized();
+            var res = await _identityService.VerifyFaceIdAsync(userId.Value, vm.FaceData);
             if (!res.Success) return BadRequest(res);
+            return Ok(res);
+        }
+
+        //toggle user role guest / host
+        [Authorize]
+        [HttpPost("toggle-role")]
+        public async Task<IActionResult> ToggleRole()
+        {
+            var userId = GetUserIdFromClaims();
+            
+            if (userId == null) return Unauthorized(); 
+            var res = await _identityService.ToggleUserRoleAsync(userId.Value);
+            if (!res.Success) return BadRequest(res);
+            return Ok(res);
+        }
+
+        //make user admin
+        [Authorize(Roles = "Admin")]
+        [HttpPost("make-admin/{userId}")]
+        public async Task<IActionResult> MakeAdmin([FromRoute] Guid userId)
+        {
+            var res = await _identityService.MakeUserAdminAsync(userId);
+            if (!res.Success) return BadRequest(res); 
             return Ok(res);
         }
 

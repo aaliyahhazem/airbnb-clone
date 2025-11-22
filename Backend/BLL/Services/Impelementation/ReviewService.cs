@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 
 namespace BLL.Services.Impelementation
 {
@@ -5,24 +6,43 @@ namespace BLL.Services.Impelementation
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
-        private readonly IReviewRepository _reviewRepo;
 
-        public ReviewService(IUnitOfWork uow, IMapper mapper, IReviewRepository reviewRepo)
+        public ReviewService(IUnitOfWork uow, IMapper mapper)
         {
             _uow = uow;
             _mapper = mapper;
-            _reviewRepo = reviewRepo;
         }
 
-        public async Task<Response<ReviewVM>> CreateReviewAsync(CreateReviewVM model)
+        public async Task<Response<ReviewVM>> CreateReviewAsync(CreateReviewVM model, Guid userId)
         {
             try
             {
-                var entity = Review.Create(model.BookingId, model.GuestId, model.Rating, model.Comment, model.CreatedAt);
-                await _uow.Reviews.AddAsync(entity);
-                await _uow.SaveChangesAsync();
+                // Validate input
+                if (model == null) return Response<ReviewVM>.FailResponse("Request model is required.");
+                if (model.Rating < 1 || model.Rating > 5) return Response<ReviewVM>.FailResponse("Rating must be between 1 and 5.");
+
+                // Ensure booking exists
+                var booking = await _uow.Bookings.GetByIdAsync(model.BookingId);
+                if (booking == null) return Response<ReviewVM>.FailResponse("Booking not found.");
+
+                // Ensure the user creating the review is the guest who made the booking
+                if (booking.GuestId != userId) return Response<ReviewVM>.FailResponse("User is not the guest for this booking.");
+
+                // Prevent duplicate review for same booking
+                var existingReviews = await _uow.Reviews.GetReviewsByBookingAsync(model.BookingId);
+                if (existingReviews != null && existingReviews.Any())
+                    return Response<ReviewVM>.FailResponse("A review for this booking already exists.");
+
+                // Use domain factory to ensure invariants and required fields are set
+                var entity = await _uow.Reviews.CreateAsync(model.BookingId, userId, model.Rating, model.Comment, DateTime.UtcNow);
                 var vm = _mapper.Map<ReviewVM>(entity);
                 return Response<ReviewVM>.SuccessResponse(vm);
+            }
+            catch (DbUpdateException dbEx)
+            {
+                // Return inner exception message or full exception details to help identify DB-level errors
+                var msg = dbEx.InnerException?.Message ?? dbEx.ToString();
+                return Response<ReviewVM>.FailResponse(msg);
             }
             catch (Exception ex)
             {
@@ -36,11 +56,16 @@ namespace BLL.Services.Impelementation
             {
                 var existing = await _uow.Reviews.GetByIdAsync(id);
                 if (existing == null) return Response<ReviewVM>.FailResponse("Review not found");
-                existing.Update(model.Rating, model.Comment);
-                _uow.Reviews.Update(existing);
-                await _uow.SaveChangesAsync();
+                existing.Update(model.Rating, model.Comment); 
+                await _uow.Reviews.UpdateAsync(existing);
                 var vm = _mapper.Map<ReviewVM>(existing);
                 return Response<ReviewVM>.SuccessResponse(vm);
+            }
+            catch (DbUpdateException dbEx)
+            {
+                // Return inner exception message or full exception details to help identify DB-level errors
+                var msg = dbEx.InnerException?.Message ?? dbEx.ToString();
+                return Response<ReviewVM>.FailResponse(msg);
             }
             catch (Exception ex)
             {
@@ -54,9 +79,14 @@ namespace BLL.Services.Impelementation
             {
                 var existing = await _uow.Reviews.GetByIdAsync(id);
                 if (existing == null) return Response<bool>.FailResponse("Review not found");
-                _uow.Reviews.Delete(existing);
-                await _uow.SaveChangesAsync();
-                return Response<bool>.SuccessResponse(true);
+                var ok = await _uow.Reviews.DeleteAsync(existing);
+                return ok ? Response<bool>.SuccessResponse(true) : Response<bool>.FailResponse("Failed to delete");
+            }
+            catch (DbUpdateException dbEx)
+            {
+                // Return inner exception message or full exception details to help identify DB-level errors
+                var msg = dbEx.InnerException?.Message ?? dbEx.ToString();
+                return Response<bool>.FailResponse(msg);
             }
             catch (Exception ex)
             {
@@ -82,7 +112,7 @@ namespace BLL.Services.Impelementation
         {
             try
             {
-                var list = await _reviewRepo.GetReviewsByGuestAsync(guestId);
+                var list = await _uow.Reviews.GetReviewsByGuestAsync(guestId); 
                 var mapped = _mapper.Map<List<ReviewVM>>(list);
                 return Response<List<ReviewVM>>.SuccessResponse(mapped);
             }

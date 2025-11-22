@@ -1,11 +1,9 @@
-
-
 namespace PL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class MessageController : ControllerBase
+    public class MessageController : BaseController
     {
         private readonly IMessageService _messageService;
         private readonly IHubContext<MessageHub> _hub;
@@ -16,40 +14,37 @@ namespace PL.Controllers
             _hub = hub;
         }
 
-        private Guid GetUserId()
-        {
-            var sub = User.FindFirst("sub")?.Value;
-            if (!string.IsNullOrWhiteSpace(sub) && Guid.TryParse(sub, out var uid)) return uid;
-            // fallback for dev
-            return Guid.Parse("729a642d-9885-40b2-2817-08de255a2d0a");
-        }
-
         [HttpGet("conversation/{otherUserId:guid}")]
         public async Task<IActionResult> GetConversation(Guid otherUserId)
         {
-            var myId = GetUserId();
-            var result = await _messageService.GetConversationAsync(myId, otherUserId);
+            var myId = GetUserIdFromClaims();
+            if (myId == null) return Unauthorized();
+            var result = await _messageService.GetConversationAsync(myId.Value, otherUserId);
             return Ok(result);
         }
 
         [HttpGet("unread")]
         public async Task<IActionResult> GetUnread()
         {
-            var myId = GetUserId();
-            var result = await _messageService.GetUnreadAsync(myId);
+            var myId = GetUserIdFromClaims();
+            if (myId == null) return Unauthorized();
+            var result = await _messageService.GetUnreadAsync(myId.Value);
             return Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateMessageVM model)
         {
-            model.SenderId = GetUserId();
-            var result = await _messageService.CreateAsync(model);
+            var myId = GetUserIdFromClaims();
+            if (myId == null) return Unauthorized();
+            var newModel = new CreateMessageVM { ReceiverId = model.ReceiverId, Content = model.Content };
+            // call service with sender id param
+            var result = await _messageService.CreateAsync(newModel, myId.Value);
             if (result.IsHaveErrorOrNo)
                 return BadRequest(result);
 
             // load created entity to get fields like Id / SentAt
-            var conv = await _messageService.GetConversationAsync(model.SenderId, model.ReceiverId);
+            var conv = await _messageService.GetConversationAsync(myId.Value, model.ReceiverId);
             var last = conv.result?.OrderByDescending(m => m.SentAt).FirstOrDefault();
 
             var connectionId = MessageHub.GetConnectionId(model.ReceiverId.ToString());

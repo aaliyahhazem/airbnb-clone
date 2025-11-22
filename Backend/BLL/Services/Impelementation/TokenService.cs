@@ -1,6 +1,3 @@
-
-
-
 namespace BLL.Services.Impelementation
 {
  public class TokenService : ITokenService
@@ -20,7 +17,8 @@ namespace BLL.Services.Impelementation
  }
  var issuer = _config["Jwt:Issuer"];
  var audience = _config["Jwt:Audience"];
- var expireMinutes = int.Parse(_config["Jwt:ExpireMinutes"] ?? "60");
+ var expireMinutes = int.TryParse(_config["Jwt:ExpireMinutes"], out var m) ? m :1440; // default1 day
+ var expiresAt = DateTime.UtcNow.AddMinutes(expireMinutes);
 
  var claims = new List<Claim>
  {
@@ -35,7 +33,7 @@ namespace BLL.Services.Impelementation
 
  var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
  var cred = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
- var token = new JwtSecurityToken(issuer, audience, claims, expires: DateTime.UtcNow.AddMinutes(expireMinutes), signingCredentials: cred);
+ var token = new JwtSecurityToken(issuer, audience, claims, expires: expiresAt, signingCredentials: cred);
  return new JwtSecurityTokenHandler().WriteToken(token);
  }
  }
