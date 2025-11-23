@@ -1,11 +1,4 @@
-﻿using AutoMapper;
-using BLL.ModelVM.ListingVM;
-using BLL.Services.Abstractions;
-using DAL.Entities;
-using DAL.Repo.Abstraction;
-using Microsoft.AspNetCore.Identity;
-
-public class ListingService : IListingService
+﻿public class ListingService : IListingService
 {
     private readonly IUnitOfWork unitOfWork;
     private readonly IMapper mapper;
@@ -24,7 +17,10 @@ public class ListingService : IListingService
         return user?.FullName ?? userId.ToString();
     }
 
-    // Create a new listing
+    // Creates a new property listing with images and amenities.
+    // First uploaded image automatically becomes the main image.
+    //Response containing the newly created listing ID
+    // The listing is created in "Pending Review" status and requires admin approval.
     public async Task<Response<int>> CreateAsync(ListingCreateVM vm, Guid hostId, CancellationToken ct = default)
     {
         if (vm == null) return new Response<int>(0, "Input is null", true);
@@ -37,7 +33,11 @@ public class ListingService : IListingService
             {
                 foreach (var f in vm.Images)
                 {
-                    var filename = Upload.UploadFile("listings", f);
+                    var filename = await Upload.UploadFile("listings", f);
+                    // Check if upload failed
+                    if (Upload.IsError(filename))
+                        return new Response<int>(0, filename, true);
+
                     uploaded.Add(filename);
                 }
             }
@@ -59,7 +59,7 @@ public class ListingService : IListingService
                 vm.MaxGuests,
                 hostId,
                 hostFullName,
-                uploaded.FirstOrDefault() ?? string.Empty,
+                uploaded.FirstOrDefault() ?? string.Empty, // main image the first uploaded
                 parsedAmenities
             );
 
@@ -69,9 +69,9 @@ public class ListingService : IListingService
             // 5) persist
             var id = await unitOfWork.Listings.CreateAsync(
                 temp,
-                uploaded.FirstOrDefault() ?? string.Empty,
-                additional,
-                parsedAmenities,
+                uploaded.FirstOrDefault() ?? string.Empty,// main image 
+                additional, // extra images
+                parsedAmenities, // amenities
                 hostId,
                 ct);
 
@@ -83,7 +83,9 @@ public class ListingService : IListingService
         }
     }
 
-    // Retrieve listing details
+    // Retrieves detailed information about a specific listing.
+    // Includes all images, amenities, location data, and pricing.
+    // Only returns non-deleted listings.
     public async Task<Response<ListingDetailVM?>> GetByIdWithImagesAsync(int id, CancellationToken ct = default)
     {
         try
@@ -100,7 +102,9 @@ public class ListingService : IListingService
         }
     }
 
-    // Public overview
+    // Retrieves paginated list of approved listings for public view.
+    // Supports filtering by location, price range, amenities, and guest capacity.
+    // Only shows approved, non-deleted listings.
     public async Task<Response<List<ListingOverviewVM>>> GetPagedOverviewAsync(int page, int pageSize, ListingFilterDto? filter = null, CancellationToken ct = default)
     {
         try
@@ -130,12 +134,15 @@ public class ListingService : IListingService
         }
     }
 
-    // Update listing
+    // Updates an existing listing with new data, images, and amenities.
+    // Can add new images and remove existing ones.
+    // If listing was previously approved, it's marked for re-review.
+    // Only the listing owner can update their listing.
     public async Task<Response<ListingUpdateVM>> UpdateAsync(
-     int listingId,
-     Guid hostId,
-     ListingUpdateVM vm,
-     CancellationToken ct = default)
+    int listingId,
+    Guid hostId,
+    ListingUpdateVM vm,
+    CancellationToken ct = default)
     {
         if (vm == null)
             return new Response<ListingUpdateVM>(null, "Input is null", true);
@@ -149,38 +156,42 @@ public class ListingService : IListingService
         {
             var hostFullName = await ResolveFullNameAsync(hostId, ct);
 
-            // 2. HARD DELETE images selected for removal
+            // 2. Handle image removal
             if (vm.RemoveImageIds != null && vm.RemoveImageIds.Any())
             {
                 foreach (var imageId in vm.RemoveImageIds)
                 {
                     var image = await unitOfWork.ListingImages.GetImageByIdAsync(imageId, ct);
-                    if (image == null)
-                        continue; // image not found, ignore
+                    if (image == null) continue;
 
-                    // 👇 IMPORTANT CHECKS
-                    // 1) must belong to this listing
+                    // Validation checks
                     if (image.ListingId != listingId)
-                        throw new Exception("This image not found in this listing");
+                        return new Response<ListingUpdateVM>(null, "Image does not belong to this listing", true);
 
-                    // 2) listing must belong to this host
                     if (image.Listing.UserId != hostId)
                         continue;
 
-                    // delete file from disk
-                    Upload.RemoveFile("listings", image.ImageUrl);
+                    // Delete file from disk
+                    var deleteResult = await Upload.RemoveFile("listings", image.ImageUrl);
+                    // Continue even if file delete fails
 
-                    // hard delete from DB
+                    // Hard delete from DB
                     await unitOfWork.ListingImages.HardDeleteImageById(imageId, hostFullName, ct);
                 }
             }
+
             // 3. Upload new images
             var newImageUrls = new List<string>();
             if (vm.NewImages != null)
             {
                 foreach (var file in vm.NewImages)
                 {
-                    var fileName = Upload.UploadFile("listings", file);
+                    var fileName = await Upload.UploadFile("listings", file);
+
+                    // Check if upload failed
+                    if (Upload.IsError(fileName))
+                        return new Response<ListingUpdateVM>(null, fileName, true);
+
                     newImageUrls.Add(fileName);
                 }
             }
@@ -199,14 +210,14 @@ public class ListingService : IListingService
                 string.Empty
             );
 
-            // 5. Save updated fields + new images (no soft-delete needed)
+            // 5. Save updated fields + new images
             var ok = await unitOfWork.Listings.UpdateAsync(
                 listingId,
                 hostId,
                 updatedListing,
                 newMainImageUrl: null,
                 newAdditionalImages: newImageUrls,
-                imagesToRemove: null,         // already hard deleted
+                imagesToRemove: vm.RemoveImageIds.ToList() , // Already handled above
                 keywordNames: vm.Amenities,
                 ct: ct
             );
@@ -214,7 +225,7 @@ public class ListingService : IListingService
             if (!ok)
                 return new Response<ListingUpdateVM>(null, "Update failed", true);
 
-            // 6. Return updated data to frontend
+            // 6. Return updated data
             var finalListing = await unitOfWork.Listings.GetListingByIdAsync(listingId, ct);
             var vmOut = mapper.Map<ListingUpdateVM>(finalListing);
 
@@ -226,7 +237,9 @@ public class ListingService : IListingService
         }
     }
 
-    // Soft delete listing
+    // Soft deletes a listing (marks as deleted but keeps in database).
+    // Only the listing owner can delete their listing.
+    // Deleted listings are hidden from public view but preserved for records.
     public async Task<Response<bool>> SoftDeleteByOwnerAsync(int listingId, Guid hostId, CancellationToken ct = default)
     {
         var isOwner = await unitOfWork.Listings.IsOwnerAsync(listingId, hostId, ct);
@@ -243,7 +256,10 @@ public class ListingService : IListingService
         }
     }
 
-    // Approve listing
+    // Approves a listing for public visibility (Admin only).
+    // Sets IsApproved=true and IsReviewed=true.
+    // Approved listings appear in public search results.
+    // Records who approved it and when for audit trail.
     public async Task<Response<bool>> ApproveAsync(int id, Guid approverUserId, CancellationToken ct = default)
     {
         var approver = await userManager.FindByIdAsync(approverUserId.ToString());
@@ -263,7 +279,10 @@ public class ListingService : IListingService
         }
     }
 
-    // Reject listing
+    // Rejects a listing with optional feedback note (Admin only).
+    // Sets IsApproved=false and IsReviewed=true.
+    // Host can see rejection note and resubmit after making changes.
+    // Records who rejected it, when, and why for audit trail.
     public async Task<Response<bool>> RejectAsync(int id, Guid approverUserId, string? note, CancellationToken ct = default)
     {
         var approver = await userManager.FindByIdAsync(approverUserId.ToString());
@@ -283,30 +302,7 @@ public class ListingService : IListingService
         }
     }
 
-    // Promote listing
-    public async Task<Response<bool>> PromoteAsync(int id, DateTime promotionEndDate, Guid performedByUserId, CancellationToken ct = default)
-    {
-        var performer = await userManager.FindByIdAsync(performedByUserId.ToString());
-        if (performer == null) return new Response<bool>(false, "Performer not found", true);
-
-        var isAdmin = await userManager.IsInRoleAsync(performer, "Admin");
-        if (!isAdmin)
-        {
-            var isOwner = await unitOfWork.Listings.IsOwnerAsync(id, performedByUserId, ct);
-            if (!isOwner) return new Response<bool>(false, "Not admin or owner", true);
-        }
-
-        try
-        {
-            var ok = await unitOfWork.Listings.PromoteAsync(id, promotionEndDate, performedByUserId, ct);
-            return new Response<bool>(ok, ok ? null : "Promote failed", !ok);
-        }
-        catch (Exception ex)
-        {
-            return new Response<bool>(false, ex.Message, true);
-        }
-    }
-
+    
     // Set main image
     public async Task<Response<bool>> SetMainImageAsync(int listingId, int imageId, Guid hostId, CancellationToken ct = default)
     {
@@ -324,4 +320,97 @@ public class ListingService : IListingService
             return new Response<bool>(false, ex.Message, true);
         }
     }
+
+
+    // Promotes a listing to appear at top of search results until end date.
+    // Can be performed by Admin .
+    // Validates that:
+    // - User is Admin or listing owner
+    // - Listing is not already promoted
+    // - Promotion end date is in the future
+    // - Listing is approved (only approved listings can be promoted)
+    public async Task<Response<bool>> PromoteAsync(int id, DateTime promotionEndDate, Guid performedByUserId, CancellationToken ct = default)
+    {
+        try
+        {
+            //  Get and validate user exists
+            var performer = await userManager.FindByIdAsync(performedByUserId.ToString());
+            if (performer == null)
+                return new Response<bool>(false, "User not found", true);
+
+            // Check if user is Admin
+            var isAdmin = await userManager.IsInRoleAsync(performer, "Admin");
+
+            if (!isAdmin)
+            {
+              return new Response<bool>(false, "Only Admin  can promote listings", true);
+            }
+
+            // Validate promotion end date before calling repository
+            if (promotionEndDate <= DateTime.UtcNow)
+                return new Response<bool>(false, "Promotion end date must be in the future", true);
+
+            // Call repository to promote
+            var ok = await unitOfWork.Listings.PromoteAsync(id, promotionEndDate, performedByUserId, ct);
+            return new Response<bool>(ok, null, false);
+        }
+       
+        catch (Exception ex)
+        {
+            // Unexpected errors
+            return new Response<bool>(false, $"Failed to promote listing: {ex.Message}", true);
+        }
+    }
+
+    // Unpromotes a listing (cancels active promotion).
+    // Can be performed by Admin.
+    // Used to manually cancel a promotion before it expires.
+    public async Task<Response<bool>> UnpromoteAsync(int id, Guid performedByUserId, CancellationToken ct = default)
+    {
+        try
+        {
+            var performer = await userManager.FindByIdAsync(performedByUserId.ToString());
+            if (performer == null)
+                return new Response<bool>(false, "User not found", true);
+
+            var isAdmin = await userManager.IsInRoleAsync(performer, "Admin");
+            if (!isAdmin)
+            {
+                return new Response<bool>(false, "Only Admin can unpromote listings", true);
+            }
+
+            var ok = await unitOfWork.Listings.UnpromoteAsync(id, performedByUserId, ct);
+            return new Response<bool>(ok, null, false);
+        }
+        catch (Exception ex)
+        {
+            return new Response<bool>(false, ex.Message, true);
+        }
+    }
+    // Extends an existing promotion with a new end date.
+    // New end date must be after current promotion end date.
+    // Only Admin can extend promotions.
+    public async Task<Response<bool>> ExtendPromotionAsync(int id, DateTime newPromotionEndDate, Guid performedByUserId, CancellationToken ct = default)
+    {
+        try
+        {
+            var performer = await userManager.FindByIdAsync(performedByUserId.ToString());
+            if (performer == null)
+                return new Response<bool>(false, "User not found", true);
+
+            var isAdmin = await userManager.IsInRoleAsync(performer, "Admin");
+            if (!isAdmin)
+            {
+                return new Response<bool>(false, "Only Admincan extend promotions", true);
+            }
+
+            var ok = await unitOfWork.Listings.ExtendPromotionAsync(id, newPromotionEndDate, performedByUserId, ct);
+            return new Response<bool>(ok, null, false);
+        }
+        catch (Exception ex)
+        {
+            return new Response<bool>(false, ex.Message, true);
+        }
+    }
 }
+

@@ -31,6 +31,12 @@
         // Existing image ids to soft-delete
         public List<int>? RemoveImageIds { get; set; }
 
+
+        // Output properties (for response)
+        public List<ListingImageVM>? Images { get; set; }  // Saved images
+        public ListingImageVM? MainImage { get; set; }
+
+
         //public bool IsPromoted { get; set; }
         //public DateTime? PromotionEndDate { get; set; }
     }

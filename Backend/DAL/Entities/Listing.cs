@@ -262,24 +262,81 @@
             UpdatedBy = performedBy;
             UpdatedOn = DateTime.UtcNow;
         }
-        // Promotion management
+
+        // Sets or updates the promotion status of a listing.
+        // Promoted listings appear at the top of search results.
+        // Validates that promotion end date is in the future.
+        // Prevents promoting already promoted listings.
         internal void SetPromotion(bool isPromoted, DateTime? promotionEndDate, string performedBy)
         {
             if (IsDeleted)
                 throw new InvalidOperationException("Cannot promote a deleted listing.");
-            if(promotionEndDate < DateTime.Now)
-                throw new InvalidOperationException("Cannot put the old Date");
 
+            //  Check if already promoted
+            if (IsPromoted && isPromoted)
+                throw new InvalidOperationException($"Listing is already promoted until {PromotionEndDate?.ToString("yyyy-MM-dd HH:mm")}.");
 
-            IsPromoted = isPromoted;
-            PromotionEndDate = promotionEndDate;
+            // Validate promotion end date is in the future
+            if (isPromoted && promotionEndDate.HasValue)
+            {
+                if (promotionEndDate.Value <= DateTime.UtcNow)
+                    throw new InvalidOperationException("Promotion end date must be in the future.");
+            }
+
+            //  If unpromoting, clear the end date
+            if (!isPromoted)
+            {
+                IsPromoted = false;
+                PromotionEndDate = null;
+            }
+            else
+            {
+                IsPromoted = true;
+                PromotionEndDate = promotionEndDate;
+            }
+
             UpdatedBy = performedBy;
             UpdatedOn = DateTime.UtcNow;
         }
+    
+        // Checks if the promotion has expired and automatically unpromotes if needed.
+        // Should be called when retrieving listings for public display
+        public bool CheckAndExpirePromotion()
+        {
+            if (IsPromoted && PromotionEndDate.HasValue && PromotionEndDate.Value <= DateTime.UtcNow)
+            {
+                IsPromoted = false;
+                PromotionEndDate = null;
+                return true;
+            }
+            return false;
+        }
 
+        // Extends the current promotion to a new end date.
+        // Validates that listing is currently promoted and new date is valid.
+        // Can only be called by Admin.
+        internal void ExtendPromotion(DateTime newPromotionEndDate, string performedBy)
+        {
+            if (IsDeleted)
+                throw new InvalidOperationException("Cannot extend promotion of a deleted listing.");
 
-        // Set main image for seedings
-        public void SetMainImage(int imageId, string performedBy) 
+            if (!IsPromoted || !PromotionEndDate.HasValue)
+                throw new InvalidOperationException("Listing is not currently promoted.");
+
+            if (newPromotionEndDate <= PromotionEndDate.Value)
+                throw new InvalidOperationException("New promotion end date must be after the current end date.");
+
+            if (newPromotionEndDate <= DateTime.UtcNow)
+                throw new InvalidOperationException("New promotion end date must be in the future.");
+
+            PromotionEndDate = newPromotionEndDate;
+            UpdatedBy = performedBy;
+            UpdatedOn = DateTime.UtcNow;
+        }
+    
+
+// Set main image for seedings
+public void SetMainImage(int imageId, string performedBy) 
         { if (IsDeleted)
                 throw new InvalidOperationException("Cannot change main image..."); 
             if (!Images.Any(img => img.Id == imageId && !img.IsDeleted)) 

@@ -28,7 +28,7 @@
             // Token service
             services.AddSingleton<ITokenService, TokenService>();
             // Ensure IdentityService is registered with token service injected
-            services.AddScoped<IIdentityService, IdentityService>();
+            //services.AddScoped<IIdentityService, IdentityService>();
             return services;
         }
     }

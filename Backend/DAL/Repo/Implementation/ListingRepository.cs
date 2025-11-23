@@ -3,7 +3,7 @@ namespace DAL.Repo.Implementation
 {
     public class ListingRepository : GenericRepository<Listing>, IListingRepository
     {
-        private readonly AppDbContext _context;
+        private new readonly AppDbContext _context;
 
         public ListingRepository(AppDbContext context) : base(context)
         {
@@ -62,14 +62,14 @@ namespace DAL.Repo.Implementation
         }
 
         public async Task<bool> UpdateAsync(
-            int listingId,
-            Guid hostId,
-            Listing updatedListing,
-            string? newMainImageUrl,
-            List<string>? newAdditionalImages,
-            List<int>? imagesToRemove,
-            List<string>? keywordNames,
-            CancellationToken ct = default)
+    int listingId,
+    Guid hostId,
+    Listing updatedListing,
+    string? newMainImageUrl,
+    List<string>? newAdditionalImages,
+    List<int>? imagesToRemove,
+    List<string>? amenitiesNames,
+    CancellationToken ct = default)
         {
             try
             {
@@ -87,25 +87,21 @@ namespace DAL.Repo.Implementation
                 if (entity.IsDeleted) throw new InvalidOperationException("Cannot update a deleted listing.");
                 if (entity.UserId != hostId) throw new UnauthorizedAccessException("You are not authorized to update this listing.");
 
-                if (imagesToRemove?.Any() == true)
-                {
-                    foreach (var imageId in imagesToRemove)
-                    {
-                        var image = entity.Images.FirstOrDefault(img => img.Id == imageId);
-                        image?.SoftDelete(hostFullName);
-                    }
-                }
+                // Note: Image removal is now handled in the service layer, not here
+                // This parameter is kept for backward compatibility but not used
 
-                if (keywordNames != null)
+                // Update amenities
+                if (amenitiesNames != null)
                 {
                     entity.Amenities.Clear();
-                    foreach (var name in keywordNames.Where(n => !string.IsNullOrWhiteSpace(n)).Select(n => n.Trim()))
+                    foreach (var name in amenitiesNames.Where(n => !string.IsNullOrWhiteSpace(n)).Select(n => n.Trim()))
                     {
                         var kw = Amenity.Create(name, entity);
                         entity.Amenities.Add(kw);
                     }
                 }
 
+                // Update scalar fields
                 var updated = entity.Update(
                     updatedListing.Title,
                     updatedListing.Description,
@@ -115,17 +111,19 @@ namespace DAL.Repo.Implementation
                     updatedListing.Longitude,
                     updatedListing.MaxGuests,
                     hostFullName,
-                    keywordNames
+                    amenitiesNames
                 );
 
                 if (!updated) return false;
 
+                // Add new images
                 if (newAdditionalImages?.Any() == true)
                 {
                     foreach (var url in newAdditionalImages.Where(u => !string.IsNullOrWhiteSpace(u)))
                         entity.AddImage(url!, hostFullName);
                 }
 
+                // Set new main image if provided
                 if (!string.IsNullOrWhiteSpace(newMainImageUrl))
                 {
                     var match = entity.Images.FirstOrDefault(i => i.ImageUrl == newMainImageUrl && !i.IsDeleted);
@@ -134,6 +132,7 @@ namespace DAL.Repo.Implementation
                     else
                     {
                         entity.AddImage(newMainImageUrl!, hostFullName);
+                        await _context.SaveChangesAsync(ct);
                         var added = entity.Images.OrderByDescending(i => i.CreatedAt).FirstOrDefault();
                         if (added != null) entity.SetMainImage(added, hostFullName);
                     }
@@ -439,32 +438,7 @@ namespace DAL.Repo.Implementation
             }
         }
 
-        public async Task<bool> PromoteAsync(int id, DateTime promotionEndDate, Guid performedByUserId, CancellationToken ct = default)
-        {
-            try
-            {
-                var listing = await _context.Listings.IgnoreQueryFilters().FirstOrDefaultAsync(l => l.Id == id, ct);
-                if (listing == null)
-                    throw new InvalidOperationException("Listing not found.");
-
-                if (listing.IsPromoted)
-                    throw new InvalidOperationException($"Listing is already promoted until {listing.PromotionEndDate}.");
-
-                if (promotionEndDate < DateTime.UtcNow)
-                    throw new InvalidOperationException("Promotion end date must be in the future.");
-
-                var performer = await GetFullNameAsync(performedByUserId, ct);
-                listing.SetPromotion(true, promotionEndDate, performer);
-
-                await _context.SaveChangesAsync(ct);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error promoting listing in repository.", ex);
-            }
-        }
-
+       
         public async Task<bool> SetMainImageAsync(int listingId, int imageId, string performedBy, CancellationToken ct = default)
         {
             try
@@ -486,6 +460,123 @@ namespace DAL.Repo.Implementation
             catch (Exception ex)
             {
                 throw new Exception("Error setting main image in repository.", ex);
+            }
+        }
+
+
+        // Promotes a listing to appear at top of search results until the specified end date.
+        // Validates that the listing exists, is not deleted, and is not already promoted.
+        // Promotion end date must be in the future.
+        // Only approved listings should be promoted.
+        public async Task<bool> PromoteAsync(int id, DateTime promotionEndDate, Guid performedByUserId, CancellationToken ct = default)
+        {
+            try
+            {
+                // 1. Get listing including deleted ones (using IgnoreQueryFilters)
+                var listing = await _context.Listings
+                    .IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(l => l.Id == id, ct);
+
+                if (listing == null)
+                    throw new InvalidOperationException("Listing not found.");
+
+                // 2. Check if deleted
+                if (listing.IsDeleted)
+                    throw new InvalidOperationException("Cannot promote a deleted listing.");
+
+                // 3.  Check if already promoted
+                if (listing.IsPromoted)
+                {
+                    throw new InvalidOperationException(
+                        $"Listing is already promoted until {listing.PromotionEndDate?.ToString("yyyy-MM-dd HH:mm UTC")}. " +
+                        "Please wait for current promotion to expire or unpromote it first.");
+                }
+
+                // 4.  Validate promotion end date is in future
+                if (promotionEndDate <= DateTime.UtcNow)
+                    throw new InvalidOperationException("Promotion end date must be in the future.");
+
+                // 5.  Optional: Only allow promoting approved listings
+                if (!listing.IsApproved)
+                    throw new InvalidOperationException("Only approved listings can be promoted.");
+
+                // 6.  Validate promotion period (e.g., max 90 days)
+                var maxPromotionDays = 90;
+                var promotionDuration = (promotionEndDate - DateTime.UtcNow).TotalDays;
+                if (promotionDuration > maxPromotionDays)
+                    throw new InvalidOperationException($"Promotion period cannot exceed {maxPromotionDays} days.");
+
+                // 7. Get performer name for auditing
+                var performer = await GetFullNameAsync(performedByUserId, ct);
+
+                // 8. Set promotion
+                listing.SetPromotion(true, promotionEndDate, performer);
+
+                // 9. Save changes
+                await _context.SaveChangesAsync(ct);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error promoting listing in repository.", ex);
+            }
+        }
+
+
+        // Unpromotes a listing (removes promotion status).
+        // Can be used to manually cancel an active promotion before it expires.
+        // Only Admin or listing owner can unpromote.
+        public async Task<bool> UnpromoteAsync(int id, Guid performedByUserId, CancellationToken ct = default)
+        {
+            try
+            {
+                var listing = await _context.Listings
+                    .IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(l => l.Id == id, ct);
+
+                if (listing == null)
+                    throw new InvalidOperationException("Listing not found.");
+
+                if (!listing.IsPromoted)
+                    throw new InvalidOperationException("Listing is not currently promoted.");
+
+                var performer = await GetFullNameAsync(performedByUserId, ct);
+                listing.SetPromotion(false, null, performer);
+
+                await _context.SaveChangesAsync(ct);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error unpromoting listing in repository.", ex);
+            }
+        }
+
+        // Extends an existing promotion with a new end date.
+        // ADMIN ONLY - Only administrators can extend promotions.
+        // New end date must be after the current promotion end date.
+        public async Task<bool> ExtendPromotionAsync(int id, DateTime newPromotionEndDate, Guid performedByUserId, CancellationToken ct = default)
+        {
+            try
+            {
+                var listing = await _context.Listings
+                    .IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(l => l.Id == id, ct);
+
+                if (listing == null)
+                    throw new InvalidOperationException("Listing not found.");
+
+                // Get admin name for auditing
+                var performer = await GetFullNameAsync(performedByUserId, ct);
+                    
+                    listing.ExtendPromotion(newPromotionEndDate, performer);
+
+                await _context.SaveChangesAsync(ct);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error extending promotion in repository.", ex);
             }
         }
     }

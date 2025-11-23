@@ -9,6 +9,8 @@ global using BLL.Services.Abstractions;
 global using DAL.Repo.Abstraction;
 
 //modular
+global using BLL.Helper;
+
 global using BLL.AutoMapper;
 global using BLL.Services.Impelementation;
 global using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +18,7 @@ global using Microsoft.AspNetCore.Http;
 global using System.ComponentModel.DataAnnotations;
 
 global using BLL.ModelVM.Message;
-global using BLL.ModelVM.LIstingVM;
+global using BLL.ModelVM.ListingVM;
 global using BLL.ModelVM.Admin;
 global using BLL.ModelVM.Booking;
 global using BLL.ModelVM.Payment;

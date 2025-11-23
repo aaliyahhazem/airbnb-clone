@@ -41,14 +41,8 @@ namespace BLL.AutoMapper
                             .ForMember(d => d.IsMain, opt => opt.MapFrom(s =>
                                 s.Listing.MainImageId == s.Id));
 
-            // ListingDetailVM -> ListingUpdateVM
-            CreateMap<ListingDetailVM, ListingUpdateVM>()
-                .ForMember(d => d.NewImages, o => o.Ignore())
-                .ForMember(d => d.RemoveImageIds, o => o.Ignore())
-                .ForMember(d => d.Amenities, o => o.MapFrom(s => s.Amenities));
-
-            CreateMap<Listing, ListingUpdateVM>()
-                // simple scalar props (adjust names if your VM uses different ones)
+                // Scalars
+           CreateMap<Listing, ListingUpdateVM>()
                 .ForMember(d => d.Title, opt => opt.MapFrom(s => s.Title))
                 .ForMember(d => d.Description, opt => opt.MapFrom(s => s.Description))
                 .ForMember(d => d.PricePerNight, opt => opt.MapFrom(s => s.PricePerNight))
@@ -57,14 +51,25 @@ namespace BLL.AutoMapper
                 .ForMember(d => d.Longitude, opt => opt.MapFrom(s => s.Longitude))
                 .ForMember(d => d.MaxGuests, opt => opt.MapFrom(s => s.MaxGuests))
 
-                // keywords: map collection of Amenity -> List<string>
-                .ForMember(d => d.Amenities, opt => opt.MapFrom(s => s.Amenities.Select(k => k.Word).ToList()))
+                // Amenities
+                .ForMember(d => d.Amenities,
+                    opt => opt.MapFrom(s => s.Amenities.Select(a => a.Word).ToList()))
 
+                // ALL images
+                .ForMember(d => d.Images,
+                    opt => opt.MapFrom(s => s.Images.Where(i => !i.IsDeleted)))
 
-                // ignore fields that are only for client uploads/changes
+                // Main image
+                .ForMember(d => d.MainImage,
+                    opt => opt.MapFrom(s =>
+                        s.MainImage != null
+                            ? s.MainImage
+                            : s.Images.Where(i => !i.IsDeleted).OrderBy(i => i.Id).FirstOrDefault()))
+
+                // Ignore inputs
                 .ForMember(d => d.NewImages, opt => opt.Ignore())
                 .ForMember(d => d.RemoveImageIds, opt => opt.Ignore());
-            // messages
+           // messages
             CreateMap<Message, GetMessageVM>().ReverseMap();
             CreateMap<Message, CreateMessageVM>().ReverseMap();
             // reviews

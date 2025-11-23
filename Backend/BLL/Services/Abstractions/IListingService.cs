@@ -29,10 +29,19 @@ namespace BLL.Services.Abstractions
         /// Admin rejects a listing with an optional note.
         Task<Response<bool>> RejectAsync(int id, Guid approverUserId, string? note, CancellationToken ct = default);
 
-        /// Admin or owner promotes a listing (sets promotion end date).
-        Task<Response<bool>> PromoteAsync(int id, DateTime promotionEndDate, Guid performedByUserId, CancellationToken ct = default);
-
         /// Host sets the main image for a listing (owner-only).
         Task<Response<bool>> SetMainImageAsync(int listingId, int imageId, Guid hostId, CancellationToken ct = default);
+
+        /// Promote a listing (admin only) until the specified end date.
+        public Task<Response<bool>> PromoteAsync(int id, DateTime promotionEndDate, Guid performedByUserId, CancellationToken ct = default);
+
+        /// Unpromote a listing (admin only).
+        public Task<Response<bool>> UnpromoteAsync(int id, Guid performedByUserId, CancellationToken ct = default);
+
+        /// Extend promotion end date for a listing (admin only).
+        public Task<Response<bool>> ExtendPromotionAsync(int id, DateTime newPromotionEndDate, Guid performedByUserId, CancellationToken ct = default);
+
+
+
     }
 }

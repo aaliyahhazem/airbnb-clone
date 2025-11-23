@@ -1,4 +1,6 @@
 ﻿
+using BLL.Helper;
+
 public class ListingImageService : IListingImageService
 {
     private readonly IUnitOfWork unitOfWork;
@@ -36,7 +38,12 @@ public class ListingImageService : IListingImageService
             var uploaded = new List<string>();
             foreach (var f in files)
             {
-                var fname = Upload.UploadFile("listings", f);
+                var fname = await Upload.UploadFile("listings", f);
+
+                // Check if upload failed
+                if (Upload.IsError(fname))
+                    return new Response<int>(0, fname, true);
+
                 uploaded.Add(fname);
             }
 
@@ -62,10 +69,14 @@ public class ListingImageService : IListingImageService
 
             if (image.Listing.UserId != hostId) return new Response<bool>(false, "Not owner", true);
 
-            var newFileName = Upload.UploadFile("listings", file);
+            var newFileName = await Upload.UploadFile("listings", file);
+
+            // Check if upload failed
+            if (Upload.IsError(newFileName))
+                return new Response<bool>(false, newFileName, true);
 
             var oldFileName = image.ImageUrl;
-            Upload.RemoveFile("listings", oldFileName);
+            await Upload.RemoveFile("listings", oldFileName);
 
             var hostName = (await unitOfWork.Users.GetByIdAsyncForlisting(hostId))?.FullName ?? hostId.ToString();
 
@@ -81,6 +92,36 @@ public class ListingImageService : IListingImageService
         }
     }
 
+    public async Task<Response<bool>> DeleteImageByIdAsync(int imageId, Guid hostId, CancellationToken ct = default)
+    {
+        try
+        {
+            var performer = (await unitOfWork.Users.GetByIdAsyncForlisting(hostId))?.FullName ?? hostId.ToString();
+
+            var imageHost = await unitOfWork.ListingImages.IsImageOwnerAsync(imageId, hostId, ct);
+            if (!imageHost)
+                return new Response<bool>(false, "Not owner", true);
+
+            var image = await unitOfWork.ListingImages.GetImageByIdAsync(imageId, ct);
+            if (image == null)
+                return new Response<bool>(false, "Image not found", true);
+
+            var removeResult = await Upload.RemoveFile("listings", image.ImageUrl);
+            // Continue even if file doesn't exist
+
+            var ok = await unitOfWork.ListingImages.HardDeleteImageById(imageId, performer, ct);
+            if (!ok)
+                return new Response<bool>(false, "Database deletion failed", true);
+
+            return new Response<bool>(true, null, false);
+        }
+        catch (Exception ex)
+        {
+            return new Response<bool>(false, ex.Message, true);
+        }
+    }
+
+   
     public async Task<Response<bool>> SoftDeleteImagesAsync(List<int> imageIds, Guid hostId, CancellationToken ct = default)
     {
         if (imageIds == null || !imageIds.Any()) return new Response<bool>(false, "No image ids", true);
@@ -138,33 +179,6 @@ public class ListingImageService : IListingImageService
         }
     }
 
-    public async Task<Response<bool>> DeleteImageByIdAsync(int imageId, Guid hostId, CancellationToken ct = default)
-    {
-        try
-        {
-            var performer = (await unitOfWork.Users.GetByIdAsyncForlisting(hostId))?.FullName ?? hostId.ToString();
-
-            var imageHost = await unitOfWork.ListingImages.IsImageOwnerAsync(imageId, hostId, ct);
-            if (!imageHost)
-                return new Response<bool>(false, "Not owner", true);
-
-            var image = await unitOfWork.ListingImages.GetImageByIdAsync(imageId, ct);
-            if (image == null)
-                return new Response<bool>(false, "Image not found", true);
-
-            var removeResult = Upload.RemoveFile("listings", image.ImageUrl);
-            if (removeResult == null)
-                return new Response<bool>(false, "File deletion failed", true);
-
-            var ok = await unitOfWork.ListingImages.HardDeleteImageById(imageId, performer, ct);
-            if (!ok)
-                return new Response<bool>(false, "Database deletion failed", true);
-
-            return new Response<bool>(true, null, false);
-        }
-        catch (Exception ex)
-        {
-            return new Response<bool>(false, ex.Message, true);
-        }
-    }
+    
+    
 }

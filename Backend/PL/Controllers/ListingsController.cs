@@ -1,7 +1,5 @@
 ﻿using BLL.ModelVM.ListingVM;
-using BLL.Services.Abstractions;
 using DAL.Entities;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,21 +7,22 @@ namespace PL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ListingsController : ControllerBase
+    public class ListingsController : BaseController
     {
         private readonly IListingService _listingService;
-        private readonly UserManager<User> _userManager;
 
         public ListingsController(
-            IListingService listingService,
-            UserManager<User> userManager)
+            IListingService listingService)
         {
             _listingService = listingService;
-            _userManager = userManager;
+            
         }
 
-        // Public list
+        // ---------------------------
+        // PUBLIC LISTINGS API
+        // ---------------------------
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll(
             [FromQuery] ListingFilterDto? filter,
             [FromQuery] int page = 1,
@@ -32,126 +31,182 @@ namespace PL.Controllers
         {
             var result = await _listingService.GetPagedOverviewAsync(page, pageSize, filter, ct);
             if (result.IsHaveErrorOrNo) return BadRequest(result);
+
             return Ok(result);
         }
 
-        // Public details
         [HttpGet("{id:int}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetListingById([FromRoute] int id, CancellationToken ct = default)
         {
-            var res = await _listingService.GetByIdWithImagesAsync(id, ct);
-            if (res.IsHaveErrorOrNo) return BadRequest(res);
-            return Ok(res);
+            var result = await _listingService.GetByIdWithImagesAsync(id, ct);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
+
+            return Ok(result);
         }
 
-        // Host create listing (with images in vm.Images)
+        // ---------------------------
+        // HOST OPERATIONS
+        // ---------------------------
+
         [HttpPost]
-        //[Authorize(Roles = "Host")]
+        [Authorize(Roles = "Guest")]   // Hosts are users with role Guest or Host
         public async Task<IActionResult> Create([FromForm] ListingCreateVM vm, CancellationToken ct = default)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+                return Unauthorized("Invalid or missing user ID in token.");
 
-            var res = await _listingService.CreateAsync(vm, user.Id, ct);
-            if (res.IsHaveErrorOrNo) return BadRequest(res);
+            var result = await _listingService.CreateAsync(vm, userId.Value, ct);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
 
-            return CreatedAtAction(nameof(GetListingById), new { id = res.result }, res);
+            return CreatedAtAction(nameof(GetListingById), new { id = result.result }, result);
         }
 
-        // Host update listing (add/remove images via vm.NewImages & vm.RemoveImageIds)
         [HttpPut("{id:int}")]
-        //[Authorize(Roles = "Host")]
+        [Authorize(Roles = "Guest")]
         public async Task<IActionResult> Update(int id, [FromForm] ListingUpdateVM vm, CancellationToken ct = default)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return Unauthorized();
 
-            var res = await _listingService.UpdateAsync(id, user.Id, vm, ct);
-            if (res.IsHaveErrorOrNo) return BadRequest(res);
+            var result = await _listingService.UpdateAsync(id, userId.Value, vm, ct);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
 
-            return Ok(res);
+            return Ok(result);
         }
 
-        // Host soft delete listing
         [HttpDelete("{id:int}")]
-        //[Authorize(Roles = "Host")]
+        [Authorize(Roles = "Guest")]
         public async Task<IActionResult> Delete(int id, CancellationToken ct = default)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return Unauthorized();
 
-            var res = await _listingService.SoftDeleteByOwnerAsync(id, user.Id, ct);
-            if (res.IsHaveErrorOrNo) return BadRequest(res);
+            var result = await _listingService.SoftDeleteByOwnerAsync(id, userId.Value, ct);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
 
-            return Ok(res);
+            return Ok(result);
         }
 
-        // Host's own listings
-        [HttpGet("AllhostListings")]
-        //[Authorize(Roles = "Host")]
+        [HttpGet("my-listings")]
+        [Authorize(Roles = "Guest")]
         public async Task<IActionResult> GetHostListings(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
             CancellationToken ct = default)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return Unauthorized();
 
-            var res = await _listingService.GetByUserAsync(user.Id, page, pageSize, ct);
-            if (res.IsHaveErrorOrNo) return BadRequest(res);
+            var result = await _listingService.GetByUserAsync(userId.Value, page, pageSize, ct);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
 
-            return Ok(res);
+            return Ok(result);
         }
 
-        // Admin approve listing
-        [HttpPut("admin/approve/listing/{id:int}")]
-        //[Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Approve(int id, CancellationToken ct = default)
-        {
-            var admin = await _userManager.GetUserAsync(User);
-            if (admin == null) return Unauthorized();
-
-            var res = await _listingService.ApproveAsync(id, admin.Id, ct);
-            if (res.IsHaveErrorOrNo) return BadRequest(res);
-
-            return Ok(res);
-        }
-
-        // Admin reject listing
-        [HttpPut("admin/reject/listing/{id:int}")]
-        //[Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Reject(int id, [FromBody] RejectListingRequest? body, CancellationToken ct = default)
-        {
-            var admin = await _userManager.GetUserAsync(User);
-            if (admin == null) return Unauthorized();
-
-            var res = await _listingService.RejectAsync(id, admin.Id, body?.Note, ct);
-            if (res.IsHaveErrorOrNo) return BadRequest(res);
-
-            return Ok(res);
-        }
-
-     
-
-        // Set main image via ListingService (still "listing-centric")
         [HttpPut("{listingId:int}/image/{imageId:int}/main")]
-        [Authorize(Roles = "Host")]
+        [Authorize(Roles = "Guest")]
         public async Task<IActionResult> SetMainImage(
             int listingId,
             int imageId,
             CancellationToken ct = default)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return Unauthorized();
 
-            var res = await _listingService.SetMainImageAsync(listingId, imageId, user.Id, ct);
-            if (res.IsHaveErrorOrNo) return BadRequest(res);
+            var result = await _listingService.SetMainImageAsync(listingId, imageId, userId.Value, ct);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
 
-            return Ok(res);
+            return Ok(result);
+        }
+
+        // ---------------------------
+        // ADMIN OPERATIONS
+        // ---------------------------
+
+        [HttpPut("admin/approve/listing/{id:int}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Approve(int id, CancellationToken ct = default)
+        {
+            var adminId = GetUserIdFromClaims();
+            if (adminId == null) return Unauthorized();
+
+            var result = await _listingService.ApproveAsync(id, adminId.Value, ct);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpPut("admin/reject/listing/{id:int}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Reject(
+            int id,
+            [FromBody] RejectListingRequest? body,
+            CancellationToken ct = default)
+        {
+            var adminId = GetUserIdFromClaims();
+            if (adminId == null) return Unauthorized();
+
+            var result = await _listingService.RejectAsync(id, adminId.Value, body?.Note, ct);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpPost("admin/promote/{id:int}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> PromoteListing(
+            int id,
+            [FromBody] PromoteListingRequest request,
+            CancellationToken ct = default)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var adminId = GetUserIdFromClaims();
+            if (adminId == null) return Unauthorized();
+
+            var result = await _listingService.PromoteAsync(id, request.PromotionEndDate, adminId.Value, ct);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpPost("admin/unpromote/{id:int}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UnpromoteListing(int id, CancellationToken ct = default)
+        {
+            var adminId = GetUserIdFromClaims();
+            if (adminId == null) return Unauthorized();
+
+            var result = await _listingService.UnpromoteAsync(id, adminId.Value, ct);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
+
+            return Ok(result);
+        }
+
+        [HttpPost("admin/extend-promotion/{id:int}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ExtendPromotion(
+            int id,
+            [FromBody] PromoteListingRequest request,
+            CancellationToken ct = default)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var adminId = GetUserIdFromClaims();
+            if (adminId == null) return Unauthorized();
+
+            var result = await _listingService.ExtendPromotionAsync(id, request.PromotionEndDate, adminId.Value, ct);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
+
+            return Ok(result);
         }
     }
 }

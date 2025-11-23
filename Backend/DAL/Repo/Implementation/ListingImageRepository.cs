@@ -3,7 +3,7 @@ namespace DAL.Repo.Implementation
 {
     public class ListingImageRepository : GenericRepository<ListingImage>, IListingImageRepository
     {
-        private readonly AppDbContext _context;
+        private new readonly AppDbContext _context;
 
         public ListingImageRepository(AppDbContext context) : base(context)
         {
