@@ -45,9 +45,9 @@ namespace BLL.Helper
                 // Combine the correct path to the file
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", folderName, fileName);
 
-                if (File.Exists(filePath))
+                if (System.IO.File.Exists(filePath))
                 {
-                    File.Delete(filePath);
+                    System.IO.File.Delete(filePath);
                     return "File Deleted Successfully";
                 }
 

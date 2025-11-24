@@ -29,3 +29,8 @@ global using Microsoft.IdentityModel.Tokens;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Security.Claims;
 global  using System.Text;
+
+//Stripe
+global using Stripe;
+global using Microsoft.Extensions.Options;
+global using BLL.Helper;

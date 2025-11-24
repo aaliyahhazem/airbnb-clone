@@ -1,3 +1,4 @@
+using Stripe;
 
 namespace PL
 {
@@ -10,6 +11,12 @@ namespace PL
 
             // Preserve original incoming JWT claims (do not map 'sub' to name)
             JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
+
+            // Configure Stripe Settings
+            builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+
+            var stripeSettings = builder.Configuration.GetSection("Stripe").Get<StripeSettings>();
+            StripeConfiguration.ApiKey = stripeSettings.SecretKey;
 
             // ----------------------------------------------------------------------------
             // CORS

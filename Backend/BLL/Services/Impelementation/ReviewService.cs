@@ -1,4 +1,3 @@
-
 namespace BLL.Services.Impelementation
 {
     public class ReviewService : IReviewService
@@ -18,7 +17,7 @@ namespace BLL.Services.Impelementation
         {
             try
             {
-                var entity = Review.Create(model.BookingId, model.GuestId, model.Rating, model.Comment, model.CreatedAt);
+                var entity = DAL.Entities.Review.Create(model.BookingId, model.GuestId, model.Rating, model.Comment, model.CreatedAt);
                 await _uow.Reviews.AddAsync(entity);
                 await _uow.SaveChangesAsync();
                 var vm = _mapper.Map<ReviewVM>(entity);
