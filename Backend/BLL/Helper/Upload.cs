@@ -64,7 +64,7 @@
 
                 if (System.IO.File.Exists(filePath))
                 {
-                    await Task.Run(() => File.Delete(filePath));
+                    await Task.Run(() => System.IO.File.Delete(filePath));
                     return "File Deleted Successfully";
                 }
 

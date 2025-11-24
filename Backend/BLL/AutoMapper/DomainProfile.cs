@@ -74,7 +74,7 @@ namespace BLL.AutoMapper
             CreateMap<Message, CreateMessageVM>().ReverseMap();
             CreateMap<DAL.Dto.ConversationDto, ConversationVM>().ReverseMap();
             // reviews
-            CreateMap<Review, CreateReviewVM>().ReverseMap();
+            CreateMap<DAL.Entities.Review, CreateReviewVM>().ReverseMap();
             // booking
             CreateMap<Booking, CreateBookingVM>().ReverseMap();
         }
