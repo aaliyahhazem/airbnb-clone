@@ -1,9 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ListingsService } from '../services/listings';
-import { Listing } from '../models/listing.model';
+import { ListingService } from '../../../core/services/listings/listing.service';
+import { ListingCreateVM, ListingUpdateVM, ListingDetailVM } from '../../../core/models/listing.model';
 
 @Component({
   selector: 'app-listings-create-edit',
@@ -16,83 +16,236 @@ export class ListingsCreateEdit implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private service = inject(ListingsService);
+  private listingService = inject(ListingService);
 
-  form = this.fb.group({
-    title: ['', Validators.required],
-    location: ['', Validators.required],
-    price: [1, [Validators.required, Validators.min(1)]],
-    description: [''],
-    rating: [0, [Validators.min(0), Validators.max(5)]],
-    dateAvailable: [''],
-    imageUrl: ['']
-  });
+  form!: FormGroup;
 
   editMode = false;
   currentId?: number;
-  imagePreview?: string;
+  imagePreviews: string[] = [];
+  selectedFiles: File[] = [];
+  removeImageIds: number[] = [];
+  existingImages: { id: number; url: string }[] = [];
+  loading = false;
+  error = '';
+  successMessage = '';
+
+  amenitiesList = [
+    'Wi-Fi', 'Pool', 'Air Conditioning', 'Kitchen', 
+    'Washer', 'Dryer', 'TV', 'Heating', 'Parking' , 'hire'
+  ];
+
+  constructor() {
+    this.initForm();
+  }
+
+  private initForm(): void {
+    this.form = this.fb.group({
+      title: ['', [Validators.required, Validators.minLength(5)]],
+      description: ['', [Validators.required, Validators.minLength(20)]],
+      pricePerNight: [0, [Validators.required, Validators.min(1)]],
+      location: ['', [Validators.required, Validators.minLength(3)]],
+      latitude: [0, [Validators.required]],
+      longitude: [0, [Validators.required]],
+      maxGuests: [1, [Validators.required, Validators.min(1)]],
+      amenities: [[]] as any
+    });
+  }
 
   ngOnInit(): void {
-    // Check if we're in edit mode by looking for an ID param on the route
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       this.editMode = true;
       this.currentId = +idParam;
-      // Load existing listing data into the form
-      const existing = this.service.getById(this.currentId);
-      if (existing) {
-        // Patch form values with existing listing data
-        this.form.patchValue(existing);
-        this.imagePreview = existing.imageUrl;
-      } else {
-        this.router.navigate(['/listings']);
-      }
+      this.loadListing(this.currentId);
     }
   }
 
-  isInvalid(name: string): boolean {
-    const c = this.form.get(name);
-    return !!c && c.invalid && (c.touched );
+  private loadListing(id: number): void {
+    this.loading = true;
+    this.listingService.getById(id).subscribe(
+      (response) => {
+        if (!response.isError && response.data) {
+          this.populateForm(response.data);
+          this.existingImages = (response.data.images || []).map(img => ({
+            id: img.id,
+            url: img.imageUrl
+          }));
+        } else {
+          this.error = response.message || 'Failed to load listing';
+          setTimeout(() => this.router.navigate(['/listings']), 2000);
+        }
+        this.loading = false;
+      },
+      (err) => {
+        this.error = 'Error loading listing';
+        this.loading = false;
+        setTimeout(() => this.router.navigate(['/listings']), 2000);
+      }
+    );
   }
 
-  // Handle image file input change to show preview 
-  onFileChange(e: Event) {
-    const input = e.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = String(reader.result);
-      this.imagePreview = dataUrl;
-      this.form.patchValue({ imageUrl: dataUrl });
-    };
-    reader.readAsDataURL(file);
+  private populateForm(listing: ListingDetailVM): void {
+    this.form.patchValue({
+      title: listing.title,
+      description: listing.description,
+      pricePerNight: listing.pricePerNight,
+      location: listing.location,
+      latitude: listing.latitude,
+      longitude: listing.longitude,
+      maxGuests: listing.maxGuests
+    });
   }
 
-  onSubmit() {
+  isInvalid(fieldName: string): boolean {
+    const control = this.form.get(fieldName);
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  onFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = input.files;
+    if (!files) return;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreviews.push(reader.result as string);
+        this.selectedFiles.push(file);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeNewImage(index: number): void {
+    this.imagePreviews.splice(index, 1);
+    this.selectedFiles.splice(index, 1);
+  }
+
+  removeExistingImage(imageId: number): void {
+    this.removeImageIds.push(imageId);
+    this.existingImages = this.existingImages.filter(img => img.id !== imageId);
+  }
+
+  toggleAmenity(amenity: string): void {
+    const currentValue = this.form.get('amenities')?.value || [];
+    const amenities = Array.isArray(currentValue) ? [...currentValue] : [];
+    const index = amenities.indexOf(amenity);
+    if (index > -1) {
+      amenities.splice(index, 1);
+    } else {
+      amenities.push(amenity);
+    }
+    this.form.patchValue({ amenities });
+  }
+
+  isAmenitySelected(amenity: string): boolean {
+    const amenities: string[] = this.form.get('amenities')?.value || [];
+    return amenities.includes(amenity);
+  }
+
+  onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-    const payload = this.form.value as Omit<Listing, 'id'>;
+
+    this.loading = true;
+    this.error = '';
+    this.successMessage = '';
+
+    const formValue = this.form.value;
 
     if (this.editMode && this.currentId) {
-      this.service.update(this.currentId, payload);
+      const updateVM: ListingUpdateVM = {
+        title: formValue.title!,
+        description: formValue.description!,
+        pricePerNight: formValue.pricePerNight!,
+        location: formValue.location!,
+        latitude: formValue.latitude!,
+        longitude: formValue.longitude!,
+        maxGuests: formValue.maxGuests!,
+        newImages: this.selectedFiles.length > 0 ? this.selectedFiles : undefined,
+        removeImageIds: this.removeImageIds.length > 0 ? this.removeImageIds : undefined,
+        amenities: formValue.amenities || []
+      };
+
+      this.listingService.update(this.currentId, updateVM).subscribe(
+        (response) => {
+          if (!response.isError) {
+            this.successMessage = 'Listing updated successfully!';
+            setTimeout(() => {
+              this.router.navigate(['/listings', 'detail', this.currentId]);
+            }, 1500);
+          } else {
+            this.error = response.message || 'Failed to update listing';
+          }
+          this.loading = false;
+        },
+        (err) => {
+          this.error = err.error?.message || 'Error updating listing';
+          this.loading = false;
+        }
+      );
     } else {
-      this.service.create(payload);
+      const createVM: ListingCreateVM = {
+        title: formValue.title!,
+        description: formValue.description!,
+        pricePerNight: formValue.pricePerNight!,
+        location: formValue.location!,
+        latitude: formValue.latitude!,
+        longitude: formValue.longitude!,
+        maxGuests: formValue.maxGuests!,
+        images: this.selectedFiles.length > 0 ? this.selectedFiles : undefined,
+        amenities: formValue.amenities || []
+      };
+
+      this.listingService.create(createVM).subscribe(
+        (response) => {
+          if (!response.isError) {
+            this.successMessage = 'Listing created successfully!';
+            setTimeout(() => {
+              this.router.navigate(['/listings', 'detail', response.data]);
+            }, 1500);
+          } else {
+            this.error = response.message || 'Failed to create listing';
+          }
+          this.loading = false;
+        },
+        (err) => {
+          this.error = err.error?.message || 'Error creating listing';
+          this.loading = false;
+        }
+      );
     }
-    this.router.navigate(['/listings']);
   }
 
-  onDelete() {
+  onDelete(): void {
     if (!this.currentId) return;
-    if (!confirm('Delete this listing?')) return;
-    this.service.remove(this.currentId);
-    this.router.navigate(['/listings']);
+    if (!confirm('Are you sure you want to delete this listing?')) return;
+
+    this.loading = true;
+    this.listingService.delete(this.currentId).subscribe(
+      (response) => {
+        if (!response.isError) {
+          this.successMessage = 'Listing deleted successfully!';
+          setTimeout(() => {
+            this.router.navigate(['/listings']);
+          }, 1500);
+        } else {
+          this.error = response.message || 'Failed to delete listing';
+        }
+        this.loading = false;
+      },
+      (err) => {
+        this.error = err.error?.message || 'Error deleting listing';
+        this.loading = false;
+      }
+    );
   }
 
-  goBack() {
+  goBack(): void {
     this.router.navigate(['/listings']);
   }
 }

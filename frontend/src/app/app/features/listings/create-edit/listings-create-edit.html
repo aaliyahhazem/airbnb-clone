@@ -1,74 +1,224 @@
-<div class="container py-4">
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <h2 class="mb-0">{{ editMode ? 'Edit Listing' : 'Add Listing' }}</h2>
-    <button class="btn btn-outline-secondary" (click)="goBack()">Back</button>
-  </div>
-
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="row g-3">
-    <!-- Title -->
-    <div class="col-md-6">
-      <label class="form-label">Title</label>
-      <input type="text" class="form-control" formControlName="title" [class.is-invalid]="isInvalid('title')">
-      <div class="invalid-feedback">Title is required.</div>
+<div class="listing-form-container">
+    <div class="form-header">
+        <h2>{{ editMode ? 'Edit Listing' : 'Create New Listing' }}</h2>
+        <button class="btn-back" (click)="goBack()">← Back</button>
     </div>
 
-    <!-- Location -->
-    <div class="col-md-6">
-      <label class="form-label">Location</label>
-      <input type="text" class="form-control" formControlName="location" [class.is-invalid]="isInvalid('location')">
-      <div class="invalid-feedback">Location is required.</div>
-    </div>
+    <!-- Messages -->
+    <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+    <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
 
-    <!-- Price -->
-    <div class="col-md-4">
-      <label class="form-label">Price</label>
-      <input type="number" class="form-control" formControlName="price" min="1" [class.is-invalid]="isInvalid('price')">
-      <div class="invalid-feedback">Price must be at least 1.</div>
-    </div>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-content">
+        <!-- Basic Information -->
+        <div class="section">
+            <h3>Basic Information</h3>
 
-    <!-- Rating -->
-    <div class="col-md-4">
-      <label class="form-label">Rating (0–5)</label>
-      <input type="number" class="form-control" formControlName="rating" min="0" max="5">
-    </div>
+            <div class="form-group">
+                <label for="title">Title *</label>
+                <input 
+                    id="title" 
+                    type="text" 
+                    formControlName="title" 
+                    placeholder="e.g., Cozy Apartment in Downtown"
+                    [class.is-invalid]="isInvalid('title')"
+                />
+                <small *ngIf="isInvalid('title')" class="error-text">
+                    Title is required and must be at least 5 characters
+                </small>
+            </div>
 
-    <!-- Date -->
-    <div class="col-md-4">
-      <label class="form-label">Available Date</label>
-      <input type="date" class="form-control" formControlName="dateAvailable">
-    </div>
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea 
+                    id="description" 
+                    formControlName="description" 
+                    placeholder="Describe your listing in detail..."
+                    rows="5"
+                    [class.is-invalid]="isInvalid('description')"
+                ></textarea>
+                <small *ngIf="isInvalid('description')" class="error-text">
+                    Description is required and must be at least 20 characters
+                </small>
+            </div>
 
-    <!-- Description -->
-    <div class="col-12">
-      <label class="form-label">Description</label>
-      <textarea rows="3" class="form-control" formControlName="description"></textarea>
-    </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="pricePerNight">Price Per Night (EGP) *</label>
+                    <input 
+                        id="pricePerNight" 
+                        type="number" 
+                        formControlName="pricePerNight" 
+                        placeholder="0"
+                        [class.is-invalid]="isInvalid('pricePerNight')"
+                    />
+                    <small *ngIf="isInvalid('pricePerNight')" class="error-text">
+                        Price is required and must be greater than 0
+                    </small>
+                </div>
 
-    <!-- Image upload -->
-    <div class="col-md-6">
-      <label class="form-label d-block">Image</label>
-      <input type="file" class="form-control" accept="image/*" (change)="onFileChange($event)">
-      <small class="text-muted">Temporary client preview; will switch to API upload later.</small>
-    </div>
+                <div class="form-group">
+                    <label for="maxGuests">Max Guests *</label>
+                    <input 
+                        id="maxGuests" 
+                        type="number" 
+                        formControlName="maxGuests" 
+                        placeholder="1"
+                        [class.is-invalid]="isInvalid('maxGuests')"
+                    />
+                    <small *ngIf="isInvalid('maxGuests')" class="error-text">
+                        Max guests is required
+                    </small>
+                </div>
+            </div>
+        </div>
 
-    <div class="col-md-6" *ngIf="imagePreview">
-      <label class="form-label d-block">Preview</label>
-      <img [src]="imagePreview" class="img-fluid rounded border" alt="Preview">
-    </div>
+        <!-- Location Information -->
+        <div class="section">
+            <h3>Location Information</h3>
 
-    <div class="col-12 d-flex gap-2 mt-2">
-      <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
-        {{ editMode ? 'Update' : 'Create' }}
-      </button>
+            <div class="form-group">
+                <label for="location">Location *</label>
+                <input 
+                    id="location" 
+                    type="text" 
+                    formControlName="location" 
+                    placeholder="e.g., Cairo, Egypt"
+                    [class.is-invalid]="isInvalid('location')"
+                />
+                <small *ngIf="isInvalid('location')" class="error-text">
+                    Location is required
+                </small>
+            </div>
 
-      <button type="button" class="btn btn-outline-secondary" (click)="form.reset()">Reset</button>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="latitude">Latitude *</label>
+                    <input 
+                        id="latitude" 
+                        type="number" 
+                        formControlName="latitude" 
+                        step="0.0001"
+                        placeholder="30.0444"
+                        [class.is-invalid]="isInvalid('latitude')"
+                    />
+                    <small *ngIf="isInvalid('latitude')" class="error-text">
+                        Latitude is required
+                    </small>
+                </div>
 
-      <button *ngIf="editMode && currentId"
-              type="button"
-              class="btn btn-outline-danger ms-auto"
-              (click)="onDelete()">
-        Delete
-      </button>
-    </div>
-  </form>
+                <div class="form-group">
+                    <label for="longitude">Longitude *</label>
+                    <input 
+                        id="longitude" 
+                        type="number" 
+                        formControlName="longitude" 
+                        step="0.0001"
+                        placeholder="31.2357"
+                        [class.is-invalid]="isInvalid('longitude')"
+                    />
+                    <small *ngIf="isInvalid('longitude')" class="error-text">
+                        Longitude is required
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Amenities -->
+        <div class="section">
+            <h3>Amenities</h3>
+            <div class="amenities-grid">
+                <button 
+                    *ngFor="let amenity of amenitiesList"
+                    type="button"
+                    class="amenity-btn"
+                    [class.selected]="isAmenitySelected(amenity)"
+                    (click)="toggleAmenity(amenity)"
+                >
+                    {{ amenity }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Images -->
+        <div class="section">
+            <h3>Images</h3>
+
+            <!-- Existing Images (Edit Mode) -->
+            <div *ngIf="editMode && existingImages.length > 0" class="image-section">
+                <h4>Current Images</h4>
+                <div class="images-grid">
+                    <div *ngFor="let img of existingImages" class="image-item">
+                        <img [src]="img.url" [alt]="'Listing image'" />
+                        <button 
+                            type="button" 
+                            class="btn-remove" 
+                            (click)="removeExistingImage(img.id)"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Images -->
+            <div class="image-section">
+                <label for="images">{{ editMode ? 'Add New Images' : 'Upload Images' }}</label>
+                <input 
+                    id="images" 
+                    type="file" 
+                    multiple 
+                    accept="image/*"
+                    (change)="onFileChange($event)"
+                />
+                <small class="help-text">You can upload multiple images. The first will be set as main.</small>
+            </div>
+
+            <!-- Image Previews -->
+            <div *ngIf="imagePreviews.length > 0" class="image-section">
+                <h4>New Images Preview</h4>
+                <div class="images-grid">
+                    <div *ngFor="let preview of imagePreviews; let i = index" class="image-item">
+                        <img [src]="preview" [alt]="'Preview ' + (i + 1)" />
+                        <button 
+                            type="button" 
+                            class="btn-remove" 
+                            (click)="removeNewImage(i)"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button 
+                type="submit" 
+                class="btn btn-primary"
+                [disabled]="loading || form.invalid"
+            >
+                {{ loading ? 'Saving...' : (editMode ? 'Update Listing' : 'Create Listing') }}
+            </button>
+
+            <button 
+                *ngIf="editMode"
+                type="button" 
+                class="btn btn-danger"
+                (click)="onDelete()"
+                [disabled]="loading"
+            >
+                {{ loading ? 'Deleting...' : 'Delete Listing' }}
+            </button>
+
+            <button 
+                type="button" 
+                class="btn btn-secondary"
+                (click)="goBack()"
+                [disabled]="loading"
+            >
+                Cancel
+            </button>
+        </div>
+    </form>
 </div>

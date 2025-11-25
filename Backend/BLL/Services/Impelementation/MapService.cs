@@ -1,4 +1,5 @@
 ﻿using BLL.ModelVM.MapsVM;
+using Microsoft.Extensions.Logging;
 
 namespace BLL.Services.Impelementation
 {
@@ -7,11 +8,13 @@ namespace BLL.Services.Impelementation
     {
         private readonly IMapRepo _mapRepo;
         private readonly IGeocodingService _geocodingService;
+        private readonly ILogger<MapService> _logger;
 
-        public MapService(IMapRepo mapRepo, IGeocodingService geocodingService)
+        public MapService(IMapRepo mapRepo, IGeocodingService geocodingService, ILogger<MapService> logger)
         {
             _mapRepo = mapRepo;
             _geocodingService = geocodingService;
+            _logger = logger;
         }
 
         public async Task<GeocodeResponseDto?> GeocodeAddressAsync(string address)
@@ -49,30 +52,43 @@ namespace BLL.Services.Impelementation
                 throw new ArgumentException("Invalid bounding box coordinates.");
             }
 
-            var properties = await _mapRepo.GetPropertiesInBoundsAsync(
-                request.NorthEastLat,
-                request.NorthEastLng,
-                request.SouthWestLat,
-                request.SouthWestLng
-            );
-
-            var propertyDtos = properties.Select(p => new PropertyMapDto
+            try
             {
-                Id = p.Id,
-                Title = p.Title,
-                PricePerNight = p.PricePerNight,
-                Latitude = p?.Latitude ?? 0,
-                Longitude = p?.Longitude ?? 0,
-                MainImageUrl = p.Images.FirstOrDefault()?.ImageUrl,
-                AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : null,
-                ReviewCount = p.Reviews.Count
-            }).ToList();
+                var properties = await _mapRepo.GetPropertiesInBoundsAsync(
+                    request.NorthEastLat,
+                    request.NorthEastLng,
+                    request.SouthWestLat,
+                    request.SouthWestLng
+                );
 
-            return new MapSearchResponseDto
+                var propertyDtos = properties.Select(p => new PropertyMapDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    PricePerNight = p.PricePerNight,
+                    Latitude = p.Latitude,
+                    Longitude = p.Longitude,
+                    MainImageUrl = p.Images.FirstOrDefault()?.ImageUrl,
+                    Type = string.Empty,
+                    Bedrooms = 0,
+                    Bathrooms = 0,
+                    AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : null,
+                    ReviewCount = p.Reviews.Count
+                }).ToList();
+
+                _logger.LogInformation($"Found {propertyDtos.Count} properties in bounds");
+
+                return new MapSearchResponseDto
+                {
+                    Properties = propertyDtos,
+                    TotalCount = propertyDtos.Count
+                };
+            }
+            catch (Exception ex)
             {
-                Properties = propertyDtos,
-                TotalCount = propertyDtos.Count
-            };
+                _logger.LogError(ex, "Error searching properties on map");
+                throw;
+            }
         }
 
         public async Task<PropertyMapDto?> GetPropertyForMapAsync(int propertyId)
@@ -86,10 +102,12 @@ namespace BLL.Services.Impelementation
                 Id = property.Id,
                 Title = property.Title,
                 PricePerNight = property.PricePerNight,
-                Latitude = property?.Latitude ?? 0,
-                Longitude = property?.Longitude ?? 0,
+                Latitude = property.Latitude,
+                Longitude = property.Longitude,
                 MainImageUrl = property.Images.FirstOrDefault()?.ImageUrl,
-
+                Type = string.Empty,
+                Bedrooms = 0,
+                Bathrooms = 0,
                 AverageRating = property.Reviews.Any() ? property.Reviews.Average(r => r.Rating) : null,
                 ReviewCount = property.Reviews.Count
             };

@@ -22,10 +22,11 @@ namespace DAL.Repo.Implementation
         {
             var query = _context.Listings
                 .AsNoTracking()
-                .Include(p => p.Location)
                 .Include(p => p.Images)
                 .Include(p => p.Reviews)
-                .Where(p => p.Location != null &&
+                .Where(p => !string.IsNullOrEmpty(p.Location) &&
+                           p.IsApproved && // Only show approved listings
+                           !p.IsDeleted && // Exclude deleted listings
                            p.Latitude >= southWestLat &&
                            p.Latitude <= northEastLat &&
                            p.Longitude >= southWestLng &&

@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ListingsService } from '../services/listings';
-import { Listing } from '../models/listing.model';
+import { ListingService } from '../../../core/services/listings/listing.service';
+import { ListingDetailVM } from '../../../core/models/listing.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-listings-detail',
@@ -11,21 +12,78 @@ import { Listing } from '../models/listing.model';
   templateUrl: './listings-detail.html',
   styleUrls: ['./listings-detail.css'],
 })
-export class ListingsDetail {
+export class ListingsDetail implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private service = inject(ListingsService);
+  private listingService = inject(ListingService);
+  private sub: Subscription | null = null;
 
-  listing?: Listing;
+  listing?: ListingDetailVM;
+  loading = true;
+  error = '';
+  currentImageIndex = 0;
 
-  constructor() {
-    const idParam = this.route.snapshot.paramMap.get('id');
-    const id = idParam ? +idParam : NaN;
-    this.listing = Number.isFinite(id) ? this.service.getById(id) : undefined;
-    // If you also add the guard below, this fallback will rarely trigger.
+  ngOnInit(): void {
+    // Subscribe to route params so component reloads when navigated via routerLink
+    this.sub = this.route.paramMap.subscribe((params) => {
+      this.loading = true;
+      this.error = '';
+      this.currentImageIndex = 0;
+      const idParam = params.get('id');
+      if (idParam) {
+        this.loadListing(+idParam);
+      } else {
+        this.error = 'Listing ID not provided';
+        this.loading = false;
+      }
+    });
   }
 
-  goBack() {
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
+  private loadListing(id: number): void {
+    this.listingService.getById(id).subscribe(
+      (response) => {
+        if (!response.isError && response.data) {
+          this.listing = response.data;
+        } else {
+          this.error = response.message || 'Failed to load listing';
+        }
+        this.loading = false;
+      },
+      (err) => {
+        this.error = 'Error loading listing details';
+        this.loading = false;
+      }
+    );
+  }
+
+  nextImage(): void {
+    if (this.listing?.images) {
+      this.currentImageIndex = (this.currentImageIndex + 1) % this.listing.images.length;
+    }
+  }
+
+  prevImage(): void {
+    if (this.listing?.images) {
+      this.currentImageIndex = 
+        (this.currentImageIndex - 1 + this.listing.images.length) % this.listing.images.length;
+    }
+  }
+
+  selectImage(index: number): void {
+    this.currentImageIndex = index;
+  }
+
+  goBack(): void {
     this.router.navigate(['/listings']);
+  }
+
+  editListing(): void {
+    if (this.listing) {
+      this.router.navigate(['/listings', 'edit', this.listing.id]);
+    }
   }
 }

@@ -1,45 +1,118 @@
-<div class="container py-4" *ngIf="listing; else notFound">
-  <div class="row g-4">
-    <div class="col-lg-6">
-      <img
-        [src]="listing.imageUrl || 'https://via.placeholder.com/1000x600?text=Listing'"
-        class="img-fluid rounded border w-100"
-        alt="Listing image"
-      />
+<div class="listing-detail-container">
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading">
+    <p>Loading listing details...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error && !loading" class="alert alert-error">
+    <p>{{ error }}</p>
+    <button class="btn btn-secondary" (click)="goBack()">← Back to Listings</button>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="listing && !loading && !error" class="detail-content">
+    <!-- Header -->
+    <div class="detail-header">
+      <button class="btn-back" (click)="goBack()">← Back</button>
+      <h1>{{ listing.title }}</h1>
+      <button class="btn btn-primary" (click)="editListing()">Edit Listing</button>
     </div>
 
-    <div class="col-lg-6">
-      <div class="d-flex align-items-center justify-content-between mb-2">
-        <h2 class="mb-0">{{ listing.title }}</h2>
-        <a class="btn btn-outline-primary" [routerLink]="['/listings/edit', listing.id]">Edit</a>
+    <!-- Images -->
+    <div class="images-section">
+      <div class="main-image">
+        <img 
+          [src]="listing.images && listing.images.length > 0 
+            ? listing.images[currentImageIndex].imageUrl 
+            : 'https://via.placeholder.com/800x600?text=No+Image'"
+          [alt]="listing.title"
+        />
+        <button *ngIf="listing.images && listing.images.length > 1" class="nav-btn prev" (click)="prevImage()">
+          ❮
+        </button>
+        <button *ngIf="listing.images && listing.images.length > 1" class="nav-btn next" (click)="nextImage()">
+          ❯
+        </button>
       </div>
 
-      <div class="text-muted mb-3">
-        <span class="me-3">📍 {{ listing.location }}</span>
-        <span>⭐ {{ listing.rating || 0 }}/5</span>
+      <!-- Thumbnails -->
+      <div *ngIf="listing.images && listing.images.length > 1" class="thumbnails">
+        <button 
+          *ngFor="let img of listing.images; let i = index"
+          class="thumbnail"
+          [class.active]="i === currentImageIndex"
+          (click)="selectImage(i)"
+        >
+          <img [src]="img.imageUrl" [alt]="'Image ' + (i + 1)" />
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Info -->
+    <div class="main-info">
+      <div class="info-header">
+        <div class="location-rating">
+          <p class="location">📍 {{ listing.location }}</p>
+          <div class="rating" *ngIf="listing.averageRating">
+            <span class="stars">⭐ {{ listing.averageRating.toFixed(1) }}</span>
+            <span class="count">({{ listing.reviewCount }} reviews)</span>
+          </div>
+          <div class="no-rating" *ngIf="!listing.averageRating">
+            <span>No reviews yet</span>
+          </div>
+        </div>
+
+        <div class="status" [class.approved]="listing.isApproved" [class.pending]="!listing.isApproved">
+          {{ listing.isApproved ? '✓ Approved' : '⏳ Pending Review' }}
+        </div>
       </div>
 
-      <h4 class="text-primary mb-3">${{ listing.price }}</h4>
+      <h2 class="price">{{ listing.pricePerNight }} EGP <span class="per-night">per night</span></h2>
 
-      <div class="mb-2">
-        <strong>Available:</strong> {{ listing.dateAvailable || '—' }}
+      <div class="description">
+        <h3>About this listing</h3>
+        <p>{{ listing.description }}</p>
       </div>
 
-      <p class="mt-3">{{ listing.description }}</p>
+      <!-- Details Grid -->
+      <div class="details-grid">
+        <div class="detail-item">
+          <span class="label">Max Guests</span>
+          <span class="value">{{ listing.maxGuests }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Created</span>
+          <span class="value">{{ listing.createdAt | date: 'short' }}</span>
+        </div>
+      </div>
 
-      <div class="mt-4 d-flex gap-2">
-        <button class="btn btn-secondary" (click)="goBack()">Back</button>
-        <a class="btn btn-success" [routerLink]="['/booking/create', listing.id]">Book now</a>
+      <!-- Amenities -->
+      <div *ngIf="listing.amenities && listing.amenities.length > 0" class="amenities">
+        <h3>Amenities</h3>
+        <div class="amenities-list">
+          <span *ngFor="let amenity of listing.amenities" class="amenity-tag">
+            {{ amenity }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Location on Map -->
+      <div class="location-info">
+        <h3>Location</h3>
+        <p><strong>Latitude:</strong> {{ listing.latitude }}</p>
+        <p><strong>Longitude:</strong> {{ listing.longitude }}</p>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button class="btn btn-primary btn-large" [routerLink]="['/booking/create', listing.id]">
+          Book Now
+        </button>
+        <button class="btn btn-secondary btn-large" (click)="goBack()">
+          Back to Listings
+        </button>
       </div>
     </div>
   </div>
 </div>
-
-<ng-template #notFound>
-  <div class="container py-5">
-    <div class="alert alert-warning">
-      Listing was not found.
-      <a class="alert-link" [routerLink]="['/listings']">Go back to listings</a>.
-    </div>
-  </div>
-</ng-template>

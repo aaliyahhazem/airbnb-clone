@@ -153,7 +153,7 @@ namespace PL
             // Make sure AdminRepository exists
             builder.Services.AddScoped<DAL.Repo.Abstraction.IAdminRepository, DAL.Repo.Implementation.AdminRepository>();
 
-            // AutoMapper – scan all assemblies for profiles
+            // AutoMapper ï¿½ scan all assemblies for profiles
             //builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             // Controllers & SignalR
@@ -271,13 +271,13 @@ namespace PL
                         title: "City Apartment",
                         description: "Modern apartment...",
                         pricePerNight: 120m,
-                        location: "New York",
-                        latitude: 40.7128,
-                        longitude: -74.0060,
+                        location: "Cairo, Egypt",
+                        latitude: 30.0444,
+                        longitude: 31.2357,
                         maxGuests: 4,
                         userId: adminId,
                         createdBy: "System Admin",
-                        mainImageUrl: null
+                        mainImageUrl: ""
                     );
 
                     context.Listings.Add(listing1);
@@ -290,7 +290,6 @@ namespace PL
                     listing1.SetMainImage(img1, "System Admin");
                     await context.SaveChangesAsync();
 
-                    // Seed amenities if table empty (attach to listings)
                     if (!context.Amenities.Any())
                     {
                         var wifi = Amenity.Create("Wi-Fi", listing1);
@@ -305,9 +304,9 @@ namespace PL
                         title: "City Apartment 2",
                         description: "Modern apartment in the city center.",
                         pricePerNight: 130m,
-                        location: "New York",
-                        latitude: 40.7128,
-                        longitude: -74.0060,
+                        location: "Cairo, Egypt",
+                        latitude: 30.0500,
+                        longitude: 31.2500,
                         maxGuests: 4,
                         userId: adminId,
                         createdBy: "System Admin",
@@ -327,6 +326,12 @@ namespace PL
 
                     listing2.SetMainImage(img2, "System Admin");
                     await context.SaveChangesAsync();
+
+                    // Mark all seeded listings as approved
+                    await context.Database.ExecuteSqlRawAsync(
+                        "UPDATE Listings SET IsApproved = 1, IsReviewed = 1 WHERE UserId = {0}",
+                        adminId
+                    );
 
                     await tx.CommitAsync();
                 }

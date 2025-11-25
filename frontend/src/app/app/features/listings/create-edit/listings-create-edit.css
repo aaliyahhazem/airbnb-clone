@@ -1,0 +1,374 @@
+/* Glassmorphism styling from first form */
+.listing-form-container {
+    background: rgba(245, 245, 220, 0.08);
+    border-radius: 1.5vw;
+    padding: 6rem 4rem 2rem 4rem;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: -2px -2px 20px rgba(2, 6, 23, 0.45);
+    transition: all 0.3s ease;
+    max-width: 900px;
+    margin: 2rem auto;
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+h2, h3, h4 {
+    color: white;
+    margin-top: -4rem;
+}
+
+h3 {
+    margin-top: 0;
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.75rem;
+}
+
+.btn-back {
+    background: rgba(49, 48, 48, 0.219);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 10px 20px;
+    color: white;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+}
+
+.btn-back:hover {
+    background: rgba(255, 234, 234, 0.342);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Form elements styling */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: white;
+}
+
+input, textarea, select {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+    padding: 10px 14px;
+    margin: 5px 0;
+    width: 100%;
+    color: rgb(245, 239, 239);
+    transition: all 0.25s ease;
+    box-shadow: -2px -2px 10px rgba(2, 6, 23, 0.473);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+input:hover, textarea:hover, select:hover,
+.amenity-btn:hover, .add-amenity-btn:hover {
+    transform: scale(1.02);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 0.15rem rgba(255, 255, 255, 0.10);
+}
+
+input::placeholder, textarea::placeholder {
+    color: rgb(245, 239, 239);
+    opacity: 0.8;
+}
+
+textarea {
+    resize: vertical;
+}
+
+/* Form row for side-by-side fields */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+/* Alerts */
+.alert {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 15px;
+    animation: slideDown 0.3s ease-out;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-error {
+    background-color: rgba(248, 215, 218, 0.2);
+    color: #ff6b6b;
+    border: 1px solid rgba(245, 198, 203, 0.3);
+}
+
+.alert-success {
+    background-color: rgba(212, 237, 218, 0.2);
+    color: #51cf66;
+    border: 1px solid rgba(195, 230, 203, 0.3);
+}
+
+.error-text {
+    display: block;
+    color: #ff6b6b;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.help-text {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+input.is-invalid, textarea.is-invalid {
+    border-color: rgba(255, 107, 107, 0.5);
+}
+
+/* Amenities */
+.amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.amenity-btn {
+    padding: 0.75rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: white;
+    backdrop-filter: blur(6px);
+}
+
+.amenity-btn:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.amenity-btn.selected {
+    background: rgba(0, 123, 255, 0.3);
+    color: white;
+    border-color: rgba(0, 123, 255, 0.5);
+}
+
+/* Images */
+.image-section {
+    margin-bottom: 1.5rem;
+}
+
+.image-section h4 {
+    margin-bottom: 1rem;
+    color: white;
+}
+
+input[type="file"] {
+    padding: 8px 12px;
+    cursor: pointer;
+    height: 45px;
+    padding: 0;
+    font-size: 16px;
+}
+
+input[type="file"]::file-selector-button {
+    appearance: none;
+    -webkit-appearance: none;
+    height: 45px;
+    padding: 4px 10px 0px 24px;
+    margin-top: -2px;
+    background: rgba(119, 116, 108, 0.25);
+    border-radius: 15px 0 0 15px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(6px);
+    border: none;
+}
+
+input[type="file"]:hover::file-selector-button {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.image-item {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: -2px -2px 10px rgba(2, 6, 23, 0.473);
+    backdrop-filter: blur(6px);
+}
+
+.image-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+.btn-remove {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(220, 53, 69, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    cursor: pointer;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    backdrop-filter: blur(6px);
+}
+
+.btn-remove:hover {
+    background: rgba(220, 53, 69, 1);
+}
+
+/* Form actions */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(6px);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: rgba(49, 48, 48, 0.219);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: rgba(255, 234, 234, 0.342);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn-danger {
+    background: rgba(220, 53, 69, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: rgba(220, 53, 69, 0.5);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+    background: rgba(108, 117, 125, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: rgba(108, 117, 125, 0.5);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .listing-form-container {
+        padding: 4rem 2rem 2rem 2rem;
+        margin: 1rem;
+    }
+
+    .form-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+
+    .amenities-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+
+    .images-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}
+
+/* Section styling */
+.section {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}

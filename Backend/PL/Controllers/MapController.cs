@@ -10,10 +10,12 @@ namespace PL.Controllers
     public class MapController : ControllerBase
     {
         private readonly IMapService _mapService;
+        private readonly ILogger<MapController> _logger;
 
-        public MapController(IMapService mapService)
+        public MapController(IMapService mapService, ILogger<MapController> logger)
         {
             _mapService = mapService;
+            _logger = logger;
         }
 
         // Use Case 1: Guest searches properties by map bounds
@@ -22,23 +24,35 @@ namespace PL.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> SearchPropertiesOnMap([FromQuery] MapSearchRequestDto request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            if (request.NorthEastLat <= request.SouthWestLat ||
-                request.NorthEastLng <= request.SouthWestLng)
-            {
-                return BadRequest(new { Message = "Invalid map bounds." });
-            }
-
             try
             {
+                _logger.LogInformation($"Map search request - NE: ({request.NorthEastLat}, {request.NorthEastLng}), SW: ({request.SouthWestLat}, {request.SouthWestLng})");
+
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning($"Invalid model state: {string.Join(", ", ModelState.Values.SelectMany(v => v.Errors))}");
+                    return BadRequest(ModelState);
+                }
+
+                if (request.NorthEastLat <= request.SouthWestLat ||
+                    request.NorthEastLng <= request.SouthWestLng)
+                {
+                    return BadRequest(new { Message = "Invalid map bounds." });
+                }
+
                 var result = await _mapService.SearchPropertiesOnMapAsync(request);
+                _logger.LogInformation($"Returned {result.Properties.Count} properties");
                 return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning($"Argument error: {ex.Message}");
+                return BadRequest(new { Message = ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = $"Search failed: {ex.Message}" });
+                _logger.LogError(ex, "Search failed");
+                return StatusCode(500, new { Message = $"Search failed: {ex.Message}", Details = ex.StackTrace });
             }
         }
 
@@ -58,6 +72,7 @@ namespace PL.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to get property");
                 return StatusCode(500, new { Message = $"Failed to get property: {ex.Message}" });
             }
         }
@@ -82,12 +97,11 @@ namespace PL.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Geocoding failed");
                 return StatusCode(500, new { Message = $"Geocoding failed: {ex.Message}" });
             }
         }
 
     }
 }
-
-
 

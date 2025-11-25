@@ -1,4 +1,6 @@
-﻿
+﻿using Microsoft.Extensions.DependencyInjection;
+using DAL.Repo.Abstraction;
+using DAL.Repo.Implementation;
 
 namespace DAL.Common
 {
@@ -17,6 +19,7 @@ namespace DAL.Common
             services.AddScoped<IListingImageRepository, ListingImageRepository>();
             services.AddScoped<IAmenityRepository, AmenityRepository>();
             services.AddScoped<IAmenityRepository, AmenityRepository>();
+            services.AddScoped<IMapRepo, MapRepo>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             // admin (register abstraction and implementation)
