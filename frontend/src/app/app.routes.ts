@@ -14,6 +14,7 @@ import { ChatWindow } from './app/features/message/chat-window';
 import { UserListingsComponent } from './app/features/listings/user-listings/user-listings';
 import { AdminListingsComponent } from './app/features/listings/admin-listings/admin-listings';
 import { MapComponent } from './app/features/Map/map/map';
+import { Listings } from './app/features/listings-page/listings/listings';
 
 export const routes: Routes = [
   { path: 'home', component: Home },
@@ -22,9 +23,10 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
   { path: 'auth/login', component: Login },
   { path: 'auth/register', component: Register },
+  { path: 'listings', component: Listings},
   // { path: '**', redirectTo: 'home' },
   {
-    path: 'listings',
+    path: 'host',
     children: [
       { path: '', component: ListingsList },
       { path: 'create', component: ListingsCreateEdit, canActivate: [AuthGuard] },

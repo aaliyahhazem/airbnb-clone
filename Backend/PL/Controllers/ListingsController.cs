@@ -131,6 +131,23 @@ namespace PL.Controllers
         // ADMIN OPERATIONS
         // ---------------------------
 
+        [HttpGet("admin/all-listings")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllListingsForAdmin(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            CancellationToken ct = default)
+        {
+            var adminId = GetUserIdFromClaims();
+            if (adminId == null) return Unauthorized();
+
+            var result = await _listingService.GetAllForAdminAsync(page, pageSize, ct);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
+
+            return Ok(result);
+        }
+
+
         [HttpPut("admin/approve/listing/{id:int}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Approve(int id, CancellationToken ct = default)

@@ -36,3 +36,12 @@ global  using System.Text;
 global using Stripe;
 global using Microsoft.Extensions.Options;
 global using BLL.Helper;
+
+
+//email service
+global using BLL.ModelVM.Email;
+global using MailKit.Net.Smtp;
+global using MailKit.Security;
+global using Microsoft.Extensions.Configuration;
+global using MimeKit;
+

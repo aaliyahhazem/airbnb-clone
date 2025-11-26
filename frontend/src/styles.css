@@ -40,6 +40,6 @@ body::before {
         linear-gradient(135deg, rgba(65, 35, 11, 0.774), rgba(94, 87, 87, 0.8)),
         url("../public/beige.jpg") center/cover no-repeat;
     background-blend-mode: soft-light;
-    filter: blur(30px) brightness(0.5);
+    filter: blur(30px) brightness(0.6);
     z-index: -1;
 }

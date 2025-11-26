@@ -1,6 +1,6 @@
 .hero-card {
     position: relative;
-    height: 85vh;
+    height: 83vh;
     min-height: 360px;
     border-radius: 2vw;
     overflow: hidden;
@@ -8,7 +8,7 @@
     background-position: center;
     box-shadow: 0 1.8vh 2.5vw rgba(0, 0, 0, 0.45);
     margin-right: 2vw;
-    color: #FAF0BB;
+    color: rgb(255, 253, 240);
 }
 
 .overlay {
@@ -34,27 +34,30 @@
 }
 
 .badge {
+    display: inline-flex;
     align-items: center;
-    width: 20%;
     background: rgba(255, 255, 255, 0.06);
-    padding: 0.5em 1em;
+    padding: 0.5em 1.1em;
     border-radius: 0.75vw;
     font-size: 0.85em;
-    color: #FAF0BB;
+    color: rgb(255, 253, 240);
     backdrop-filter: blur(0.35em);
     box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.4);
+    width: fit-content;
+    white-space: nowrap;
 }
+
 
 .desc {
     max-width: 80%;
-    color: #FAF0BB;
+    color: rgb(255, 253, 240);
     font-size: 1.2vw;
     margin: 20px 0 1em;
 }
 
 .title {
     max-width: 85%;
-    font-size: 3.5vw;
+    font-size: 3.2vw;
     line-height: 1.1;
     margin: 0 0 0.5em;
     font-weight: 500;
@@ -93,7 +96,7 @@
 
 .btn.ghost {
     background: rgba(80, 82, 88, 0.38);
-    color: #FAF0BB;
+    color: rgb(255, 253, 240);
     border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -103,7 +106,6 @@
 }
 
 .btn.ghost:hover {
-    color: rgb(216, 211, 162);
     background: rgba(255, 255, 255, 0.15);
     border-color: rgba(105, 91, 59, 0.719);
     text-shadow: 0 0 0.5em rgba(133, 124, 72, 0.842);
@@ -162,13 +164,13 @@
     }
 
     .title {
-        font-size: 22px;
+        font-size: 20px;
         max-width: 100%;
         line-height: 1.1;
     }
 
     .desc {
-        font-size: 14px;
+        font-size: 12px;
         max-width: 100%;
     }
 

@@ -1,65 +1,270 @@
+/* ===========================
+   NAVBAR BASE STYLE
+=========================== */
 .navbar {
-    margin: 5px 25px;
+    margin: 1vw 2vw;
 }
 
 .navbar-brand {
-    margin-right: 50px;
-    font-size: 32px;
-    color: rgb(250, 240, 187);
+    margin-right: 2em;
+    font-size: 1.5em;
+    color: rgb(255, 253, 240);
 }
 
-img{
-     height: 34px;
-     margin-bottom: 4px ;
+img {
+    height: 30px;
+    /* margin-bottom: 4px; */
 }
 
 .nav-item {
-    font-size: 20px;
-    margin: 0px 10px;
+    font-size: 1.1em;
+    margin: 0 0.2em;
 }
 
 .nav-link {
-    color: rgb(250, 240, 187);
+    color: rgb(255, 253, 240);
 }
 
 .navbar .dropdown-toggle::after {
     display: none;
 }
 
-/* Notification dropdown styles (kept separate and additive) */
-.notification-bell{ position: relative; display: inline-block; }
-.bell-btn{ background: transparent; border: none; font-size: 20px; cursor: pointer; position: relative; }
-.badge{ background: #dc3545; color: #fff; border-radius: 12px; padding: 2px 7px; font-size: 12px; position: absolute; top: -6px; right: -8px; }
+/* ===========================
+   LEFT / RIGHT BUTTONS STYLE
+=========================== */
+.left:hover,
+.right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5vw;
+    background: rgba(224, 202, 169, 0.233);
+    box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.35);
+    transition: all 0.25s ease;
+}
 
-.notification-bell .dropdown{ position: absolute; right: 0; top: 36px; width: 320px; max-height: 420px; overflow-y: auto; box-shadow: 0 6px 18px rgba(0,0,0,0.12); border-radius: 8px; background: rgba(255,255,255,0.98); z-index: 1000; padding: 8px; border: 1px solid rgba(0,0,0,0.06); color: #222; }
-.notification-bell .dropdown .item{ padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.06); background: transparent; cursor: pointer; }
-.notification-bell .dropdown .item:last-child{ border-bottom: none; }
-.notification-bell .dropdown .item.unread{ font-weight: 600; }
-.notification-bell .dropdown .item:hover{ background: rgba(0,0,0,0.02); }
-.notification-bell .item-content .title-row{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
-.notification-bell .title{ font-size: 14px; }
-.notification-bell .body{ margin: 6px 0 0 0; font-size: 13px; color: #444; }
-.notification-bell .time{ color: #888; font-size: 11px; }
-.notification-bell .empty{ padding: 18px; text-align: center; color: #666; }
-.notification-bell .mark-all{ display:block; width: calc(100% - 12px); margin: 8px auto 0; padding: 8px; border: none; background: transparent; color: #007bff; cursor: pointer; }
-.notification-bell .mark-all:hover{ text-decoration: underline; }
+.left {
+    padding: 0em 0.5em;
+}
 
-/* temporary highlight for newly arrived notifications */
-.notification-bell .dropdown .item.just-arrived{ box-shadow: inset 0 0 0 2px rgba(220,53,69,0.08); background: linear-gradient(90deg, rgba(220,53,69,0.04), rgba(255,255,255,0)); transition: background 0.4s ease; }
+.right {
+    margin: 0em 0.35em;
+    width: 2.7vw;
+    flex-shrink: 0;
+}
 
-/* messages dropdown */
-.message-bell{ position: relative; display: inline-block; margin-left: 12px; }
-.message-bell .dropdown{ position: absolute; right: 0; top: 36px; width: 360px; max-height: 420px; overflow-y: auto; box-shadow: 0 6px 18px rgba(0,0,0,0.12); border-radius: 8px; background: rgba(255,255,255,0.98); z-index: 1000; padding: 8px; border: 1px solid rgba(0,0,0,0.06); color: #222; }
-.message-bell .dropdown { position: absolute; right: 0; top: 36px; width: 380px; max-height: 420px; overflow: hidden; box-shadow: 0 8px 26px rgba(15,15,15,0.12); border-radius: 10px; background: #fff; z-index: 1000; padding: 0; border: 1px solid rgba(12,30,60,0.04); color: #222; }
-.message-bell .dropdown .dropdown-top{ display:flex; justify-content:flex-end; padding:8px; border-bottom:1px solid #f4f6fb; background:linear-gradient(90deg,#fff,#fbfdff)}
-.message-bell .dropdown .open-chat{background:#0b5ed7;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer}
-.message-bell .dropdown .list{max-height:320px;overflow:auto;padding:8px}
-.message-bell .dropdown .item{ display:flex; gap:10px; align-items:flex-start; padding:10px; border-bottom:1px solid #f4f6fb; cursor:pointer }
-.message-bell .dropdown .item:last-child{ border-bottom:none }
-.message-bell .dropdown .avatar{width:38px;height:38px;border-radius:50%;background:#e9eef8;display:inline-block}
-.message-bell .dropdown .meta{flex:1;display:flex;flex-direction:column}
-.message-bell .dropdown .meta .title{font-weight:600;color:#0b5ed7}
-.message-bell .dropdown .meta .snippet{font-size:0.92rem;color:#556}
-.message-bell .dropdown .time{font-size:0.78rem;color:#9aa0a6}
-.message-bell .dropdown .item.unread .title{font-weight:700}
-.message-bell .msgs{ max-height: 260px; overflow-y: auto; }
+/* ===========================
+   BELL / BADGE STYLE
+=========================== */
+.bell-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: white;
+}
+
+.badge {
+    background: #dc3545;
+    color: #fff;
+    border-radius: 12px;
+    padding: 2px 7px;
+    font-size: 12px;
+    position: absolute;
+    top: -6px;
+    right: -8px;
+}
+
+/* ===========================
+   NOTIFICATIONS DROPDOWN
+=========================== */
+.notification-bell {
+    position: relative !important;
+}
+
+.notification-bell .dropdown {
+    position: absolute;
+    right: 0;
+    top: 3.5em;
+    width: 220px;
+    max-height: 420px;
+    overflow-y: auto;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    border-radius: 1.5em;
+    background: rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    z-index: 1000;
+    padding: 8px;
+    color: #222;
+}
+
+.notification-bell .dropdown .item {
+    padding: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    background: transparent;
+    cursor: pointer;
+}
+
+.notification-bell .dropdown .item:last-child {
+    border-bottom: none;
+}
+
+.notification-bell .dropdown .item.unread {
+    font-weight: 600;
+}
+
+.notification-bell .dropdown .item:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.notification-bell .item-content .title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.notification-bell .title {
+    font-size: 14px;
+}
+
+.notification-bell .body {
+    margin: 6px 0 0 0;
+    font-size: 13px;
+    color: #444;
+}
+
+.notification-bell .time {
+    color: #888;
+    font-size: 11px;
+}
+
+.notification-bell .empty {
+    padding: 18px;
+    text-align: center;
+    color: #666;
+}
+
+.notification-bell .mark-all {
+    display: block;
+    width: calc(100% - 12px);
+    margin: 8px auto 0;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    color: #007bff;
+    cursor: pointer;
+}
+
+.notification-bell .mark-all:hover {
+    text-decoration: underline;
+}
+
+.notification-bell .dropdown .item.just-arrived {
+    box-shadow: inset 0 0 0 2px rgba(220, 53, 69, 0.08);
+    background: linear-gradient(90deg, rgba(220, 53, 69, 0.04), rgba(255, 255, 255, 0));
+    transition: background 0.4s ease;
+}
+
+/* ===========================
+   MESSAGES DROPDOWN
+=========================== */
+.message-bell {
+    position: relative;
+    display: inline-block;
+    margin-left: 12px;
+}
+
+.message-bell .dropdown {
+    position: absolute;
+    right: 0;
+    top: 3.5em;
+    width: 360px;
+    max-height: 420px;
+    overflow-y: auto;
+    box-shadow: 0 8px 26px rgba(15, 15, 15, 0.12);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    z-index: 1000;
+    padding: 0;
+    color: #222;
+}
+
+.message-bell .dropdown .dropdown-top {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px;
+    border-bottom: 1px solid #f4f6fb;
+    background: linear-gradient(90deg, #fff, #fbfdff);
+}
+
+.message-bell .dropdown .open-chat {
+    background: #0b5ed7;
+    color: #fff;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.message-bell .dropdown .list {
+    max-height: 320px;
+    overflow: auto;
+    padding: 8px;
+}
+
+.message-bell .dropdown .item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px;
+    border-bottom: 1px solid #f4f6fb;
+    cursor: pointer;
+}
+
+.message-bell .dropdown .item:last-child {
+    border-bottom: none;
+}
+
+.message-bell .dropdown .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #e9eef8;
+    display: inline-block;
+}
+
+.message-bell .dropdown .meta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.message-bell .dropdown .meta .title {
+    font-weight: 600;
+    color: #0b5ed7;
+}
+
+.message-bell .dropdown .meta .snippet {
+    font-size: 0.92rem;
+    color: #556;
+}
+
+.message-bell .dropdown .time {
+    font-size: 0.78rem;
+    color: #9aa0a6;
+}
+
+.message-bell .dropdown .item.unread .title {
+    font-weight: 700;
+}
+
+.message-bell .msgs {
+    max-height: 260px;
+    overflow-y: auto;
+}
