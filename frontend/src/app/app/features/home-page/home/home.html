@@ -1,11 +1,68 @@
 <div class="container-fluid">
     <div class="row">
-        <div class="col-6"></div>
-        <div class="col-6"><app-hero-card></app-hero-card></div>
-    </div>
-    <div class="row">
-        <div class="col-12">
-            <app-listing-card></app-listing-card>
+        <div class="col-6">
+            <div class="filters">
+                <app-stacked-cards></app-stacked-cards>
+            </div>
         </div>
+
+        <div class="col-6">
+            <div class="hero">
+                <app-hero-card></app-hero-card>
+            </div>
+        </div>
+    </div>
+
+    <div class="row listings-row mx-4">
+        <div class="col-12 my-3">
+
+            <h5>
+                Featured for You
+                <i class="bi bi-arrow-right-short"></i>
+            </h5>
+
+            <div class="cards-list d-flex flex-nowrap gap-4">
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+            </div>
+        </div>
+        <div class="col-12 my-3">
+
+            <h5>
+                Beachfront Stays
+                <i class="bi bi-arrow-right-short"></i>
+            </h5>
+
+            <div class="cards-list d-flex flex-nowrap gap-4">
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+            </div>
+
+        </div>
+        <div class="col-12 my-3">
+
+            <h5>
+                Popular in Cairo
+                <i class="bi bi-arrow-right-short"></i>
+            </h5>
+
+            <div class="cards-list d-flex flex-nowrap gap-4">
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+                <app-home-listing-card></app-home-listing-card>
+            </div>
+        </div>
+
     </div>
 </div>

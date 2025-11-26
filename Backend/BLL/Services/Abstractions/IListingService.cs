@@ -20,6 +20,9 @@ namespace BLL.Services.Abstractions
         /// Get paged listings for a host (owner dashboard).
         Task<Response<List<ListingOverviewVM>>> GetByUserAsync(Guid userId, int page, int pageSize, CancellationToken ct = default);
 
+        /// Get paginated listings for admin dashboard (all listings, optional deleted)
+        Task<Response<List<ListingOverviewVM>>> GetAllForAdminAsync(int page, int pageSize, CancellationToken ct = default);
+
         /// Soft-delete a listing by its owner (host).
         Task<Response<bool>> SoftDeleteByOwnerAsync(int listingId, Guid hostId, CancellationToken ct = default);
 

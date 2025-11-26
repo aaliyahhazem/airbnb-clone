@@ -1,14 +1,14 @@
 .footer {
   background: hsla(48, 27%, 63%, 0.11);
   border-top: 1px solid transparent;
-  color: #ffffff;
+  color: rgb(255, 253, 240);
   font-size: 0.9rem;
   margin-top: 1em;
 }
 
 .footer a {
   text-decoration: none;
-  color: #ffffff;
+  color: rgb(255, 253, 240);
   transition: color 0.2s;
 }
 

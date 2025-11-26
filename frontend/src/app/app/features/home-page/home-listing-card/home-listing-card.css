@@ -1,0 +1,66 @@
+.listing-card {
+  width: 220px;
+  background: hsla(48, 27%, 63%, 0.322);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.listing-card:hover {
+  transform: translateY(-3px);
+}
+
+.card-img-top {
+  height: 10em;
+  object-fit: cover;
+}
+
+.title,
+.price {
+  color: #333333;
+}
+
+.title {
+  font-size: 1.1em;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  background: hsla(48, 27%, 63%, 0.322);
+  padding: 0.5em 1em;
+  border-radius: 0.6vw;
+  font-size: 0.75em;
+  color: #333333;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.4);
+  width: fit-content;
+  white-space: nowrap;
+}
+
+.rate {
+  font-size: 0.85em;
+  padding: 0.2em 0.3em;
+  color: rgb(255, 253, 240);
+}
+
+.more {
+  margin-top: -0.8em;
+}
+
+.bi-star-fill {
+  font-size: 0.8em;
+  margin-right: 0.4em;
+}
+
+.bi-arrow-up-right-circle-fill {
+  font-size: 2em;
+  color: rgb(255, 253, 240, 0.76);
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .listing-card {
+    width: 90%;
+  }
+}

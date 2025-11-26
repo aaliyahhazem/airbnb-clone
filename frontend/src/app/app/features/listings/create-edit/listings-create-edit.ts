@@ -1,4 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -12,9 +13,9 @@ import { ListingCreateVM, ListingUpdateVM, ListingDetailVM } from '../../../core
   templateUrl: './listings-create-edit.html',
   styleUrls: ['./listings-create-edit.css']
 })
-export class ListingsCreateEdit implements OnInit {
+export class ListingsCreateEdit {
+
   private fb = inject(FormBuilder);
-  private route = inject(ActivatedRoute);
   private router = inject(Router);
   private listingService = inject(ListingService);
 

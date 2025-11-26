@@ -1,110 +1,138 @@
 <nav class="navbar navbar-expand-sm">
   <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center" href="#">
+
+    <a class="navbar-brand d-flex align-items-center" href="/home">
       <img src="logo.png" alt="logo" class="me-3">
       LUXUY
     </a>
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
       aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
-      <ul class="navbar-nav me-auto"> <!-- Left items -->
-        <li class="nav-item">
-          <a class="nav-link" href="#">Home</a>
+
+      <!-- LEFT NAV -->
+      <ul class="navbar-nav me-auto">
+        <li class="left nav-item">
+          <a class="nav-link" href="/home">Home</a>
         </li>
-        <li class="nav-item">
+
+        <li class="left nav-item">
           <a class="nav-link" href="/listings">Listings</a>
         </li>
-        <li class="nav-item">
+
+        <li class="left nav-item">
           <a class="nav-link" href="#">About</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Contact Us</a>
+
+        <li class="left nav-item">
+          <a class="nav-link" href="#">Contact</a>
         </li>
       </ul>
 
+      <!-- RIGHT NAV -->
       <ng-container *ngIf="auth.isAuthenticated(); else notLogged">
-        <ul class="navbar-nav ms-auto"> <!-- Right items for logged in users -->
-          <li class="nav-item">
-            <a class="nav-link" href="#">Start hosting</a>
+
+        <ul class="navbar-nav ms-auto">
+
+          <!-- 🔔 NOTIFICATIONS (unchanged logic) -->
+          <div class="right notification-bell">
+            <button class="bell-btn" (click)="toggleNotifications()" aria-label="Notifications">
+              <i class="bi bi-bell"></i>
+              <span *ngIf="unreadCount > 0" class="badge">{{ unreadCount }}</span>
+            </button>
+
+            <div class="dropdown" *ngIf="notificationOpen" role="menu">
+              <div *ngIf="notifications.length > 0; else emptyList">
+                <div *ngFor="let n of notifications; trackBy: trackById" class="item" [class.unread]="!n.isRead"
+                  [class.just-arrived]="newIds.has(n.id)" (click)="markAsRead(n.id, $event)">
+
+                  <div class="item-content">
+                    <div class="title-row">
+                      <strong class="title">{{ n.title }}</strong>
+                      <small class="time">{{ n.createdAt | date:'short' }}</small>
+                    </div>
+                    <p class="body">{{ n.body }}</p>
+                  </div>
+
+                </div>
+              </div>
+
+              <ng-template #emptyList>
+                <div class="empty">No notifications</div>
+              </ng-template>
+
+              <button class="mark-all" (click)="markAll()">Mark all as read</button>
+            </div>
+          </div>
+
+          <!-- 💬 MESSAGES (logic untouched) -->
+          <div class="right message-bell">
+            <button class="bell-btn" (click)="toggleMessages()" (dblclick)="openChat()" aria-label="Messages">
+              <i class="bi bi-chat-dots"></i>
+              <span *ngIf="unreadMsgCount > 0" class="badge">{{ unreadMsgCount }}</span>
+            </button>
+
+            <div class="dropdown messages" *ngIf="messageOpen" role="menu">
+              <div class="dropdown-top">
+                <button class="open-chat" (click)="openChat()">Open Chat</button>
+              </div>
+
+              <div *ngIf="messages.length > 0; else emptyMsg">
+                <div *ngFor="let m of messages" class="item" [class.unread]="!m.isRead">
+
+                  <div class="item-content">
+                    <div class="title-row">
+                      <strong class="title">{{ m.content | slice:0:30 }}</strong>
+                      <small class="time">{{ m.sentAt | date:'short' }}</small>
+                    </div>
+                    <p class="body">From: {{ m.senderId }}</p>
+                  </div>
+
+                </div>
+              </div>
+
+              <ng-template #emptyMsg>
+                <div class="empty">No messages</div>
+              </ng-template>
+            </div>
+          </div>
+
+          <!-- 🌐 Language icon -->
+          <li class="right nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-globe-americas"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end"></ul>
           </li>
-          <li class="nav-item dropdown">
+
+          <!-- User Menu -->
+          <li class="right nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="bi bi-list"></i>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end"> <!-- Important! -->
-              <li><a class="dropdown-item" href="#">Translate</a></li>
+
+            <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="#">Profile</a></li>
               <li><a class="dropdown-item" href="#" (click)="auth.logout()">Log Out</a></li>
             </ul>
           </li>
+
         </ul>
 
-        <div class="notification-bell">
-          <button class="bell-btn" (click)="toggleNotifications()" aria-label="Notifications">
-            🔔
-            <span *ngIf="unreadCount > 0" class="badge">{{ unreadCount }}</span>
-          </button>
-
-          <div class="dropdown" *ngIf="notificationOpen" role="menu">
-            <div *ngIf="notifications.length > 0; else emptyList">
-              <div *ngFor="let n of notifications; trackBy: trackById" class="item" [class.unread]="!n.isRead" [class.just-arrived]="newIds.has(n.id)" (click)="markAsRead(n.id, $event)">
-                <div class="item-content">
-                  <div class="title-row">
-                    <strong class="title">{{ n.title }}</strong>
-                    <small class="time">{{ n.createdAt | date:'short' }}</small>
-                  </div>
-                  <p class="body">{{ n.body }}</p>
-                </div>
-              </div>
-            </div>
-
-            <ng-template #emptyList>
-              <div class="empty">No notifications</div>
-            </ng-template>
-
-            <button class="mark-all" (click)="markAll()">Mark all as read</button>
-          </div>
-        </div>
-
-        <div class="message-bell">
-          <button class="bell-btn" (click)="toggleMessages()" (dblclick)="openChat()" aria-label="Messages">
-            💬
-            <span *ngIf="unreadMsgCount > 0" class="badge">{{ unreadMsgCount }}</span>
-          </button>
-          <div class="dropdown messages" *ngIf="messageOpen" role="menu">
-            <div class="dropdown-top">
-              <button class="open-chat" (click)="openChat()">Open Chat</button>
-            </div>
-            <div *ngIf="messages.length > 0; else emptyMsg">
-              <div *ngFor="let m of messages" class="item" [class.unread]="!m.isRead">
-                <div class="item-content">
-                  <div class="title-row">
-                    <strong class="title">{{ m.content | slice:0:30 }}</strong>
-                    <small class="time">{{ m.sentAt | date:'short' }}</small>
-                  </div>
-                  <p class="body">From: {{ m.senderId }}</p>
-                </div>
-              </div>
-            </div>
-            <ng-template #emptyMsg>
-              <div class="empty">No messages</div>
-            </ng-template>
-          </div>
-        </div>
       </ng-container>
 
+      <!-- NOT LOGGED -->
       <ng-template #notLogged>
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
+          <li class="right nav-item">
             <a class="nav-link" routerLink="/auth/login">Log In</a>
           </li>
         </ul>
       </ng-template>
+
     </div>
-
-
   </div>
 </nav>
