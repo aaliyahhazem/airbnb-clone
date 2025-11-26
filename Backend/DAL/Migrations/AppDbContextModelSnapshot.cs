@@ -96,6 +96,37 @@ namespace DAL.Migrations
                     b.ToTable("Bookings");
                 });
 
+            modelBuilder.Entity("DAL.Entities.Favorite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<int>("ListingId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ListingId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "ListingId")
+                        .IsUnique();
+
+                    b.ToTable("Favorites", (string)null);
+                });
+
             modelBuilder.Entity("DAL.Entities.Listing", b =>
                 {
                     b.Property<int>("Id")
@@ -734,6 +765,25 @@ namespace DAL.Migrations
                     b.Navigation("Listing");
                 });
 
+            modelBuilder.Entity("DAL.Entities.Favorite", b =>
+                {
+                    b.HasOne("DAL.Entities.Listing", "Listing")
+                        .WithMany("Favorites")
+                        .HasForeignKey("ListingId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DAL.Entities.User", "User")
+                        .WithMany("Favorites")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Listing");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DAL.Entities.Listing", b =>
                 {
                     b.HasOne("DAL.Entities.ListingImage", "MainImage")
@@ -891,6 +941,8 @@ namespace DAL.Migrations
 
                     b.Navigation("Bookings");
 
+                    b.Navigation("Favorites");
+
                     b.Navigation("Images");
 
                     b.Navigation("Reviews");
@@ -899,6 +951,8 @@ namespace DAL.Migrations
             modelBuilder.Entity("DAL.Entities.User", b =>
                 {
                     b.Navigation("Bookings");
+
+                    b.Navigation("Favorites");
 
                     b.Navigation("Listings");
 

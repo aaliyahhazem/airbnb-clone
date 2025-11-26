@@ -21,6 +21,7 @@ namespace DAL.Common
             services.AddScoped<IAmenityRepository, AmenityRepository>();
             services.AddScoped<IAdminRepository, AdminRepository>();
             services.AddScoped<IMapRepo, MapRepo>();
+            services.AddScoped<IFavoriteRepository, FavoriteRepository>();
             return services;
         }
     }

@@ -100,8 +100,11 @@ namespace DAL.Configurations
                     .WithOne(k => k.Listing)
                     .HasForeignKey(k => k.ListingId)
                     .OnDelete(DeleteBehavior.Cascade);
-
-
+            // Favorites relationship
+            builder.HasMany(l => l.Favorites)
+                 .WithOne(f => f.Listing)
+                 .HasForeignKey(f => f.ListingId)
+                 .OnDelete(DeleteBehavior.NoAction); // Avoid multiple cascade paths
             // Indexes
             builder.HasIndex(l => l.Location);
             builder.HasIndex(l => l.PricePerNight);

@@ -155,7 +155,10 @@ namespace PL
 
             // AutoMapper – scan all assemblies for profiles
             //builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
+            builder.Services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<FavoriteProfile>();
+            });
             // Controllers & SignalR
             builder.Services.AddControllers();
             builder.Services.AddSignalR();

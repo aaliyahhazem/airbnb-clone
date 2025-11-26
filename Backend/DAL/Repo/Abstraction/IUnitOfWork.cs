@@ -11,6 +11,8 @@
         INotificationRepository Notifications { get; }
         IListingImageRepository ListingImages { get; }
         IAmenityRepository Amenities { get; }
+        IFavoriteRepository Favorites { get; }
+
         // Commits all changes in one transaction
         Task<int> SaveChangesAsync(); 
 

@@ -13,6 +13,7 @@ namespace DAL.Database
         public DbSet<Notification> Notifications { get; set; } = null!;
         public DbSet<ListingImage> ListingImages { get; set; } = null!;
         public DbSet<Amenity> Amenities { get; set; } = null!;
+        public DbSet<Favorite> Favorites { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
