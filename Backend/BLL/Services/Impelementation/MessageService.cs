@@ -79,6 +79,19 @@ namespace BLL.Services.Impelementation
             }
         }
 
+        public async Task<Response<int>> GetUnreadCountAsync(Guid receiverId)
+        {
+            try
+            {
+                var count = await _uow.Messages.GetUnreadCountAsync(receiverId);
+                return Response<int>.SuccessResponse(count);
+            }
+            catch (Exception ex)
+            {
+                return Response<int>.FailResponse(ex.Message);
+            }
+        }
+
         public async Task<Response<List<GetMessageVM>>> GetUnreadAsync(Guid receiverId)
         {
             try
@@ -90,6 +103,37 @@ namespace BLL.Services.Impelementation
             catch (Exception ex)
             {
                 return new Response<List<GetMessageVM>>(null, ex.Message, true);
+            }
+        }
+
+        public async Task<Response<int>> MarkAllAsReadAsync(Guid receiverId)
+        {
+            try
+            {
+                var count = await _uow.Messages.MarkAllAsReadAsync(receiverId);
+                return Response<int>.SuccessResponse(count);
+            }
+            catch (Exception ex)
+            {
+                return Response<int>.FailResponse(ex.Message);
+            }
+        }
+
+        public async Task<Response<bool>> DeleteMessageAsync(int messageId, Guid userId)
+        {
+            try
+            {
+                var msg = await _uow.Messages.GetByIdAsync(messageId);
+                if (msg == null) return Response<bool>.FailResponse("Message not found");
+                // allow sender or receiver or admin to delete
+                if (msg.SenderId != userId && msg.ReceiverId != userId)
+                    return Response<bool>.FailResponse("Not authorized to delete this message");
+                var ok = await _uow.Messages.DeleteAsync(messageId);
+                return ok ? Response<bool>.SuccessResponse(true) : Response<bool>.FailResponse("Failed to delete");
+            }
+            catch (Exception ex)
+            {
+                return Response<bool>.FailResponse(ex.Message);
             }
         }
     }

@@ -1,0 +1,52 @@
+<div class="notification-window-container">
+  <div class="notification-header">
+    <h2>Notifications</h2>
+    <span class="unread-count" *ngIf="unreadCount > 0">{{ unreadCount }} unread</span>
+  </div>
+
+  <div class="actions-bar">
+    <button class="mark-all-btn" (click)="markAll()" *ngIf="unreadCount > 0">
+      <i class="bi bi-check-all"></i> Mark all as read
+    </button>
+  </div>
+
+  <div class="notifications-list">
+    <div *ngIf="notifications.length > 0; else emptyList">
+      <div
+        *ngFor="let n of notifications; trackBy: trackById"
+        class="notification-item"
+        [class.unread]="!n.isRead"
+        [class.just-arrived]="newIds.has(n.id)"
+        (click)="markAsRead(n.id, $event)">
+
+        <div class="notification-icon">
+          <i class="bi bi-bell-fill" *ngIf="!n.isRead"></i>
+          <i class="bi bi-bell" *ngIf="n.isRead"></i>
+        </div>
+
+        <div class="notification-content">
+          <div class="title-row">
+            <strong class="title">{{ n.title }}</strong>
+            <small class="time">{{ n.createdAt | date:'short' }}</small>
+          </div>
+          <p class="body">{{ n.body }}</p>
+        </div>
+
+        <button
+          class="mark-read-btn"
+          (click)="markAsRead(n.id, $event)"
+          *ngIf="!n.isRead"
+          aria-label="Mark as read">
+          <i class="bi bi-check"></i>
+        </button>
+      </div>
+    </div>
+
+    <ng-template #emptyList>
+      <div class="empty-state">
+        <i class="bi bi-bell-slash"></i>
+        <p>No notifications yet</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

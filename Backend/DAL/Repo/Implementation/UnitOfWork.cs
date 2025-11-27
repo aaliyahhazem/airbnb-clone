@@ -18,6 +18,7 @@
             Notifications = new NotificationRepository(_context);
             ListingImages = new ListingImageRepository(_context);
             Amenities = new AmenityRepository(_context);
+            Favorites = new FavoriteRepository(_context);
         }
 
         public IUserRepository Users { get; private set; }
@@ -29,6 +30,7 @@
         public INotificationRepository Notifications { get; private set; }
         public IListingImageRepository ListingImages { get; private set; }
         public IAmenityRepository Amenities { get; private set; }
+        public IFavoriteRepository Favorites { get; private set; }
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();

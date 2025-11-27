@@ -16,6 +16,7 @@
         public ICollection<Message> MessagesSent { get; private set; } = new List<Message>();
         public ICollection<Message> MessagesReceived { get; private set; } = new List<Message>();
         public ICollection<Notification> Notifications { get; private set; } = new List<Notification>();
+        public ICollection<Favorite> Favorites { get; private set; } = new List<Favorite>();
 
         private User() { }
 

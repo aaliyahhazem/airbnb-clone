@@ -23,7 +23,7 @@
         public ICollection<Review> Reviews { get; private set; } = new List<Review>();
         public ICollection<Amenity> Amenities { get; private set; } = new List<Amenity>();
         public ICollection<ListingImage> Images { get; private set; } = new List<ListingImage>();
-
+        public ICollection<Favorite> Favorites { get; private set; } = new List<Favorite>();
 
         // Main Image
         public int? MainImageId { get; private set; }

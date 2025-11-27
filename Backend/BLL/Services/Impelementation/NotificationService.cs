@@ -70,6 +70,20 @@ namespace BLL.Services.Impelementation
             }
         }
 
+        // Get unread count
+        public async Task<Response<int>> GetUnreadCountAsync(Guid userId)
+        {
+            try
+            {
+                var count = await _unitOfWork.Notifications.GetUnreadCountAsync(userId);
+                return Response<int>.SuccessResponse(count);
+            }
+            catch (Exception ex)
+            {
+                return Response<int>.FailResponse(ex.Message);
+            }
+        }
+
         // Pagination
         public async Task<Response<List<GetNotificationVM>>> GetPagedAsync(Guid userId, int page, int pageSize)
         {
