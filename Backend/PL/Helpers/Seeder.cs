@@ -82,6 +82,10 @@ namespace PL.Helpers
                 userId: owner.Id,
                 createdBy: owner.FullName,
                 mainImageUrl: string.Empty,
+                destination: "Default Destination", // Added required parameter
+                type: "Apartment", // Added required parameter
+                numberOfRooms: 2, // Added required parameter
+                numberOfBathrooms: 1, // Added required parameter
                 keywordNames: new List<string> { "wifi", "parking" }
                 );
 

@@ -1,3 +1,4 @@
+// src/app/models/listing.model.ts
 export interface Listing {
   id: number;
   title: string;
@@ -16,6 +17,10 @@ export interface Listing {
   userId: string;
   images?: ListingImage[];
   amenities?: string[];
+  destination: string;
+  type: string;
+  bedrooms: number;
+  bathrooms: number;
 }
 
 export interface ListingImage {
@@ -34,19 +39,27 @@ export interface ListingCreateVM {
   maxGuests: number;
   images?: File[];
   amenities?: string[];
+  destination: string;
+  type: string;
+  numberOfRooms: number;
+  numberOfBathrooms: number;
 }
 
 export interface ListingUpdateVM {
-  title: string;
-  description: string;
-  pricePerNight: number;
-  location: string;
-  latitude: number;
-  longitude: number;
-  maxGuests: number;
+  title?: string;
+  description?: string;
+  pricePerNight?: number;
+  location?: string;
+  latitude?: number;
+  longitude?: number;
+  maxGuests?: number;
   newImages?: File[];
   removeImageIds?: number[];
   amenities?: string[];
+  destination?: string;
+  type?: string;
+  numberOfRooms?: number;
+  numberOfBathrooms?: number;
 }
 
 export interface ListingDetailVM {
@@ -66,6 +79,10 @@ export interface ListingDetailVM {
   amenities: string[];
   userId: string;
   createdAt: string;
+  destination: string;
+  type: string;
+  bedrooms: number;
+  bathrooms: number;
 }
 
 export interface ListingOverviewVM {
@@ -78,6 +95,10 @@ export interface ListingOverviewVM {
   reviewCount: number;
   isApproved: boolean;
   description?: string;
+  destination: string;
+  type: string;
+  bedrooms: number;
+  bathrooms: number;
 }
 
 export interface ListingsResponse<T> {

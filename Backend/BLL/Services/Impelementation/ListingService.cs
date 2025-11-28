@@ -61,7 +61,11 @@ public class ListingService : IListingService
                 vm.MaxGuests,
                 hostId,
                 hostFullName,
-                uploaded.FirstOrDefault() ?? string.Empty, // main image the first uploaded
+                uploaded.FirstOrDefault() ?? string.Empty, // main image
+                vm.Destination,
+                vm.Type,
+                vm.NumberOfRooms,
+                vm.NumberOfBathrooms,
                 parsedAmenities
             );
 
@@ -185,6 +189,24 @@ public class ListingService : IListingService
         {
             var hostFullName = await ResolveFullNameAsync(hostId, ct);
 
+            // Fetch existing listing to preserve Destination and Type
+            var existingListing = await unitOfWork.Listings.GetByIdAsync(listingId, ct);
+            if (existingListing == null)
+                return new Response<ListingUpdateVM>(null, "Listing not found", true);
+
+            // Validate provided values (only if they are provided)
+            if (vm.PricePerNight.HasValue && (vm.PricePerNight < 1 || vm.PricePerNight > 100000))
+                return new Response<ListingUpdateVM>(null, "PricePerNight must be between 1 and 100000", true);
+
+            if (vm.MaxGuests.HasValue && (vm.MaxGuests < 1 || vm.MaxGuests > 50))
+                return new Response<ListingUpdateVM>(null, "MaxGuests must be between 1 and 50", true);
+
+            if (vm.Latitude.HasValue && (vm.Latitude < -90 || vm.Latitude > 90))
+                return new Response<ListingUpdateVM>(null, "Latitude must be between -90 and 90", true);
+
+            if (vm.Longitude.HasValue && (vm.Longitude < -180 || vm.Longitude > 180))
+                return new Response<ListingUpdateVM>(null, "Longitude must be between -180 and 180", true);
+
             // 2. Handle image removal
             if (vm.RemoveImageIds != null && vm.RemoveImageIds.Any())
             {
@@ -226,18 +248,23 @@ public class ListingService : IListingService
             }
 
             // 4. Create a minimal aggregate with updated scalar fields
+            // Use provided values or fall back to existing values
             var updatedListing = Listing.Create(
-                vm.Title,
-                vm.Description,
-                vm.PricePerNight,
-                vm.Location,
-                vm.Latitude,
-                vm.Longitude,
-                vm.MaxGuests,
-                hostId,
-                hostFullName,
-                string.Empty
-            );
+                    vm.Title ?? existingListing.Title,
+                    vm.Description ?? existingListing.Description,
+                    vm.PricePerNight ?? existingListing.PricePerNight,
+                    vm.Location ?? existingListing.Location,
+                    vm.Latitude ?? existingListing.Latitude,    
+                    vm.Longitude ?? existingListing.Longitude,
+                    vm.MaxGuests ?? existingListing.MaxGuests,
+                    hostId,
+                    hostFullName,
+                    string.Empty,
+                    vm.Destination ?? existingListing.Destination,
+                    vm.Type ?? existingListing.Type,
+                    vm.NumberOfRooms ?? existingListing.NumberOfRooms,
+                    vm.NumberOfBathrooms ?? existingListing.NumberOfBathrooms
+                );
 
             // 5. Save updated fields + new images
             var ok = await unitOfWork.Listings.UpdateAsync(

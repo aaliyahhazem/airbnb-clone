@@ -20,10 +20,10 @@
   <div *ngIf="listing && !loading && !error" class="detail-content">
     <!-- Header -->
     <div class="detail-header glass-card">
-      <button class="glass-btn" (click)="goBack()">
+      <!-- <button class="glass-btn" (click)="goBack()">
         <i class="bi bi-arrow-left"></i>Back
-      </button>
-      <h1>{{ listing.title }}</h1>
+      </button> -->
+      <h1 >{{ listing.title }}</h1>
       <button class="glass-btn" (click)="editListing()">
         <i class="bi bi-pencil"></i>Edit
       </button>
@@ -90,13 +90,25 @@
         <!-- Details Grid -->
         <div class="details-grid">
           <div class="detail-item">
+            <span class="label">Destination</span>
+            <span class="value">{{ listing.destination }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Property Type</span>
+            <span class="value">{{ listing.type }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Bedrooms</span>
+            <span class="value">{{ listing.bedrooms || 'N/A' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Bathrooms</span>
+            <span class="value">{{ listing.bathrooms || 'N/A' }}</span>
+          </div>
+          <div class="detail-item">
             <span class="label">Max Guests</span>
             <span class="value">{{ listing.maxGuests }}</span>
           </div>
-          <!-- <div class="detail-item">
-            <span class="label">Bedrooms</span>
-            <span class="value">{{ listing.bedrooms || 'N/A' }}</span>
-          </div> -->
         </div>
 
         <!-- Amenities -->

@@ -161,12 +161,12 @@ export class ListingsDetail implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/listings']);
+    this.router.navigate(['/host']);
   }
 
   editListing(): void {
     if (this.listing) {
-      this.router.navigate(['/listings', this.listing.id, 'edit']);
+      this.router.navigate(['/host', this.listing.id, 'edit']);
     }
   }
 }

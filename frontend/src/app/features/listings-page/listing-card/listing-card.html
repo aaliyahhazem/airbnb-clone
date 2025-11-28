@@ -21,7 +21,11 @@
       <h6 class="title fw-semibold">{{ listing?.title || 'Untitled' }}</h6>
 
       <p class="location text-muted medium">
-        {{ listing?.location || 'Location not provided' }}
+        {{ listing?.destination || 'Destination not provided' }}
+      </p>
+
+      <p class="type text-muted small">
+        {{ listing?.type || 'Type not provided' }} • {{ listing?.bedrooms || 0 }} Bed • {{ listing?.bathrooms || 0 }} Bath
       </p>
 
       <p class="desc text-muted small">
