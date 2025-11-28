@@ -6,12 +6,22 @@
         public string Title { get; set; } = null!;
         public string Description { get; set; }
         public decimal PricePerNight { get; set; }
-        public string Location { get; set; } = null!;
+        
+        //public string Location { get; set; } = null!;
         public string? MainImageUrl { get; set; }
 
         //public bool IsPromoted { get; set; }
         public bool IsApproved { get; set; }
 
         public List<string> Amenities { get; set; } = new List<string>();
+
+        public string Destination { get; set; }
+
+        public string Type { get; set; }
+
+        public int Bedrooms { get; set; }
+        public int Bathrooms { get; set; }
+
+
     }
 }

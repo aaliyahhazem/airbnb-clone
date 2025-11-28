@@ -44,7 +44,12 @@ namespace DAL.Repo.Implementation
                 userId: hostId,
                 createdBy: hostFullName,
                 mainImageUrl: mainImageUrl,
-                keywordNames: keywordNames
+                keywordNames: keywordNames,
+                destination: listing.Destination,
+                type: listing.Type,
+                numberOfRooms: listing.NumberOfRooms,
+                numberOfBathrooms: listing.NumberOfBathrooms
+
             );
 
             if (additionalImageUrls?.Any() == true)
@@ -103,16 +108,20 @@ namespace DAL.Repo.Implementation
 
                 // Update scalar fields
                 var updated = entity.Update(
-                    updatedListing.Title,
-                    updatedListing.Description,
-                    updatedListing.PricePerNight,
-                    updatedListing.Location,
-                    updatedListing.Latitude,
-                    updatedListing.Longitude,
-                    updatedListing.MaxGuests,
-                    hostFullName,
-                    amenitiesNames
-                );
+                        updatedListing.Title,
+                        updatedListing.Description,
+                        updatedListing.PricePerNight,
+                        updatedListing.Location,
+                        updatedListing.Latitude,
+                        updatedListing.Longitude,
+                        updatedListing.MaxGuests,
+                        hostFullName,
+                        updatedListing.Destination,
+                        updatedListing.Type,
+                        updatedListing.NumberOfRooms,
+                        updatedListing.NumberOfBathrooms,
+                        amenitiesNames
+                    );
 
                 if (!updated) return false;
 

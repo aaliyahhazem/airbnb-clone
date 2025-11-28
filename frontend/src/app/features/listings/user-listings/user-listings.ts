@@ -1,13 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { ListingService } from '../../../core/services/listings/listing.service';
 import { ListingOverviewVM } from '../../../core/models/listing.model';
 
 @Component({
   selector: 'app-user-listings',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './user-listings.html',
   styleUrls: ['./user-listings.css']
 })

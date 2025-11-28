@@ -101,7 +101,13 @@
               </div>
             </div>
           </div>
-
+          <!-- ❤️ FAVORITES -->
+          <li class="right nav-item favorites-link">
+            <a class="nav-link" routerLink="/favorites" title="My Favorites">
+              <i class="bi bi-heart"></i>
+              <span *ngIf="favoriteCount > 0" class="badge">{{ favoriteCount }}</span>
+            </a>
+          </li>
           <!-- 🌐 Language icon -->
           <li class="right nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">

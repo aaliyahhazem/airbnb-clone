@@ -2,42 +2,21 @@
 {
     public class ListingUpdateVM
     {
-        [ MaxLength(150)]
-        public string? Title { get; set; } = null!;
-
-        [MaxLength(2000)]
-        public string Description { get; set; } = null!;
-
-        [ Range(1, 100000)]
-        public decimal PricePerNight { get; set; }
-
-        [MaxLength(255)]
-        public string Location { get; set; } = null!;
-
-        [Range(-90, 90)]
-        public double Latitude { get; set; }
-
-        [Range(-180, 180)]
-        public double Longitude { get; set; }
-
-        [Range(1, 50)]
-        public int MaxGuests { get; set; }
-
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public decimal? PricePerNight { get; set; }
+        public string? Location { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+        public int? MaxGuests { get; set; }
+        public string? Destination { get; set; }
+        public string? Type { get; set; }
+        public int? NumberOfRooms { get; set; }
+        public int? NumberOfBathrooms { get; set; }
         public List<string>? Amenities { get; set; }
-
-        // Images to add on update (we will upload these)
         public List<IFormFile>? NewImages { get; set; }
-
-        // Existing image ids to soft-delete
         public List<int>? RemoveImageIds { get; set; }
-
-
-        // Output properties (for response)
-        public List<ListingImageVM>? Images { get; set; }  // Saved images
+        public List<ListingImageVM>? Images { get; set; }
         public ListingImageVM? MainImage { get; set; }
-
-
-        //public bool IsPromoted { get; set; }
-        //public DateTime? PromotionEndDate { get; set; }
     }
 }

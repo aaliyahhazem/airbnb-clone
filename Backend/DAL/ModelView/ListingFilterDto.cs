@@ -9,6 +9,8 @@
     public string? Amenity { get; set; }
     //filter with availability
 
-    //for search in title
+    public string? Type { get; set; }
+    public string? Destination { get; set; }
+
     public string? TitleContains { get; set; }
 }

@@ -15,4 +15,10 @@
 
     public List<string> Amenities { get; set; } = new();
     public List<ListingImageVM> Images { get; set; } = new();
+
+    public string Destination { get; set; }
+    public string Type { get; set; }
+
+    public int Bedrooms { get; set; }        
+    public int Bathrooms { get; set; }  
 }

@@ -31,13 +31,13 @@ export class AdminListingsComponent implements OnInit {
     this.error = '';
 
     this.listingService.getAdminListings(this.currentPage, this.pageSize).subscribe(
-      (response) => {
+      (response: any) => {
         if (!response.isError) {
           let filtered = response.data;
           if (this.filterStatus === 'approved') {
-            filtered = filtered.filter(l => l.isApproved);
+            filtered = filtered.filter((l: ListingOverviewVM) => l.isApproved);
           } else if (this.filterStatus === 'pending') {
-            filtered = filtered.filter(l => !l.isApproved);
+            filtered = filtered.filter((l: ListingOverviewVM) => !l.isApproved);
           }
           this.listings = filtered;
           this.totalCount = response.totalCount;
@@ -46,7 +46,7 @@ export class AdminListingsComponent implements OnInit {
         }
         this.loading = false;
       },
-      (err) => {
+      (err: any) => {
         this.error = 'Error loading listings';
         this.loading = false;
       }

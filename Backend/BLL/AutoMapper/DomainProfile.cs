@@ -24,7 +24,9 @@ namespace BLL.AutoMapper
             .ForMember(d => d.MainImageUrl, opt => opt.MapFrom(s => s.MainImage != null
                        ? $"/listings/{s.MainImage.ImageUrl}"
                        : s.Images.Where(i => !i.IsDeleted).OrderBy(i => i.Id).Select(i => $"/listings/{i.ImageUrl}").FirstOrDefault()))
-                        .ForMember(d => d.Amenities, opt => opt.MapFrom(s => s.Amenities.Select(k => k.Word)));
+                        .ForMember(d => d.Amenities, opt => opt.MapFrom(s => s.Amenities.Select(k => k.Word)))
+                        .ForMember(d => d.Bedrooms, opt => opt.MapFrom(s => s.NumberOfRooms))
+                        .ForMember(d => d.Bathrooms, opt => opt.MapFrom(s => s.NumberOfBathrooms));
 
 
             /// Listing → ListingDetailVM
@@ -40,7 +42,9 @@ namespace BLL.AutoMapper
                                               .Select(i => $"/listings/{i.ImageUrl}")
                                               .FirstOrDefault()))
                             .ForMember(d => d.Amenities, opt => opt.MapFrom(s =>
-                                s.Amenities.Select(k => k.Word).ToList()));
+                                s.Amenities.Select(k => k.Word).ToList()))
+                            .ForMember(d => d.  Bedrooms, opt => opt.MapFrom(s => s.NumberOfRooms))
+                            .ForMember(d => d.Bathrooms, opt => opt.MapFrom(s => s.NumberOfBathrooms));
 
             CreateMap<ListingImage, ListingImageVM>()
                             .ForMember(d => d.Id, opt => opt.MapFrom(s => s.Id))
@@ -57,6 +61,10 @@ namespace BLL.AutoMapper
                  .ForMember(d => d.Latitude, opt => opt.MapFrom(s => s.Latitude))
                  .ForMember(d => d.Longitude, opt => opt.MapFrom(s => s.Longitude))
                  .ForMember(d => d.MaxGuests, opt => opt.MapFrom(s => s.MaxGuests))
+                 .ForMember(d => d.Destination, opt => opt.MapFrom(s => s.Destination))
+                 .ForMember(d => d.Type, opt => opt.MapFrom(s => s.Type))
+                 .ForMember(d => d.NumberOfRooms, opt => opt.MapFrom(s => s.NumberOfRooms))
+                 .ForMember(d => d.NumberOfBathrooms, opt => opt.MapFrom(s => s.NumberOfBathrooms))
 
                  // Amenities
                  .ForMember(d => d.Amenities,

@@ -1,0 +1,10 @@
+ <button 
+      class="favorite-btn"
+      [class.favorited]="isFavorited"
+      [class.loading]="loading"
+      (click)="toggleFavorite($event)"
+      [disabled]="loading"
+      [title]="isFavorited ? 'Remove from favorites' : 'Add to favorites'"
+    >
+      <i class="bi" [class.bi-heart]="!isFavorited" [class.bi-heart-fill]="isFavorited"></i>
+    </button>

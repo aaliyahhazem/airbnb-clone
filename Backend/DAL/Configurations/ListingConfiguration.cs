@@ -36,6 +36,20 @@ namespace DAL.Configurations
                 .HasColumnType("decimal(18,2)")
                 .IsRequired();
 
+            builder.Property(l => l.Destination)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            builder.Property(l => l.Type)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            builder.Property(l => l.NumberOfRooms)
+                .IsRequired();
+
+            builder.Property(l => l.NumberOfBathrooms)
+                .IsRequired();
+
             builder.Property(l => l.Latitude)
                 .HasColumnType("float");
 

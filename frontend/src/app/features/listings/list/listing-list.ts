@@ -186,6 +186,6 @@ export class ListingsList implements OnInit {
   }
 
   trackById(index: number, item: ListingOverviewVM): number {
-    return item.id ?? index;
-  }
+    return item.id ?? index;
+  }
 }

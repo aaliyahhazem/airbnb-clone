@@ -22,6 +22,16 @@
 
         [Required, Range(1, 50)]
         public int MaxGuests { get; set; }
+        
+        [Required]
+        public string Destination { get; set; }
+        [Required]
+        public string Type { get; set; }
+        [Required]
+        public int NumberOfRooms { get; set; }
+        [Required]
+        public int NumberOfBathrooms { get; set; }
+
 
         public List<string>? Amenities { get; set; }   // e.g. ["beach","family"]
 
@@ -29,6 +39,6 @@
         public List<IFormFile>? Images { get; set; }
         //public bool IsPromoted { get; set; }
         //public DateTime? PromotionEndDate { get; set; }
-
+       
     }
 }

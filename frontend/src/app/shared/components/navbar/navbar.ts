@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ElementRef, Renderer2 } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ElementRef, Renderer2, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { NotificationDto } from '../../../core/models/notification';
 import { NotificationStoreService } from '../../../core/services/notification-store';
@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { MessageStoreService } from '../../../core/services/message-store';
 import { MessageDto } from '../../../core/models/message';
+import { FavoriteStoreService } from '../../../core/services/favoriteService/favorite-store-service';
 
 
 @Component({
@@ -28,6 +29,8 @@ export class Navbar implements OnInit, OnDestroy {
 
   notificationOpen = false;
   messageOpen = false;
+  favoriteCount = 0;
+  private favoriteStore = inject(FavoriteStoreService);
 
   isAuthenticated = false;
 
@@ -45,12 +48,18 @@ export class Navbar implements OnInit, OnDestroy {
           console.log('User authenticated, loading unread notifications and messages');
           this.store.loadUnread();
           this.messageStore.loadUnread();
+            // Load favorites
+          try { this.favoriteStore.loadFavorites(); } catch (err) { 
+            console.warn('Failed to load favorites:', err); 
+          }
         } else {
           // Clear data when logged out
           this.notifications = [];
           this.messages = [];
           this.unreadCount = 0;
           this.unreadMsgCount = 0;
+          this.favoriteCount = 0;
+
         }
         this.cdr.detectChanges();
       });

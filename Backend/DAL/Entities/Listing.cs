@@ -47,7 +47,12 @@
         public DateTime? DeletedOn { get; private set; }
         public bool IsDeleted { get; private set; }
 
- 
+        //additional property
+        public string Destination { get; set; } 
+        public string Type { get; set; }
+
+        public int NumberOfRooms { get; set; }        //#of rooms
+        public int NumberOfBathrooms { get; set; }   //#of bathrooms
 
         // Private constructor for EF
         private Listing() { }
@@ -64,8 +69,13 @@
      Guid userId,
      string createdBy,
      string mainImageUrl,
+     string destination,
+     string type,
+        int numberOfRooms,
+        int numberOfBathrooms,
      //bool isPromoted = false,
      //DateTime? promotionEndDate = null,
+
      List<string>? keywordNames = null)     // optional keyword names
         {
             var listing = new Listing
@@ -78,6 +88,10 @@
                 Longitude = longitude,
                 MaxGuests = maxGuests,
                 UserId = userId,
+                Destination = destination,
+                Type = type,
+                NumberOfRooms = numberOfRooms,
+                NumberOfBathrooms = numberOfBathrooms,
                 //IsPromoted = isPromoted,
                 //PromotionEndDate = promotionEndDate,
 
@@ -132,6 +146,10 @@
     double longitude,
     int maxGuests,
     string updatedBy,
+     string destination,
+ string type,
+    int numberOfRooms,
+    int numberOfBathrooms,
     //bool isPromoted,
     //DateTime? promotionEndDate,
     IEnumerable<string>? keywordNames = null,
@@ -147,6 +165,10 @@
             Latitude = latitude;
             Longitude = longitude;
             MaxGuests = maxGuests;
+            Destination = destination;
+            Type = type;
+            NumberOfRooms = numberOfRooms;
+            NumberOfBathrooms = numberOfBathrooms;
             //IsPromoted = isPromoted;
             //PromotionEndDate = promotionEndDate;
 

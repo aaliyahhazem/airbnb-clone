@@ -16,7 +16,9 @@ import { UserListingsComponent } from './features/listings/user-listings/user-li
 import { AdminListingsComponent } from './features/listings/admin-listings/admin-listings';
 import { MapComponent } from './features/Map/map/map';
 import { Listings } from './features/listings-page/listings/listings';
+import { AdminDashboard } from './features/admin/admin-dashboard/admin-dashboard';
 
+import { FavoritePage } from './features/favorites/favorite-page/favorite-page'; 
 export const routes: Routes = [
   { path: 'home', component: Home },
   { path: 'map', component: MapComponent },
@@ -24,7 +26,7 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
   { path: 'auth/login', component: Login },
   { path: 'auth/register', component: Register },
-  { path: 'listings/:id/edit', component: ListingsCreateEdit, canActivate: [AuthGuard] },
+  //{ path: 'listings/:id/edit', component: ListingsCreateEdit, canActivate: [AuthGuard] },
   { path: 'listings/:id', component: ListingsDetail },
   { path: 'listings', component: Listings},
   // { path: '**', redirectTo: 'home' },
@@ -46,11 +48,13 @@ export const routes: Routes = [
   { path: 'admin/listings', component: AdminListingsComponent },
 
   // other app routes
-  { path: 'admin', component: Dashboard, canActivate: [AuthGuard] },
+  { path: 'admin', component: AdminDashboard, canActivate: [AuthGuard] },
   { path: 'booking', component: BookingComponent, canActivate: [AuthGuard] },
   { path: 'payment/:id', component: PaymentComponent, canActivate: [AuthGuard] },
   { path: 'messages', component: ChatWindow, canActivate: [AuthGuard] },
   { path: 'notifications', component: NotificationWindow, canActivate: [AuthGuard] },
+  //Favaorites 
+  { path: 'favorites', component: FavoritePage, canActivate: [AuthGuard] },
   // Optional:
   // { path: '**', redirectTo: 'home' },
 ];

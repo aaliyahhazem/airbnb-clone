@@ -61,9 +61,13 @@ export class ListingsCreateEdit {
       description: ['', [Validators.required, Validators.minLength(20)]],
       pricePerNight: [0, [Validators.required, Validators.min(1)]],
       location: ['', [Validators.required, Validators.minLength(3)]],
+      destination: ['', [Validators.required, Validators.minLength(2)]],
+      type: ['', [Validators.required]],
       latitude: [0, [Validators.required]],
       longitude: [0, [Validators.required]],
       maxGuests: [1, [Validators.required, Validators.min(1)]],
+      bedrooms: [1, [Validators.required, Validators.min(1)]],
+      bathrooms: [1, [Validators.required, Validators.min(1)]],
       amenities: [[]] as any
     });
   }
@@ -184,7 +188,7 @@ export class ListingsCreateEdit {
           // Update form and existing images inside the Angular zone
           // and trigger change detection immediately to avoid
           // ExpressionChangedAfterItHasBeenCheckedError when bindings
-          // (like `disabled`) change as a result of populating the form.
+          // (like disabled) change as a result of populating the form.
           this.ngZone.run(() => {
             this.populateForm(response.data);
             this.existingImages = (response.data.images || []).map((img: any) => ({
@@ -213,9 +217,13 @@ export class ListingsCreateEdit {
       description: listing.description,
       pricePerNight: listing.pricePerNight,
       location: listing.location,
+      destination: listing.destination,
+      type: listing.type,
       latitude: listing.latitude,
       longitude: listing.longitude,
-      maxGuests: listing.maxGuests
+      maxGuests: listing.maxGuests,
+      bedrooms: listing.bedrooms,
+      bathrooms: listing.bathrooms
     });
   }
 
@@ -294,13 +302,18 @@ export class ListingsCreateEdit {
         description: formValue.description!,
         pricePerNight: formValue.pricePerNight!,
         location: formValue.location!,
+        destination: formValue.destination!,
+        type: formValue.type!,
         latitude: formValue.latitude!,
         longitude: formValue.longitude!,
         maxGuests: formValue.maxGuests!,
+        numberOfRooms: formValue.bedrooms!,
+        numberOfBathrooms: formValue.bathrooms!,
         newImages: this.selectedFiles.length > 0 ? this.selectedFiles : undefined,
         removeImageIds: this.removeImageIds.length > 0 ? this.removeImageIds : undefined,
         amenities: formValue.amenities || []
       };
+      console.log('Update payload:', updateVM);
 
       this.listingService.update(this.currentId, updateVM).subscribe(
         (response) => {
@@ -325,12 +338,17 @@ export class ListingsCreateEdit {
         description: formValue.description!,
         pricePerNight: formValue.pricePerNight!,
         location: formValue.location!,
+        destination: formValue.destination!,
+        type: formValue.type!,
         latitude: formValue.latitude!,
         longitude: formValue.longitude!,
         maxGuests: formValue.maxGuests!,
+        numberOfRooms: formValue.bedrooms!,
+        numberOfBathrooms: formValue.bathrooms!,
         images: this.selectedFiles.length > 0 ? this.selectedFiles : undefined,
         amenities: formValue.amenities || []
       };
+      console.log('Create payload:', createVM);
 
       this.listingService.create(createVM).subscribe(
         (response) => {
@@ -379,5 +397,5 @@ export class ListingsCreateEdit {
 
   goBack(): void {
     this.router.navigate(['/host']);
-  }
+  }
 }

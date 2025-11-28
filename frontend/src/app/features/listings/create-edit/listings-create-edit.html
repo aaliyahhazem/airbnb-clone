@@ -1,7 +1,7 @@
 ﻿<div class="listing-form-container">
     <div class="form-header">
         <h2>{{ editMode ? 'Edit Listing' : 'Create New Listing' }}</h2>
-        <button class="btn-back" (click)="goBack()">← Back</button>
+        <!-- <button class="btn-back" (click)="goBack()">← Back</button> -->
     </div>
 
     <!-- Messages -->
@@ -92,6 +92,41 @@
 
             <div class="form-row">
                 <div class="form-group">
+                    <label for="destination">Destination *</label>
+                    <input 
+                        id="destination" 
+                        type="text" 
+                        formControlName="destination" 
+                        placeholder="e.g., Downtown Cairo"
+                        [class.is-invalid]="isInvalid('destination')"
+                    />
+                    <small *ngIf="isInvalid('destination')" class="error-text">
+                        Destination is required
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="type">Property Type *</label>
+                    <select 
+                        id="type" 
+                        formControlName="type"
+                        [class.is-invalid]="isInvalid('type')"
+                    >
+                        <option value="">Select a type</option>
+                        <option value="Apartment">Apartment</option>
+                        <option value="House">House</option>
+                        <option value="Villa">Villa</option>
+                        <option value="Studio">Studio</option>
+                        <option value="Penthouse">Penthouse</option>
+                    </select>
+                    <small *ngIf="isInvalid('type')" class="error-text">
+                        Property type is required
+                    </small>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
                     <label for="latitude">Latitude *</label>
                     <input 
                         id="latitude" 
@@ -118,6 +153,38 @@
                     />
                     <small *ngIf="isInvalid('longitude')" class="error-text">
                         Longitude is required
+                    </small>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bedrooms">Bedrooms *</label>
+                    <input 
+                        id="bedrooms" 
+                        type="number" 
+                        formControlName="bedrooms" 
+                        placeholder="1"
+                        min="1"
+                        [class.is-invalid]="isInvalid('bedrooms')"
+                    />
+                    <small *ngIf="isInvalid('bedrooms')" class="error-text">
+                        Bedrooms is required
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="bathrooms">Bathrooms *</label>
+                    <input 
+                        id="bathrooms" 
+                        type="number" 
+                        formControlName="bathrooms" 
+                        placeholder="1"
+                        min="1"
+                        [class.is-invalid]="isInvalid('bathrooms')"
+                    />
+                    <small *ngIf="isInvalid('bathrooms')" class="error-text">
+                        Bathrooms is required
                     </small>
                 </div>
             </div>
@@ -212,7 +279,7 @@
                 class="btn btn-primary"
                 [disabled]="loading || form.invalid"
             >
-                {{ loading ? 'Saving...' : (editMode ? 'Update Listing' : 'Create Listing') }}
+                {{ loading ? 'Saving...' : (editMode ? 'Update' : 'Create') }}
             </button>
 
             <button 
@@ -220,16 +287,15 @@
                 type="button" 
                 class="btn btn-danger"
                 (click)="onDelete()"
-                [disabled]="loading"
+                
             >
-                {{ loading ? 'Deleting...' : 'Delete Listing' }}
+                Delete
             </button>
 
             <button 
                 type="button" 
                 class="btn btn-secondary"
                 (click)="goBack()"
-                [disabled]="loading"
             >
                 Cancel
             </button>
