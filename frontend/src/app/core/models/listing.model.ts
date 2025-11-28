@@ -111,5 +111,5 @@ export interface ListingsPagedResponse<T> {
   data: T[];
   totalCount: number;
   message?: string;
-  isError: boolean;
+  isError: boolean;
 }

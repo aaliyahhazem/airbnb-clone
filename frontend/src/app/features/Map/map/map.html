@@ -1,7 +1,7 @@
 <div id="map" class="map-container"></div>
 
 <div class="property-card" *ngIf="selectedProperty">
-    <img [src]="selectedProperty?.mainImageUrl" alt="" />
-    <h3>{{ selectedProperty?.title }}</h3>
-    <p>{{ selectedProperty?.pricePerNight }} EGP/night</p>
+    <img [src]="selectedProperty.mainImageUrl" alt="" />
+    <h3>{{ selectedProperty.title }}</h3>
+    <p>{{ selectedProperty.pricePerNight }} EGP/night</p>
 </div>

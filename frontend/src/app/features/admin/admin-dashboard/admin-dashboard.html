@@ -1,0 +1,613 @@
+<!-- Enhanced Admin Dashboard -->
+<div class="admin-dashboard">
+  <div class="dashboard-container">
+    
+    <!-- Dashboard Header -->
+    <div class="dashboard-header glass-card">
+      <div class="header-content">
+        <div class="header-title">
+          <div class="admin-icon">👑</div>
+          <div>
+            <h1>Admin Dashboard</h1>
+            <p class="header-subtitle">Manage your platform with ease</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button (click)="loadStats()" class="glass-btn">
+            🔄 Refresh Data
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="admin-nav glass-card">
+      <button 
+        *ngFor="let tab of ['dashboard', 'guests', 'listings', 'listings-pending', 'bookings', 'revenue', 'promotions']"
+        [class.active]="activeTab === tab"
+        (click)="onTabChange(tab)"
+        class="nav-btn">
+        <span>{{ getTabLabel(tab) }}</span>
+      </button>
+    </nav>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="loading-spinner glass-card">
+      <div class="spinner"></div>
+      <p>Loading data...</p>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-box glass-card">
+      <div>
+        <strong>⚠️ Error:</strong>
+        <span>{{ errorMessage }}</span>
+      </div>
+      <button (click)="errorMessage = null" class="close-btn">Dismiss</button>
+    </div>
+
+    <!-- Dashboard Overview Tab -->
+    <div *ngIf="activeTab === 'dashboard' && stats && !isLoading" class="tab-content">
+      <div class="stats-grid">
+        <div class="stat-card glass-card">
+          <div class="stat-header">
+            <div>
+              <h3>Total Guests</h3>
+            </div>
+            <div class="stat-icon">👥</div>
+          </div>
+          <p class="stat-number">{{ stats.totalUsers }}</p>
+          <p class="stat-subtitle">
+            <span class="stat-trend up">↑ 12%</span>
+            Active users
+          </p>
+        </div>
+
+        <div class="stat-card glass-card">
+          <div class="stat-header">
+            <div>
+              <h3>Total Hosts</h3>
+            </div>
+            <div class="stat-icon">🏠</div>
+          </div>
+          <p class="stat-number">{{ stats.totalHosts || stats.totalUsers }}</p>
+          <p class="stat-subtitle">
+            <span class="stat-trend up">↑ 8%</span>
+            Property owners
+          </p>
+        </div>
+
+        <div class="stat-card glass-card">
+          <div class="stat-header">
+            <div>
+              <h3>Total Listings</h3>
+            </div>
+            <div class="stat-icon">🏢</div>
+          </div>
+          <p class="stat-number">{{ stats.totalListings }}</p>
+          <p class="stat-subtitle">
+            <span class="stat-trend up">↑ 15%</span>
+            Properties listed
+          </p>
+        </div>
+
+        <div class="stat-card glass-card">
+          <div class="stat-header">
+            <div>
+              <h3>Total Bookings</h3>
+            </div>
+            <div class="stat-icon">📅</div>
+          </div>
+          <p class="stat-number">{{ stats.totalBookings }}</p>
+          <p class="stat-subtitle">
+            <span class="stat-trend up">↑ 22%</span>
+            Reservations made
+          </p>
+        </div>
+
+        <div class="stat-card glass-card">
+          <div class="stat-header">
+            <div>
+              <h3>Pending Approvals</h3>
+            </div>
+            <div class="stat-icon">⏳</div>
+          </div>
+          <p class="stat-number">{{ stats.pendingListingsCount || 0 }}</p>
+          <p class="stat-subtitle">
+            Awaiting review
+          </p>
+        </div>
+
+        <div class="stat-card glass-card">
+          <div class="stat-header">
+            <div>
+              <h3>Active Promotions</h3>
+            </div>
+            <div class="stat-icon">🎯</div>
+          </div>
+          <p class="stat-number">{{ stats.activePromotionsCount || 0 }}</p>
+          <p class="stat-subtitle">
+            Currently running
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guests Management Tab -->
+    <div *ngIf="activeTab === 'guests' && !isLoading" class="tab-content">
+      
+      <!-- Filter Section -->
+      <div class="filter-section glass-card">
+        <div class="filter-controls">
+          <div class="filter-group">
+            <label>🔍 Search by Email or Name</label>
+            <input 
+              [(ngModel)]="userSearchQuery"
+              placeholder="Search guests..."
+              class="form-input" 
+              (keyup.enter)="searchUsers()" />
+          </div>
+          
+          <div class="filter-group">
+            <label>👤 Filter by Role</label>
+            <select [(ngModel)]="userRoleFilter" class="form-select">
+              <option value="">All Roles</option>
+              <option value="Guest">Guest</option>
+              <option value="Host">Host</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>✅ Status</label>
+            <select [(ngModel)]="userActiveFilter" class="form-select">
+              <option [ngValue]="null">All</option>
+              <option [ngValue]="true">Active</option>
+              <option [ngValue]="false">Inactive</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>&nbsp;</label>
+            <button (click)="searchUsers()" class="glass-btn primary">Apply Filters</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Table -->
+      <div class="table-container glass-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Email</th>
+              <th>Full Name</th>
+              <th>Role</th>
+              <th>Bookings</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td>{{ user.id.slice(0, 8) }}...</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.fullName }}</td>
+              <td><span class="badge">{{ user.role }}</span></td>
+              <td>{{ user.bookingsCount || 0 }}</td>
+              <td>
+                <span [class]="user.isActive ? 'status-active' : 'status-inactive'">
+                  {{ user.isActive ? '✓ Active' : '✗ Inactive' }}
+                </span>
+              </td>
+              <td>{{ user.createdAt | date:'short' }}</td>
+              <td>
+                <button 
+                  *ngIf="user.isActive"
+                  (click)="deactivateUser(user.id)"
+                  class="glass-btn btn-danger btn-sm">
+                  Deactivate
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="users.length === 0" class="empty-message">
+          No users found matching your criteria
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination glass-card">
+        <button (click)="previousPage('users')" [disabled]="usersPage === 1" class="glass-btn">
+          ← Previous
+        </button>
+        <span>Page {{ usersPage }}</span>
+        <button (click)="nextPage('users')" [disabled]="users.length < usersPageSize" class="glass-btn">
+          Next →
+        </button>
+      </div>
+    </div>
+
+    <!-- All Listings Tab -->
+    <div *ngIf="activeTab === 'listings' && !isLoading" class="tab-content">
+      
+      <!-- Filter Section -->
+      <div class="filter-section glass-card">
+        <div class="filter-controls">
+          <div class="filter-group">
+            <label>🏷️ Filter by Status</label>
+            <select [(ngModel)]="listingStatusFilter" class="form-select">
+              <option value="">All Statuses</option>
+              <option value="approved">Approved</option>
+              <option value="pending">Pending</option>
+              <option value="rejected">Rejected</option>
+              <option value="promoted">Promoted</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>&nbsp;</label>
+            <button (click)="filterListings()" class="glass-btn primary">Apply Filter</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Listings Table -->
+      <div class="table-container glass-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Location</th>
+              <th>Price/Night</th>
+              <th>Host</th>
+              <th>Status</th>
+              <th>Promotion</th>
+              <th>Reviews</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let listing of listings">
+              <td>#{{ listing.id }}</td>
+              <td>{{ listing.title }}</td>
+              <td>📍 {{ listing.location }}</td>
+              <td>{{ listing.pricePerNight | number:'1.0-2' }} EGP</td>
+              <td>{{ listing.hostName }}</td>
+              <td>
+                <span [ngClass]="{
+                  'status-approved': listing.status === 'approved',
+                  'status-pending': listing.status === 'pending',
+                  'status-rejected': listing.status === 'rejected',
+                  'status-promoted': listing.status === 'promoted'
+                }">
+                  {{ listing.status || 'Unknown' }}
+                </span>
+              </td>
+              <td>
+                <span *ngIf="listing.isPromoted && listing.promotionEndDate" class="promotion-badge">
+                  🎯 Until {{ listing.promotionEndDate | date:'short' }}
+                </span>
+                <span *ngIf="!listing.isPromoted" class="text-muted">—</span>
+              </td>
+              <td>⭐ {{ listing.reviewsCount || 0 }}</td>
+              <td class="actions-cell">
+                <div class="action-buttons">
+                  <button 
+                    *ngIf="listing.status === 'pending'"
+                    (click)="approveListing(listing.id)"
+                    class="glass-btn btn-success btn-xs">
+                    ✓ Approve
+                  </button>
+                  <button 
+                    *ngIf="listing.status === 'pending'"
+                    (click)="rejectListing(listing.id)"
+                    class="glass-btn btn-danger btn-xs">
+                    ✗ Reject
+                  </button>
+                  <button 
+                    *ngIf="listing.status === 'approved' && !listing.isPromoted"
+                    (click)="promoteListing(listing.id)"
+                    class="glass-btn btn-info btn-xs">
+                    📈 Promote
+                  </button>
+                  <button 
+                    *ngIf="listing.isPromoted"
+                    (click)="unpromoteListing(listing.id)"
+                    class="glass-btn btn-warning btn-xs">
+                    Stop Promo
+                  </button>
+                  <button 
+                    *ngIf="listing.isPromoted"
+                    (click)="extendPromotion(listing.id)"
+                    class="glass-btn btn-info btn-xs">
+                    🔄 Extend
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="listings.length === 0" class="empty-message">
+          No listings found matching your criteria
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination glass-card">
+        <button (click)="previousPage('listings')" [disabled]="listingsPage === 1" class="glass-btn">
+          ← Previous
+        </button>
+        <span>Page {{ listingsPage }}</span>
+        <button (click)="nextPage('listings')" [disabled]="listings.length < listingsPageSize" class="glass-btn">
+          Next →
+        </button>
+      </div>
+    </div>
+
+    <!-- Pending Listings Tab -->
+    <div *ngIf="activeTab === 'listings-pending' && !isLoading" class="tab-content">
+      <h2>📋 Listings Pending Approval</h2>
+      <div class="table-container glass-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Location</th>
+              <th>Price/Night</th>
+              <th>Host</th>
+              <th>Submitted</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let listing of pendingListings">
+              <td>#{{ listing.id }}</td>
+              <td>{{ listing.title }}</td>
+              <td>📍 {{ listing.location }}</td>
+              <td>{{ listing.pricePerNight | number:'1.0-2' }} EGP</td>
+              <td>{{ listing.hostName }}</td>
+              <td>{{ listing.createdAt | date:'short' }}</td>
+              <td class="actions-cell">
+                <button (click)="approveListing(listing.id)" class="glass-btn btn-success btn-xs">
+                  ✓ Approve
+                </button>
+                <button (click)="rejectListing(listing.id)" class="glass-btn btn-danger btn-xs">
+                  ✗ Reject
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="pendingListings.length === 0" class="empty-message">
+          No pending listings
+        </div>
+      </div>
+    </div>
+
+    <!-- Bookings Tab -->
+    <div *ngIf="activeTab === 'bookings' && !isLoading" class="tab-content">
+      <h2>📅 Bookings Management</h2>
+      <div class="table-container glass-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Listing</th>
+              <th>Guest</th>
+              <th>Host</th>
+              <th>Check-in</th>
+              <th>Check-out</th>
+              <th>Total Price</th>
+              <th>Status</th>
+              <th>Payment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let booking of bookings">
+              <td>#{{ booking.id }}</td>
+              <td>{{ booking.listingTitle }}</td>
+              <td>{{ booking.guestName }}</td>
+              <td>{{ booking.hostName }}</td>
+              <td>{{ booking.checkIn | date:'short' }}</td>
+              <td>{{ booking.checkOut | date:'short' }}</td>
+              <td>{{ booking.totalPrice | number:'1.0-2' }} EGP</td>
+              <td>
+                <span [ngClass]="{
+                  'status-confirmed': booking.bookingStatus === 'confirmed',
+                  'status-pending': booking.bookingStatus === 'pending',
+                  'status-cancelled': booking.bookingStatus === 'cancelled'
+                }">
+                  {{ booking.bookingStatus || '—' }}
+                </span>
+              </td>
+              <td>
+                <span [ngClass]="{
+                  'status-paid': booking.paymentStatus === 'paid',
+                  'status-pending': booking.paymentStatus === 'pending',
+                  'status-failed': booking.paymentStatus === 'failed'
+                }">
+                  {{ booking.paymentStatus || '—' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="bookings.length === 0" class="empty-message">
+          No bookings found
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination glass-card">
+        <button (click)="previousPage('bookings')" [disabled]="bookingsPage === 1" class="glass-btn">
+          ← Previous
+        </button>
+        <span>Page {{ bookingsPage }}</span>
+        <button (click)="nextPage('bookings')" [disabled]="bookings.length < bookingsPageSize" class="glass-btn">
+          Next →
+        </button>
+      </div>
+    </div>
+
+    <!-- Revenue Tab -->
+    <div *ngIf="activeTab === 'revenue' && !isLoading" class="tab-content">
+      <h2>💰 Revenue Analytics</h2>
+      
+      <!-- Revenue Summary -->
+      <div class="revenue-summary glass-card">
+        <div class="revenue-card">
+          <h3>Total Revenue ({{ revenueMonths }} months)</h3>
+          <p class="revenue-number">{{ getTotalRevenue() | number:'1.0-2' }} EGP</p>
+        </div>
+        <div class="revenue-card">
+          <h3>Average Monthly</h3>
+          <p class="revenue-number">{{ (getTotalRevenue() / revenueMonths) | number:'1.0-2' }} EGP</p>
+        </div>
+      </div>
+
+      <!-- Revenue Table -->
+      <div class="table-container glass-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Total Revenue</th>
+              <th>Transactions</th>
+              <th>Average/Transaction</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let point of revenueData">
+              <td>{{ point.monthDate | date:'MMM yyyy' }}</td>
+              <td>{{ point.total | number:'1.0-2' }} EGP</td>
+              <td>{{ point.transactionCount || 0 }}</td>
+              <td>{{ ((point.transactionCount || 0) > 0 ? point.total / (point.transactionCount || 1) : 0) | number:'1.0-2' }} EGP</td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="revenueData.length === 0" class="empty-message">
+          No revenue data available
+        </div>
+      </div>
+    </div>
+
+    <!-- Promotions Tab -->
+    <div *ngIf="activeTab === 'promotions' && !isLoading" class="tab-content">
+      <h2>🎯 Promotions Management</h2>
+
+      <!-- Active Promotions Section -->
+      <div class="promotion-section">
+        <h3>🔴 Active Promotions ({{ activePromotions.length }})</h3>
+        <div class="table-container glass-card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Listing</th>
+                <th>Host</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Days Remaining</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let promo of activePromotions">
+                <td>{{ promo.listingTitle }}</td>
+                <td>{{ promo.hostName }}</td>
+                <td>{{ promo.startDate | date:'short' }}</td>
+                <td>{{ promo.endDate | date:'short' }}</td>
+                <td>
+                  <span [class]="getDaysRemainingClass(promo.endDate)">
+                    {{ getDaysRemaining(promo.endDate) }} days
+                  </span>
+                </td>
+                <td>
+                  <button (click)="extendPromotion(promo.listingId)" class="glass-btn btn-info btn-xs">
+                    🔄 Extend
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="activePromotions.length === 0" class="empty-message">
+            No active promotions
+          </div>
+        </div>
+      </div>
+
+      <!-- Expiring Soon Section -->
+      <div class="promotion-section">
+        <h3>⚠️ Expiring Soon (Next 7 Days) - {{ expiringPromotions.length }}</h3>
+        <div class="table-container glass-card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Listing</th>
+                <th>Host</th>
+                <th>Expires In</th>
+                <th>End Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let promo of expiringPromotions">
+                <td>{{ promo.listingTitle }}</td>
+                <td>{{ promo.hostName }}</td>
+                <td>
+                  <span class="expiry-warning">
+                    {{ getDaysRemaining(promo.endDate) }} days
+                  </span>
+                </td>
+                <td>{{ promo.endDate | date:'short' }}</td>
+                <td>
+                  <button (click)="extendPromotion(promo.listingId)" class="glass-btn btn-info btn-xs">
+                    🔄 Extend
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="expiringPromotions.length === 0" class="empty-message">
+            No promotions expiring soon
+          </div>
+        </div>
+      </div>
+
+      <!-- Promotion History Section -->
+      <div class="promotion-section">
+        <h3>📋 Promotion History</h3>
+        <div class="table-container glass-card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Listing</th>
+                <th>Host</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Duration</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let promo of promotionHistory">
+                <td>{{ promo.listingTitle }}</td>
+                <td>{{ promo.hostName }}</td>
+                <td>{{ promo.startDate | date:'short' }}</td>
+                <td>{{ promo.endDate | date:'short' }}</td>
+                <td>{{ getDaysBetween(promo.startDate, promo.endDate) }} days</td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="promotionHistory.length === 0" class="empty-message">
+            No promotion history
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

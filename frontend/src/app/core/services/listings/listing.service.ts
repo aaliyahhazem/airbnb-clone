@@ -304,5 +304,5 @@ export class ListingService {
     if (u.startsWith('http://') || u.startsWith('https://')) return u;
     if (u.startsWith('/')) return `${this.backendOrigin}${u}`;
     return `${this.backendOrigin}/${u}`;
-  }
+  }
 }

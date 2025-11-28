@@ -16,6 +16,7 @@ import { UserListingsComponent } from './features/listings/user-listings/user-li
 import { AdminListingsComponent } from './features/listings/admin-listings/admin-listings';
 import { MapComponent } from './features/Map/map/map';
 import { Listings } from './features/listings-page/listings/listings';
+import { AdminDashboard } from './features/admin/admin-dashboard/admin-dashboard';
 
 export const routes: Routes = [
   { path: 'home', component: Home },
@@ -46,7 +47,7 @@ export const routes: Routes = [
   { path: 'admin/listings', component: AdminListingsComponent },
 
   // other app routes
-  { path: 'admin', component: Dashboard, canActivate: [AuthGuard] },
+  { path: 'admin', component: AdminDashboard, canActivate: [AuthGuard] },
   { path: 'booking', component: BookingComponent, canActivate: [AuthGuard] },
   { path: 'payment/:id', component: PaymentComponent, canActivate: [AuthGuard] },
   { path: 'messages', component: ChatWindow, canActivate: [AuthGuard] },
