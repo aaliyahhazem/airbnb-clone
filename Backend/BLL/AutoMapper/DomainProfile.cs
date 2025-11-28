@@ -1,4 +1,5 @@
 ﻿
+using BLL.ModelVM.LIstingVM;
 using BLL.ModelVM.Message;
 
 namespace BLL.AutoMapper
@@ -11,6 +12,12 @@ namespace BLL.AutoMapper
             CreateMap<Notification, GetNotificationVM>().ReverseMap();
             CreateMap<Notification, CreateNotificationVM>().ReverseMap();
 
+
+            //listing -> HomepageVM
+            CreateMap<Listing, HomeVM>()
+                .ForMember(d => d.ImageUrl, opt => opt.MapFrom(s => s.MainImage != null
+                       ? $"/listings/{s.MainImage.ImageUrl}"
+                       : s.Images.Where(i => !i.IsDeleted).OrderBy(i => i.Id).Select(i => $"/listings/{i.ImageUrl}").FirstOrDefault()));
 
             // Listing -> OverviewVM
             CreateMap<Listing, ListingOverviewVM>()

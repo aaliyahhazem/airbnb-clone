@@ -11,6 +11,14 @@
             return notification;
         }
 
+        public async Task<Notification> CreateAsync(Guid userId, string title, string body, DAL.Enum.NotificationType type)
+        {
+            var entity = Notification.Create(userId, title, body, type);
+            await _context.Notifications.AddAsync(entity);
+            await _context.SaveChangesAsync();
+            return entity;
+        }
+
         public async Task<bool> DeleteAsync(Notification notification)
         {
             _context.Notifications.Remove(notification);
@@ -51,6 +59,11 @@
                 .Where(n => n.UserId == userId && !n.IsRead)
                 .OrderByDescending(n => n.CreatedAt)
                 .ToListAsync();
+        }
+
+        public async Task<int> GetUnreadCountAsync(Guid userId)
+        {
+            return await _context.Notifications.CountAsync(n => n.UserId == userId && !n.IsRead);
         }
 
         public async Task<bool> MarkAllAsReadAsync(Guid userId)

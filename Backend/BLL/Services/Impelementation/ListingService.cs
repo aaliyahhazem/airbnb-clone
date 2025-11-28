@@ -1,4 +1,6 @@
-﻿public class ListingService : IListingService
+﻿using BLL.ModelVM.LIstingVM;
+
+public class ListingService : IListingService
 {
     private readonly IUnitOfWork unitOfWork;
     private readonly IMapper mapper;
@@ -437,6 +439,23 @@
         catch (Exception ex)
         {
             return new Response<bool>(false, ex.Message, true);
+        }
+    }
+
+    // Get home view listings.
+
+
+    public async Task<Response<List<HomeVM>>> GetHomeViewAsync(int page, int pageSize, ListingFilterDto? filter = null, CancellationToken ct = default)
+    {
+        try
+        {
+            var (listings, total) = await unitOfWork.Listings.GetUserViewAsync(filter, page, pageSize, ct);
+            var vms = mapper.Map<List<HomeVM>>(listings);
+            return new Response<List<HomeVM>>(vms, null, false);
+        }
+        catch (Exception ex)
+        {
+            return new Response<List<HomeVM>>(new List<HomeVM>(), ex.Message, true);
         }
     }
 }

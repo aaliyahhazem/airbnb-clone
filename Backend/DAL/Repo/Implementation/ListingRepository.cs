@@ -265,7 +265,7 @@ namespace DAL.Repo.Implementation
                 if (pageSize <= 0) pageSize = 10;
 
                 var baseQuery = _context.Listings
-                    .Where(l => !l.IsDeleted && l.UserId == hostId);
+                    .Where(l => !l.IsDeleted && l.UserId == hostId );
 
                 if (filter != null) baseQuery = baseQuery.Where(filter);
 

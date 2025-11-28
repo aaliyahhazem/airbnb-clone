@@ -32,6 +32,17 @@ namespace PL.Controllers
             return Ok(result);
         }
 
+        [HttpGet("unread-count")]
+        public async Task<IActionResult> GetUnreadCount()
+        {
+            var myId = GetUserIdFromClaims();
+            if (myId == null) return Unauthorized();
+
+            var result = await _messageService.GetUnreadCountAsync(myId.Value);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
+            return Ok(result);
+        }
+
         [HttpGet("unread")]
         public async Task<IActionResult> GetUnread()
         {
@@ -97,6 +108,26 @@ namespace PL.Controllers
                 }
             }
 
+            return Ok(result);
+        }
+
+        [HttpPut("read-all")]
+        public async Task<IActionResult> MarkAllRead()
+        {
+            var myId = GetUserIdFromClaims();
+            if (myId == null) return Unauthorized();
+            var result = await _messageService.MarkAllAsReadAsync(myId.Value);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var myId = GetUserIdFromClaims();
+            if (myId == null) return Unauthorized();
+            var result = await _messageService.DeleteMessageAsync(id, myId.Value);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
             return Ok(result);
         }
 

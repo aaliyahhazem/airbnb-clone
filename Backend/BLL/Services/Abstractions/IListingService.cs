@@ -1,4 +1,4 @@
-﻿using BLL.ModelVM.ListingVM;
+﻿using BLL.ModelVM.LIstingVM;
 using DAL.Entities;
 
 namespace BLL.Services.Abstractions
@@ -44,7 +44,8 @@ namespace BLL.Services.Abstractions
         /// Extend promotion end date for a listing (admin only).
         public Task<Response<bool>> ExtendPromotionAsync(int id, DateTime newPromotionEndDate, Guid performedByUserId, CancellationToken ct = default);
 
-
+        /// Get home view listings.
+        public Task<Response<List<HomeVM>>> GetHomeViewAsync(int page, int pageSize, ListingFilterDto? filter = null, CancellationToken ct = default);
 
     }
 }

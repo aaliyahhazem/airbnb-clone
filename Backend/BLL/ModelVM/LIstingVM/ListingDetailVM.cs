@@ -9,6 +9,8 @@
     public double Longitude { get; set; }
     public int MaxGuests { get; set; }
 
+    public bool IsApproved { get; set; }
+
     public string? MainImageUrl { get; set; }        
 
     public List<string> Amenities { get; set; } = new();

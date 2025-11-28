@@ -1,11 +1,11 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { Router, RouterOutlet, NavigationStart, NavigationEnd, NavigationError, Event } from '@angular/router';
-import { Navbar } from './app/shared/components/navbar/navbar';
-import { Footer } from './app/shared/components/footer/footer';
-import { NotificationHub } from './app/core/services/notification-hub';
-import { MessageHub } from './app/core/services/message-hub';
-import { NotificationStoreService } from './app/core/services/notification-store';
-import { AuthService } from './app/core/services/auth.service';
+import { Navbar } from './shared/components/navbar/navbar';
+import { Footer } from './shared/components/footer/footer';
+import { NotificationHub } from './core/services/notification-hub';
+import { MessageHub } from './core/services/message-hub';
+import { NotificationStoreService } from './core/services/notification-store';
+import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',

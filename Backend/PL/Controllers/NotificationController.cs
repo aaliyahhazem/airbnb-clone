@@ -77,6 +77,18 @@
             return Ok(result);
         }
 
+        // --------------------------- UNREAD COUNT -------------------------
+        [HttpGet("unread-count")]
+        public async Task<IActionResult> GetUnreadCount()
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return Unauthorized();
+
+            var result = await _notificationService.GetUnreadCountAsync(userId.Value);
+            if (result.IsHaveErrorOrNo) return BadRequest(result);
+            return Ok(result);
+        }
+
         // --------------------------- PAGED --------------------------------
         [HttpGet("paged")]
         public async Task<IActionResult> GetPaged([FromQuery] int page =1, [FromQuery] int pageSize =10)

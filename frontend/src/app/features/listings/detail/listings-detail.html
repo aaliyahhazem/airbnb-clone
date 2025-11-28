@@ -1,0 +1,235 @@
+<div class="listing-detail-container">
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading glass-card">
+    <div class="spinner"></div>
+    <p>Loading listing details...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error && !loading" class="error glass-card">
+    <div class="error-content">
+      <i class="bi bi-exclamation-triangle"></i>
+      <p>{{ error }}</p>
+    </div>
+    <button class="glass-btn" (click)="goBack()">
+      <i class="bi bi-arrow-left"></i>Back to Listings
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="listing && !loading && !error" class="detail-content">
+    <!-- Header -->
+    <div class="detail-header glass-card">
+      <button class="glass-btn" (click)="goBack()">
+        <i class="bi bi-arrow-left"></i>Back
+      </button>
+      <h1>{{ listing.title }}</h1>
+      <button class="glass-btn" (click)="editListing()">
+        <i class="bi bi-pencil"></i>Edit
+      </button>
+    </div>
+
+    <div class="content-grid">
+      <!-- Images Section -->
+      <div class="images-section glass-card">
+        <div class="main-image">
+          <img [src]="listing.images && listing.images.length > 0 
+              ? listing.images[currentImageIndex].imageUrl 
+              : 'https://via.placeholder.com/800x600?text=No+Image'" [alt]="listing.title" />
+
+          <button *ngIf="listing.images && listing.images.length > 1" class="nav-btn prev" (click)="prevImage()">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <button *ngIf="listing.images && listing.images.length > 1" class="nav-btn next" (click)="nextImage()">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Thumbnails -->
+        <div *ngIf="listing.images && listing.images.length > 1" class="thumbnails">
+          <button *ngFor="let img of listing.images; let i = index" class="thumbnail"
+            [class.active]="i === currentImageIndex" (click)="selectImage(i)">
+            <img [src]="img.imageUrl" [alt]="'Image ' + (i + 1)" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Info -->
+      <div class="main-info glass-card">
+        <div class="info-header">
+          <div class="location-rating">
+            <p class="location">
+              <i class="bi bi-geo-alt"></i>{{ listing.location }}
+            </p>
+            <div class="rating" *ngIf="listing.averageRating">
+              <span class="stars">
+                <i class="bi bi-star-fill"></i>{{ listing.averageRating.toFixed(1) }}
+              </span>
+              <span class="count">({{ listing.reviewCount }} reviews)</span>
+            </div>
+            <div class="no-rating" *ngIf="!listing.averageRating">
+              <i class="bi bi-star"></i>No reviews yet
+            </div>
+          </div>
+
+          <div class="status" [class.approved]="listing.isApproved" [class.pending]="!listing.isApproved">
+            {{ listing.isApproved ? '✓ Approved' : '⏳ Pending' }}
+          </div>
+        </div>
+
+        <h2 class="price">
+          {{ listing.pricePerNight }} EGP
+          <span class="per-night">per night</span>
+        </h2>
+
+        <div class="description">
+          <h3>About this listing</h3>
+          <p>{{ listing.description }}</p>
+        </div>
+
+        <!-- Details Grid -->
+        <div class="details-grid">
+          <div class="detail-item">
+            <span class="label">Max Guests</span>
+            <span class="value">{{ listing.maxGuests }}</span>
+          </div>
+          <!-- <div class="detail-item">
+            <span class="label">Bedrooms</span>
+            <span class="value">{{ listing.bedrooms || 'N/A' }}</span>
+          </div> -->
+        </div>
+
+        <!-- Amenities -->
+        <div *ngIf="listing.amenities && listing.amenities.length > 0" class="amenities">
+          <h3>Amenities</h3>
+          <div class="amenities-list">
+            <span *ngFor="let amenity of listing.amenities" class="amenity-tag">
+              {{ amenity }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button class="glass-btn primary" [routerLink]="['/booking/create', listing.id]">
+            <i class="bi bi-calendar-check"></i>Book Now
+          </button>
+          <button class="glass-btn" (click)="goBack()">
+            <i class="bi bi-arrow-left"></i>Back to Listings
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Location Section -->
+    <div class="location-info glass-card">
+      <h3><i class="bi bi-map"></i>Location: {{ listing.location }}</h3>
+      <div id="detail-map" class="detail-map"></div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+<!-- <div class="listing-detail-container">
+  <div *ngIf="loading" class="loading">
+    <p>Loading listing details...</p>
+  </div>
+
+  <div *ngIf="error && !loading" class="alert alert-error">
+    <p>{{ error }}</p>
+    <button class="btn btn-secondary" (click)="goBack()">← Back to Listings</button>
+  </div>
+
+  <div *ngIf="listing && !loading && !error" class="detail-content">
+    <div class="detail-header">
+      <button class="btn-back" (click)="goBack()">← Back</button>
+      <h1>{{ listing.title }}</h1>
+      <button class="btn btn-primary" (click)="editListing()">Edit Listing</button>
+    </div>
+
+    <div class="images-section">
+      <div class="main-image">
+        <img [src]="listing.images && listing.images.length > 0 
+            ? listing.images[currentImageIndex].imageUrl 
+            : 'https://via.placeholder.com/800x600?text=No+Image'" [alt]="listing.title" />
+        <button *ngIf="listing.images && listing.images.length > 1" class="nav-btn prev" (click)="prevImage()">
+          ❮
+        </button>
+        <button *ngIf="listing.images && listing.images.length > 1" class="nav-btn next" (click)="nextImage()">
+          ❯
+        </button>
+      </div>
+
+      <div *ngIf="listing.images && listing.images.length > 1" class="thumbnails">
+        <button *ngFor="let img of listing.images; let i = index" class="thumbnail"
+          [class.active]="i === currentImageIndex" (click)="selectImage(i)">
+          <img [src]="img.imageUrl" [alt]="'Image ' + (i + 1)" />
+        </button>
+      </div>
+    </div>
+
+    <div class="main-info">
+      <div class="info-header">
+        <div class="location-rating">
+          <p class="location">📍 {{ listing.location }}</p>
+          <div class="rating" *ngIf="listing.averageRating">
+            <span class="stars">⭐ {{ listing.averageRating.toFixed(1) }}</span>
+            <span class="count">({{ listing.reviewCount }} reviews)</span>
+          </div>
+          <div class="no-rating" *ngIf="!listing.averageRating">
+            <span>No reviews yet</span>
+          </div>
+        </div>
+
+        <div class="status" [class.approved]="listing.isApproved" [class.pending]="!listing.isApproved">
+          {{ listing.isApproved ? '✓ Approved' : '⏳ Pending Review' }}
+        </div>
+      </div>
+
+      <h2 class="price">{{ listing.pricePerNight }} EGP <span class="per-night">per night</span></h2>
+
+      <div class="description">
+        <h3>About this listing</h3>
+        <p>{{ listing.description }}</p>
+      </div>
+
+      <div class="details-grid">
+        <div class="detail-item">
+          <span class="label">Max Guests</span>
+          <span class="value">{{ listing.maxGuests }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="listing.amenities && listing.amenities.length > 0" class="amenities">
+        <h3>Amenities</h3>
+        <div class="amenities-list">
+          <span *ngFor="let amenity of listing.amenities" class="amenity-tag">
+            {{ amenity }}
+          </span>
+        </div>
+      </div>
+
+      <div class="location-info">
+        <h3>Location : {{ listing.location }}</h3>
+        <div id="detail-map" class="detail-map" style="height:300px; border-radius:6px; overflow:hidden;"></div>
+        <p class="map-coords"></p>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary btn-large" [routerLink]="['/booking/create', listing.id]">
+          Book Now
+        </button>
+        <button class="btn btn-secondary btn-large" (click)="goBack()">
+          Back to Listings
+        </button>
+      </div>
+    </div>
+  </div>
+</div> -->

@@ -1,0 +1,101 @@
+<div class="row m-5">
+
+  <!-- LISTINGS (10 columns) -->
+  <div class="col-10">
+    <div class="row listings-row p-3 py-4">
+      <div class="cards-list">
+        <div class="glass-card p-2" *ngFor="let l of filtered(); trackBy: trackById">
+
+          <img [src]="l.mainImageUrl 
+              ? (l.mainImageUrl.indexOf('http') === 0 
+                ? l.mainImageUrl 
+                : 'http://localhost:5235' + l.mainImageUrl)
+              : 'assets/default-listing.svg'" class="listing-img" />
+
+          <div class="px-2 py-3 d-flex flex-column">
+
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="text-white mb-0">{{ l.title }}</h5>
+              <span *ngIf="!l.isApproved" class="badge bg-warning text-dark">Pending</span>
+              <span *ngIf="l.isApproved" class="badge bg-success">Approved</span>
+            </div>
+
+            <p class="text-muted small mb-1">{{ l.location }}</p>
+            <p class="text-muted small mb-2">★ {{ l.averageRating || 0 }} / 5 ({{ l.reviewCount }} reviews)</p>
+
+            <div class="mt-auto d-flex justify-content-between align-items-center">
+              <span class="badge bg-primary">${{ l.pricePerNight }}/night</span>
+
+              <div class="btn-group btn-group-sm">
+                <a class="btn btn-outline-light" [routerLink]="['/listings', l.id]">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <a class="btn btn-outline-primary" [routerLink]="['/listings', l.id, 'edit']">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button class="btn btn-outline-danger" (click)="onDelete(l.id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-2 d-flex flex-column">
+
+    <!-- Sidebar -->
+    <div class="filters-sidebar glass-card p-4 d-flex flex-column">
+      <div class="sidebar-content flex-grow-1">
+        <!-- Search -->
+        <div class="search-wrap mb-3">
+          <i class="bi bi-search"></i>
+          <input class="search-input" type="text" placeholder="Search..." [ngModel]="search()"
+            (ngModelChange)="search.set($event)" />
+        </div>
+
+        <div class="filter-block mb-3">
+          <select class="form-select fancy-input" [ngModel]="location()" (ngModelChange)="location.set($event)">
+            <option value="">All Locations</option>
+            <option *ngFor="let loc of locations()" [value]="loc">{{ loc }}</option>
+          </select>
+        </div>
+
+        <div class="filter-block mb-3">
+          <select class="form-select fancy-input" [ngModel]="isApproved()" (ngModelChange)="isApproved.set($event)">
+            <option value="">Status</option>
+            <option value="approved">Approved</option>
+            <option value="not-approved">Not Approved</option>
+          </select>
+        </div>
+
+        <div class="filter-block mb-3">
+          <input type="number" placeholder="Max Price" class="form-control fancy-input" [ngModel]="maxPrice()"
+            (ngModelChange)="maxPrice.set($event === '' ? null : +$event)">
+        </div>
+
+        <div class="filter-block">
+          <input type="number" placeholder="Min Rate" class="form-control fancy-input" min="0" max="5" step="0.5" [ngModel]="minRating()"
+            (ngModelChange)="minRating.set($event === '' ? null : +$event)">
+        </div>
+
+        <div class="text-center text-white-50 small mt-2">
+          {{ filtered().length }} results
+        </div>
+
+        <!-- Reset at bottom -->
+        <button class="btn btn-outline-light w-100 mt-auto mb-2" (click)="resetFilters()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Add Listing OUTSIDE the sidebar -->
+    <div class="mt-4">
+      <button class="search-wrap btn-outline-light w-100" [routerLink]="['/host/create']">
+        + Add Listing
+      </button>
+    </div>
+
+  </div>
+</div>

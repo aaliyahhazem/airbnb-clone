@@ -1,0 +1,125 @@
+.filters-row,
+.listings-row {
+  background: rgba(245, 245, 220, 0.08);
+  border-radius: 1.5vw;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: -2px -2px 20px rgba(2, 6, 23, 0.45);
+  transition: all 0.3s ease;
+}
+
+.filters-row {
+  padding: 1em;
+  margin-bottom: 1em;
+}
+
+.listings-row {
+  padding: 1.5em;
+}
+
+.cards-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  column-gap: 1.2rem;
+  row-gap: 1.2rem;
+}
+
+
+.search-wrap {
+  display: flex;
+  gap: 15px;
+  /* width: 40.35%; */
+  padding: 9px 12px;
+  right: 4em;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: rgba(119, 116, 108, 0.253);
+  transition: all 0.3s ease;
+  box-shadow: -2px -2px 10px rgba(2, 6, 23, 0.473);
+  vertical-align: middle;
+}
+
+.search-wrap {
+  transition: all 0.25s ease;
+}
+
+.search-wrap:hover {
+  transform: scalez(20px);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+
+.search-input {
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: rgb(245, 239, 239);
+  width: 500px;
+  font-size: 18px;
+  transition: color 0.3s ease;
+}
+
+.search-input::placeholder {
+  color: rgb(245, 239, 239);
+  font-size: 16px;
+}
+
+.bi.bi-search {
+  padding-left: 20px;
+  margin-top: 3.5px;
+  color: rgb(245, 239, 239);
+}
+
+.glass-btn {
+  width: 50px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.glass-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.filters-sidebar {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 10px 16px;
+}
+
+.amenities-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.amenity-btn {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  text-align: left;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.amenity-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.amenity-btn.selected {
+  background: rgba(59, 57, 57, 0.616);
+  border-color: rgba(59, 57, 57, 0.616);
+  color: white;
+  box-shadow: 0 0 10px rgba(255, 246, 251, 0.5);
+}

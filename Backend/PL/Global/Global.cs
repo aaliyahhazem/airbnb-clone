@@ -31,4 +31,5 @@ global using System.Text;
 
 global using BLL.AutoMapper;
 global using BLL.Helper;
+global using Stripe;
 

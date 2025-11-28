@@ -30,6 +30,11 @@
                 .ToListAsync();
         }
 
+        public async Task<int> GetUnreadCountAsync(Guid receiverId)
+        {
+            return await _context.Messages.CountAsync(m => m.ReceiverId == receiverId && !m.IsRead);
+        }
+
         public async Task<IEnumerable<DAL.Dto.ConversationDto>> GetConversationsAsync(Guid userId)
         {
             // Group messages by the other participant
@@ -75,6 +80,24 @@
                 await _context.SaveChangesAsync();
             }
             return msg;
+        }
+
+        public async Task<int> MarkAllAsReadAsync(Guid receiverId)
+        {
+            var unread = await _context.Messages.Where(m => m.ReceiverId == receiverId && !m.IsRead).ToListAsync();
+            if (!unread.Any()) return 0;
+            foreach (var m in unread) m.IsRead = true;
+            await _context.SaveChangesAsync();
+            return unread.Count;
+        }
+
+        public async Task<bool> DeleteAsync(int messageId)
+        {
+            var msg = await _context.Messages.FindAsync(messageId);
+            if (msg == null) return false;
+            _context.Messages.Remove(msg);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

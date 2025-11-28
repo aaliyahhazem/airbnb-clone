@@ -10,7 +10,7 @@
         public string? MainImageUrl { get; set; }
 
         //public bool IsPromoted { get; set; }
-        //public bool IsApproved { get; set; }
+        public bool IsApproved { get; set; }
 
         public List<string> Amenities { get; set; } = new List<string>();
     }

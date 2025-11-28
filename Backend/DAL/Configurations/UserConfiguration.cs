@@ -92,6 +92,11 @@
                    .WithOne(n => n.User)
                    .HasForeignKey(n => n.UserId)
                    .OnDelete(DeleteBehavior.Cascade);
+            //Favorites relationship
+            builder.HasMany(u => u.Favorites)
+                  .WithOne(f => f.User)
+                  .HasForeignKey(f => f.UserId)
+                  .OnDelete(DeleteBehavior.NoAction); // Prevent multiple cascade paths
         }
     }
 }

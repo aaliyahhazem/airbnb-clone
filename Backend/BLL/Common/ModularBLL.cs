@@ -24,11 +24,16 @@
             services.AddScoped<IBookingService, BookingService>();
             services.AddScoped<IPaymentService, PaymentService>();
 
+            // email
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<EmailMappingService>();
+
             services.AddAutoMapper(x => x.AddProfile(new DomainProfile()));
             // Token service
             services.AddSingleton<ITokenService, Services.Impelementation.TokenService>();
             // Ensure IdentityService is registered with token service injected
             //services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<IFavoriteService, FavoriteService>();
             return services;
         }
     }

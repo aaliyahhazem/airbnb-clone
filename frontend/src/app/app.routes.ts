@@ -1,20 +1,21 @@
 import { Routes } from '@angular/router';
-import { Home } from './app/features/home-page/home/home';
-import { ListingsList } from './app/features/listings/list/listing-list';
-import { ListingsCreateEdit } from './app/features/listings/create-edit/listings-create-edit';
-import { listingExistsGuard } from './app/core/services/listings/listing-exists.guard';
-import { AuthGuard } from './app/core/guards/auth.guard';
-import { ListingsDetail } from './app/features/listings/detail/listings-detail';
-import { Login } from './app/features/auth/login';
-import { Register } from './app/features/auth/register';
-import { Dashboard } from './app/features/admin/dashboard';
-import { BookingComponent } from './app/features/booking/booking';
-import { PaymentComponent } from './app/features/payment/payment';
-import { ChatWindow } from './app/features/message/chat-window';
-import { UserListingsComponent } from './app/features/listings/user-listings/user-listings';
-import { AdminListingsComponent } from './app/features/listings/admin-listings/admin-listings';
-import { MapComponent } from './app/features/Map/map/map';
-import { Listings } from './app/features/listings-page/listings/listings';
+import { Home } from './features/home-page/home/home';
+import { ListingsList } from './features/listings/list/listing-list';
+import { ListingsCreateEdit } from './features/listings/create-edit/listings-create-edit';
+import { listingExistsGuard } from './core/services/listings/listing-exists.guard';
+import { AuthGuard } from './core/guards/auth.guard';
+import { ListingsDetail } from './features/listings/detail/listings-detail';
+import { Login } from './features/auth/login';
+import { Register } from './features/auth/register';
+import { Dashboard } from './features/admin/dashboard';
+import { BookingComponent } from './features/booking/booking';
+import { PaymentComponent } from './features/payment/payment';
+import { ChatWindow } from './features/message/chat-window';
+import { NotificationWindow } from './features/notification/notification-window';
+import { UserListingsComponent } from './features/listings/user-listings/user-listings';
+import { AdminListingsComponent } from './features/listings/admin-listings/admin-listings';
+import { MapComponent } from './features/Map/map/map';
+import { Listings } from './features/listings-page/listings/listings';
 
 export const routes: Routes = [
   { path: 'home', component: Home },
@@ -23,10 +24,13 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
   { path: 'auth/login', component: Login },
   { path: 'auth/register', component: Register },
+  { path: 'listings/:id/edit', component: ListingsCreateEdit, canActivate: [AuthGuard] },
+  { path: 'listings/:id', component: ListingsDetail },
   { path: 'listings', component: Listings},
   // { path: '**', redirectTo: 'home' },
   {
     path: 'host',
+    canActivate: [AuthGuard],
     children: [
       { path: '', component: ListingsList },
       { path: 'create', component: ListingsCreateEdit, canActivate: [AuthGuard] },
@@ -46,6 +50,7 @@ export const routes: Routes = [
   { path: 'booking', component: BookingComponent, canActivate: [AuthGuard] },
   { path: 'payment/:id', component: PaymentComponent, canActivate: [AuthGuard] },
   { path: 'messages', component: ChatWindow, canActivate: [AuthGuard] },
+  { path: 'notifications', component: NotificationWindow, canActivate: [AuthGuard] },
   // Optional:
   // { path: '**', redirectTo: 'home' },
 ];
