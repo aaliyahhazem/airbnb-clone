@@ -47,13 +47,13 @@ export class FavoriteStoreService {
             if (res.result) {
               const current = this.favoritesSubject.value;
               this.favoritesSubject.next([...current, res.result]);
-            }
           }
+        }
         }
       })
     );
   }
-  // Remove from favorites
+   // Remove from favorites
   removeFavorite(listingId: number): Observable<any> {
     return this.api.removeFavorite(listingId).pipe(
       tap({
@@ -71,7 +71,7 @@ export class FavoriteStoreService {
       })
     );
   }
-  // Toggle favorite
+   // Toggle favorite
   toggleFavorite(listingId: number): Observable<any> {
     return this.api.toggleFavorite(listingId).pipe(
       tap({
@@ -81,12 +81,14 @@ export class FavoriteStoreService {
             // overwriting optimistic UI changes. The favorites list can be synced
             // explicitly elsewhere if needed.
             this.updateFavoriteState(listingId, res.result);
+            }
+            this.loadFavorites();
           }
         }
       })
     );
   }
-  // Check if listing is favorited (from cache)
+ // Check if listing is favorited (from cache)
   isFavorited(listingId: number): boolean {
     return this.favoriteListingIds.has(listingId);
   }

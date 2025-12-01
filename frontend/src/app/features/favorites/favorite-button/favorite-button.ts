@@ -37,10 +37,11 @@ export class FavoriteButton {
         this.loading = false;
         if (!res.isError && res.result !== undefined) {
           if (res.result !== newState) {
-            this.isFavorited = res.result;
+          this.isFavorited = res.result;
             this.favoriteChanged.emit(res.result);
           }
         }
+        this.loading = false;
       },
       error: (err) => {
         console.error('Failed to toggle favorite', err);

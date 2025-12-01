@@ -24,7 +24,7 @@ export class FavoritePage implements OnInit {
 
   ngOnInit(): void {
     this.loadFavorites();
-
+    
     // Subscribe to store updates
     this.store.favorites$.subscribe({
       next: (favorites) => {
@@ -76,7 +76,7 @@ export class FavoritePage implements OnInit {
 
   removeFavorite(listingId: number, event: Event): void {
     event.stopPropagation();
-
+    
     if (!confirm('Remove this listing from your favorites?')) return;
 
     // Optimistic UI update: remove from view immediately, then call API.
