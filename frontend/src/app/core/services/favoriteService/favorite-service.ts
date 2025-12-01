@@ -25,7 +25,18 @@ addFavorite(listingId: number): Observable<FavoriteResponse<FavoriteVM>> {
   }
    // Toggle favorite status
   toggleFavorite(listingId: number): Observable<FavoriteResponse<boolean>> {
-    return this.http.post<FavoriteResponse<boolean>>(`${this.url}/toggle/${listingId}`, {});
+    // The backend Toggle endpoint returns an object { isFavorited: bool, message: string }
+    // but other endpoints use the shared FavoriteResponse<T> shape. Normalize here so
+    // callers can rely on res.result === boolean.
+    return this.http.post<any>(`${this.url}/toggle/${listingId}`, {}).pipe(
+      map((res: any) => {
+        // If the response already matches FavoriteResponse<boolean>, pass through
+        if (res && ('result' in res || 'isError' in res)) return res as FavoriteResponse<boolean>;
+        // Otherwise normalize the anonymous payload
+        const isFavorited = !!res?.isFavorited;
+        return { success: true, result: isFavorited } as FavoriteResponse<boolean>;
+      })
+    );
   }
    // Get current user's favorites
   getMyFavorites(): Observable<FavoriteResponse<FavoriteVM[]>> {

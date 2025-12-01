@@ -20,10 +20,13 @@
         <span>{{ rating.toFixed(1) }}</span>
       </div>
 
-      <!-- Favorite Button -->
-      <button class="broker-favorite-btn" type="button">
-        <i class="bi bi-heart"></i>
-      </button>
+      <!-- Favorite Button (uses shared FavoriteButton component) -->
+      <app-favorite-button
+        class="broker-favorite-btn"
+        [listingId]="listing.id"
+        [isFavorited]="isFavorited"
+        (favoriteChanged)="onFavoriteChanged($event)">
+      </app-favorite-button>
     </div>
 
     <!-- Property Details Section -->

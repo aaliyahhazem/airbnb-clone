@@ -1,16 +1,16 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
+import { ListingCard } from '../../listings-page/listing-card/listing-card';
 import { FavoriteStoreService } from '../../../core/services/favoriteService/favorite-store-service';
 import { Router } from '@angular/router';
 import { FavoriteListingVM, FavoriteVM } from '../../../core/models/favorite';
-import { ListingCard } from '../../listings-page/listing-card/listing-card';
 import { ListingOverviewVM } from '../../../core/models/listing.model';
 
 @Component({
   selector: 'app-favorite-page',
   standalone: true,
-  imports: [CommonModule, FavoriteButton, TranslateModule],
+  imports: [CommonModule,TranslateModule, ListingCard],
   templateUrl: './favorite-page.html',
   styleUrl: './favorite-page.css',
 })
@@ -55,20 +55,27 @@ export class FavoritePage implements OnInit {
     return item.id;
   }
   private convertToListingOverview(favListing: FavoriteListingVM): ListingOverviewVM {
+    // Ensure all required ListingOverviewVM fields are present and provide sensible defaults
     return {
       id: favListing.id,
       title: favListing.title,
-      pricePerNight: favListing.pricePerNight,
-      location: favListing.location,
+      pricePerNight: favListing.pricePerNight ?? 0,
+      location: favListing.location ?? '',
       mainImageUrl: this.normalizeImageUrl(favListing.mainImageUrl),
-      averageRating: favListing.averageRating || 0,
-      reviewCount: favListing.reviewCount,
-      isApproved: favListing.isApproved,
-      description: favListing.description,
-      destination: favListing.destination,
-      type: favListing.type,
-      bedrooms: favListing.bedrooms,
-      bathrooms: favListing.bathrooms
+      averageRating: favListing.averageRating ?? 0,
+      reviewCount: favListing.reviewCount ?? 0,
+      isApproved: favListing.isApproved ?? false,
+      description: favListing.description ?? '',
+      destination: favListing.destination ?? '',
+      type: favListing.type ?? '',
+      bedrooms: favListing.bedrooms ?? 0,
+      bathrooms: favListing.bathrooms ?? 0,
+      // ListingOverviewVM requires these additional fields — supply defaults when converting
+      createdAt: (favListing as any).createdAt ?? new Date().toISOString(),
+      priority: 0,
+      viewCount: 0,
+      favoriteCount: favListing.favoriteCount ?? 0,
+      bookingCount: 0
     };
   }
   loadFavorites(): void {

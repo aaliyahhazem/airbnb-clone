@@ -9,14 +9,15 @@ import { FavoriteStoreService } from '../../../core/services/favoriteService/fav
 @Component({
   selector: 'app-listing-card',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslateModule],
+  imports: [CommonModule, RouterLink, TranslateModule,FavoriteButton],
   templateUrl: './listing-card.html',
   styleUrls: ['./listing-card.css']
 })
 export class ListingCard implements OnInit {
   @Input() listing!: ListingOverviewVM;
   @Input() isFavorited = false;
-  @Output() favoriteChanged = new EventEmitter<boolean>();
+  // Emit a payload containing listing id + new favorite state so parent components can react
+  @Output() favoriteChanged = new EventEmitter<{ listingId: number; isFavorited: boolean }>();
   private favoriteStore = inject(FavoriteStoreService);
 
   ngOnInit(): void {
@@ -45,13 +46,14 @@ export class ListingCard implements OnInit {
   get price(): number {
     return this.listing?.pricePerNight ?? 0;
   }
- onFavoriteChanged(isFavorited: boolean): void {
-    console.log('Listing card favorite changed:', this.listing.id, isFavorited); // Debug log
+  onFavoriteChanged(isFavorited: boolean): void {
+    console.log('Listing card favorite changed:', this.listing.id, isFavorited);
     this.isFavorited = isFavorited;
-    this.favoriteChanged.emit(isFavorited); // Make sure this emits
-    
-    // Update store state
-    if (this.listing.id) {
+
+    // emit structured payload so parent can act on it
+    if (this.listing && this.listing.id) {
+      this.favoriteChanged.emit({ listingId: this.listing.id, isFavorited });
+      // keep optimistic UI in sync
       this.favoriteStore.updateFavoriteState(this.listing.id, isFavorited);
     }
   }

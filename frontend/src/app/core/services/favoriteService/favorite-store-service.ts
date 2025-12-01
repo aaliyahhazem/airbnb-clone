@@ -81,6 +81,13 @@ export class FavoriteStoreService {
             // overwriting optimistic UI changes. The favorites list can be synced
             // explicitly elsewhere if needed.
             this.updateFavoriteState(listingId, res.result);
+            // If the server indicates the listing is now favorited, refresh
+            // the full favorites list so the favorites Subject contains
+            // the listing objects (required by Favorites page UI).
+            // This keeps the Favorites page in sync after toggles.
+            if (res.result === true) {
+              try { this.loadFavorites(); } catch { /* best-effort */ }
+            }
             // Consider whether you want to call loadFavorites() here
             // this.loadFavorites();
           }
