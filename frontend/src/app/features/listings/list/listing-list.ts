@@ -2,13 +2,14 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { ListingService } from '../../../core/services/listings/listing.service';
 import { ListingOverviewVM } from '../../../core/models/listing.model';
 
 @Component({
   selector: 'app-listings-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, TranslateModule],
   templateUrl: './listing-list.html',
   styleUrls: ['./listing-list.css'],
 })

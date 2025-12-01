@@ -12,7 +12,6 @@ import { BookingComponent } from './features/booking/booking';
 import { PaymentComponent } from './features/payment/payment';
 import { ChatWindow } from './features/message/chat-window';
 import { NotificationWindow } from './features/notification/notification-window';
-import { UserListingsComponent } from './features/listings/user-listings/user-listings';
 import { AdminListingsComponent } from './features/listings/admin-listings/admin-listings';
 import { MapComponent } from './features/Map/map/map';
 import { Listings } from './features/listings-page/listings/listings';
@@ -51,7 +50,6 @@ export const routes: Routes = [
   },
 
   // user / admin lists
-  { path: 'my-listings', component: UserListingsComponent },
   { path: 'admin/listings', component: AdminListingsComponent },
 
   // other app routes
