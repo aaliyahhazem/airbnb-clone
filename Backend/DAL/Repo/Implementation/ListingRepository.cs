@@ -723,5 +723,20 @@ namespace DAL.Repo.Implementation
                 return false;
             }
         }
+
+        public async Task<int> GetListingCountByUserAsync(Guid userId, CancellationToken ct = default)
+        {
+            try
+            {
+                var count = await _context.Listings
+                    .Where(l => l.UserId == userId && !l.IsDeleted)
+                    .CountAsync(ct);
+                return count;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
     }
 }

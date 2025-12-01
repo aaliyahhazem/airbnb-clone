@@ -18,7 +18,7 @@
                                 {{ 'home.exploreListing' | translate }}
                                 <i class="bi bi-arrow-right ms-2"></i>
                             </a>
-                            <a class="btn-broker-outline" routerLink="/host/create">
+                            <a class="btn-broker-outline" (click)="checkHaveListing()">
                                 {{ 'home.listProperty' | translate }}
                             </a>
                         </div>
@@ -43,12 +43,12 @@
         </div>
     </section>
 
-    <!-- Featured Listings -->
+    <!-- Featured Listings - Top Priority -->
     <section class="broker-listings">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">
-                    <span class="red-accent">{{ 'home.featuredForYou' | translate }}</span>
+                    <span class="red-accent">{{ 'home.TopPriorityListings' | translate }}</span>
                     <i class="bi bi-arrow-right-short"></i>
                 </h2>
                 <a routerLink="/listings" class="view-all-link">
@@ -57,7 +57,15 @@
                 </a>
             </div>
 
-            <div class="cards-list">
+            <div *ngIf="loading" class="text-center my-5">
+                <p class="text-muted">Loading featured listings...</p>
+            </div>
+
+            <div *ngIf="error" class="alert alert-danger my-3">
+                {{ error }}
+            </div>
+
+            <div class="cards-list" *ngIf="!loading && !error">
                 <app-home-listing-card
                   *ngFor="let listing of topPriorityListings"
                   [listing]="listing">
@@ -66,12 +74,12 @@
         </div>
     </section>
 
-    <!-- Beachfront Stays -->
+    <!-- Villas Section -->
     <section class="broker-listings bg-light-section">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">
-                    <span class="red-accent">{{ 'home.beachfrontStays' | translate }}</span>
+                    <span class="red-accent">{{ 'home.villas' | translate }}</span>
                     <i class="bi bi-arrow-right-short"></i>
                 </h2>
                 <a routerLink="/listings" class="view-all-link">
@@ -80,16 +88,16 @@
                 </a>
             </div>
 
-            <div class="cards-list">
+            <div class="cards-list" *ngIf="!loading && !error">
                 <app-home-listing-card
-                  *ngFor="let listing of listings.slice(6, 12)"
+                  *ngFor="let listing of villaListings"
                   [listing]="listing">
                 </app-home-listing-card>
             </div>
         </div>
     </section>
 
-    <!-- Popular in Cairo -->
+    <!-- Popular in Cairo Section -->
     <section class="broker-listings">
         <div class="container">
             <div class="section-header">
@@ -103,9 +111,9 @@
                 </a>
             </div>
 
-            <div class="cards-list">
+            <div class="cards-list" *ngIf="!loading && !error">
                 <app-home-listing-card
-                  *ngFor="let listing of listings.slice(12, 18)"
+                  *ngFor="let listing of cairoListings"
                   [listing]="listing">
                 </app-home-listing-card>
             </div>

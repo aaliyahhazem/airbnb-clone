@@ -47,5 +47,8 @@ namespace BLL.Services.Abstractions
         /// Get home view listings.
         public Task<Response<List<HomeVM>>> GetHomeViewAsync(int page, int pageSize, ListingFilterDto? filter = null, CancellationToken ct = default);
 
+        /// Check if user has any listings.
+        public Task<bool> UserHasListingsAsync(Guid userId, CancellationToken ct = default);
+
     }
 }

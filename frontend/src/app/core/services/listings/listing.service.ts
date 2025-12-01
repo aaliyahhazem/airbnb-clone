@@ -343,4 +343,15 @@ export class ListingService {
     if (u.startsWith('http://') || u.startsWith('https://')) return u;
     if (u.startsWith('/')) return `${this.backendOrigin}${u}`;
     return `${this.backendOrigin}/${u}`;
-  }}
+  }
+
+  checkUserHasListings(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/has-listings`).pipe(
+      map(response => ({
+        hasListings: response?.hasListings ?? false,
+        message: response?.message ?? '',
+        isError: response?.isError ?? false
+      }))
+    );
+  }
+}

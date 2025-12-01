@@ -24,6 +24,12 @@ export class Home implements OnInit {
   private languageService = inject(LanguageService);
   currentLang: string = 'en';
 
+  // Pagination state for each section
+  topPriorityPage = 1;
+  villaPage = 1;
+  cairoPage = 1;
+  itemsPerPage = 6;
+
   constructor(
     private listingService: ListingService,
     private router: Router,
@@ -31,21 +37,96 @@ export class Home implements OnInit {
   ) {}
 
   get topPriorityListings(): ListingOverviewVM[] {
+    const sorted = this.listings
+      .sort((a, b) => (b.priority || 0) - (a.priority || 0));
+    const start = (this.topPriorityPage - 1) * this.itemsPerPage;
+    return sorted.slice(start, start + this.itemsPerPage);
+  }
+
+  get topPriorityTotal(): number {
     return this.listings
-      .sort((a, b) => (b.priority || 0) - (a.priority || 0))
-      .slice(0, 6);
+      .sort((a, b) => (b.priority || 0) - (a.priority || 0)).length;
+  }
+
+  get topPriorityPages(): number {
+    return Math.ceil(this.topPriorityTotal / this.itemsPerPage);
   }
 
   get cairoListings(): ListingOverviewVM[] {
+    const filtered = this.listings
+      .filter(l => l.destination?.toLowerCase().includes('cairo') || l.location?.toLowerCase().includes('cairo'));
+    const start = (this.cairoPage - 1) * this.itemsPerPage;
+    return filtered.slice(start, start + this.itemsPerPage);
+  }
+
+  get cairoTotal(): number {
     return this.listings
-      .filter(l => l.destination?.toLowerCase().includes('cairo') || l.location?.toLowerCase().includes('cairo'))
-      .slice(0, 6);
+      .filter(l => l.destination?.toLowerCase().includes('cairo') || l.location?.toLowerCase().includes('cairo')).length;
+  }
+
+  get cairoPages(): number {
+    return Math.ceil(this.cairoTotal / this.itemsPerPage);
   }
 
   get villaListings(): ListingOverviewVM[] {
+    const filtered = this.listings
+      .filter(l => l.type?.toLowerCase().includes('villa'));
+    const start = (this.villaPage - 1) * this.itemsPerPage;
+    return filtered.slice(start, start + this.itemsPerPage);
+  }
+
+  get villaTotal(): number {
     return this.listings
-      .filter(l => l.type?.toLowerCase().includes('villa'))
-      .slice(0, 6);
+      .filter(l => l.type?.toLowerCase().includes('villa')).length;
+  }
+
+  get villaPages(): number {
+    return Math.ceil(this.villaTotal / this.itemsPerPage);
+  }
+
+  // Pagination methods for top priority
+  nextTopPriorityPage(): void {
+    if (this.topPriorityPage < this.topPriorityPages) {
+      this.topPriorityPage++;
+      this.cdr.markForCheck();
+    }
+  }
+
+  prevTopPriorityPage(): void {
+    if (this.topPriorityPage > 1) {
+      this.topPriorityPage--;
+      this.cdr.markForCheck();
+    }
+  }
+
+  // Pagination methods for villas
+  nextVillaPage(): void {
+    if (this.villaPage < this.villaPages) {
+      this.villaPage++;
+      this.cdr.markForCheck();
+    }
+  }
+
+  prevVillaPage(): void {
+    if (this.villaPage > 1) {
+      this.villaPage--;
+      this.cdr.markForCheck();
+    }
+  }
+
+  // Pagination methods for cairo
+  nextCairoPage(): void {
+    if (this.cairoPage < this.cairoPages) {
+      this.cairoPage++;
+      this.cdr.markForCheck();
+    }
+  }
+
+  prevCairoPage(): void {
+    if (this.cairoPage > 1) {
+      this.cairoPage--;
+      this.cdr.markForCheck();
+    }
   }
 
   ngOnInit(): void {
@@ -78,6 +159,25 @@ export class Home implements OnInit {
         this.error = 'Failed to load listings';
         this.loading = false;
         this.cdr.markForCheck();
+      }
+    });
+  }
+
+  checkHaveListing(): void {
+    this.listingService.checkUserHasListings().subscribe({
+      next: (response) => {
+        if (response.hasListings) {
+          // User has listings, navigate to host dashboard
+          this.router.navigate(['/host']);
+        } else {
+          // User has no listings, navigate to create listing
+          this.router.navigate(['/host/create']);
+        }
+      },
+      error: (err) => {
+        console.error('Error checking listings:', err);
+        // Default to create page on error
+        this.router.navigate(['/host/create']);
       }
     });
   }

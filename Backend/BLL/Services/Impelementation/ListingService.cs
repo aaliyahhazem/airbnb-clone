@@ -568,5 +568,19 @@ public class ListingService : IListingService
             return new Response<List<HomeVM>>(new List<HomeVM>(), ex.Message, true);
         }
     }
+
+    // Check if user has any listings
+    public async Task<bool> UserHasListingsAsync(Guid userId, CancellationToken ct = default)
+    {
+        try
+        {
+            var count = await unitOfWork.Listings.GetListingCountByUserAsync(userId, ct);
+            return count > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }
 

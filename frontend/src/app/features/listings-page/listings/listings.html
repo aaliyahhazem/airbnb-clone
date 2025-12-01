@@ -113,6 +113,17 @@
               <p>{{ 'listings.tryDifferentFilters' | translate }}</p>
               <button class="btn-broker" (click)="resetFilters()">{{ 'listings.clearFilters' | translate }}</button>
             </div>
+
+            <!-- Pagination -->
+            <div *ngIf="!loading() && totalPages() > 1" class="pagination-section">
+              <button *ngIf="currentPage() > 1" (click)="prevPage()" class="pagination-btn">Previous</button>
+              <span *ngFor="let page of paginationPages()" class="pagination-number">
+                <button *ngIf="typeof page === 'number'" (click)="goToPage(+page)" [class.active]="page === currentPage()" class="pagination-page-btn">{{ page }}</button>
+                <span *ngIf="typeof page === 'string'" class="pagination-ellipsis">{{ page }}</span>
+              </span>
+              <button *ngIf="currentPage() < totalPages()" (click)="nextPage()" class="pagination-btn">Next</button>
+              <div class="pagination-info">Page {{ currentPage() }} of {{ totalPages() }}</div>
+            </div>
           </div>
         </div>
 

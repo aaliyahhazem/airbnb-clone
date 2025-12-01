@@ -58,5 +58,8 @@ namespace DAL.Repo.Abstraction
         Task<bool> AdjustPriorityByReviewRatingAsync(int listingId, int rating, CancellationToken ct = default);
         Task<bool> ReverseRatingPriorityAdjustmentAsync(int listingId, int oldRating, CancellationToken ct = default);
 
+        // Check if user has any listings
+        Task<int> GetListingCountByUserAsync(Guid userId, CancellationToken ct = default);
+
     }
 }

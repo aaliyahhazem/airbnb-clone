@@ -1,150 +1,187 @@
-<div class="row m-5">
-
-  <!-- LISTINGS (10 columns) -->
-  <div class="col-10">
-    <div class="row listings-row p-3 py-4">
-      <div class="cards-list">
-        <div class="glass-card p-2" *ngFor="let l of filtered(); trackBy: trackById">
-
-          <img [src]="l.mainImageUrl
-              ? (l.mainImageUrl.indexOf('http') === 0
-                ? l.mainImageUrl
-                : 'http://localhost:5235' + l.mainImageUrl)
-              : 'assets/default-listing.svg'" class="listing-img" />
-
-          <div class="px-2 py-3 d-flex flex-column">
-
-            <div class="d-flex justify-content-between align-items-start mb-2">
-              <h5 class="text-white mb-0">{{ l.title }}</h5>
-              <span *ngIf="!l.isApproved" class="badge bg-warning text-dark">Pending</span>
-              <span *ngIf="l.isApproved" class="badge bg-success">Approved</span>
-            </div>
-
-            <p class="text-muted small mb-1">{{ l.destination }}</p>
-            <p class="text-muted small mb-1">{{ l.type }}</p>
-            <p class="text-muted small mb-1">{{ l.bedrooms }} Bed • {{ l.bathrooms }} Bath</p>
-            <p class="text-muted small mb-2">★ {{ l.averageRating || 0 }} / 5 ({{ l.reviewCount }} reviews)</p>
-
-            <div class="mt-auto d-flex justify-content-between align-items-center">
-              <span class="badge bg-primary">${{ l.pricePerNight }}/night</span>
-
-              <div class="btn-group btn-group-sm">
-                <a class="btn btn-outline-light" [routerLink]="['/listings', l.id]">
-                  <i class="bi bi-eye"></i>
-                </a>
-                <a class="btn btn-outline-primary" [routerLink]="['/host', l.id, 'edit']">
-                  <i class="bi bi-pencil"></i>
-                </a>
-                <button class="btn btn-outline-danger" (click)="onDelete(l.id)">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div *ngIf="loading()" class="text-center my-3 text-white">
-      Loading listings...
-    </div>
-
-    <div *ngIf="error()" class="alert alert-danger my-3">
-      {{ error() }}
-    </div>
-
-    <!-- Pagination -->
-    <div *ngIf="!loading()" class="pagination-wrapper mt-5 mb-4">
-      <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-          <!-- Previous Button -->
-          <li class="page-item" [class.disabled]="currentPage() === 1">
-            <button class="page-link" (click)="prevPage()" [disabled]="currentPage() === 1">
-              <i class="bi bi-chevron-left"></i> Previous
-            </button>
-          </li>
-
-          <!-- Page Numbers -->
-          <li class="page-item" *ngFor="let page of paginationPages()" 
-            [class.active]="page === currentPage()"
-            [class.disabled]="typeof page === 'string'">
-            <button class="page-link" 
-              *ngIf="typeof page === 'number'" 
-              (click)="goToPage(+page)"
-              [disabled]="page === currentPage()">
-              {{ page }}
-            </button>
-            <span class="page-link" *ngIf="typeof page === 'string'">{{ page }}</span>
-          </li>
-
-          <!-- Next Button -->
-          <li class="page-item" [class.disabled]="currentPage() === totalPages()">
-            <button class="page-link" (click)="nextPage()" [disabled]="currentPage() === totalPages()">
-              Next <i class="bi bi-chevron-right"></i>
-            </button>
-          </li>
-        </ul>
-      </nav>
-
-      <!-- Pagination Info -->
-      <div class="text-center text-muted small mt-2">
-        Page {{ currentPage() }} of {{ totalPages() }} | Showing {{ filtered().length }} of {{ totalCount() }} listings
+<div class="broker-listings-container">
+  <!-- Hero Header Section -->
+  <div class="broker-search-hero">
+    <div class="container-fluid">
+      <div class="broker-branding-header text-center">
+        <h2 class="broker-title">My Listings</h2>
+        <p class="broker-subtitle">Manage your properties and track their performance</p>
       </div>
     </div>
   </div>
-  <div class="col-2 d-flex flex-column">
 
-    <!-- Sidebar -->
-    <div class="filters-sidebar glass-card p-4 d-flex flex-column">
-      <div class="sidebar-content flex-grow-1">
-        <!-- Search -->
-        <div class="search-wrap mb-3">
-          <i class="bi bi-search"></i>
-          <input class="search-input" type="text" placeholder="Search..." [ngModel]="search()"
-            (ngModelChange)="search.set($event)" />
+  <!-- Main Content Area -->
+  <div class="broker-main-content">
+    <div class="container-fluid">
+      <div class="row">
+
+        <!-- Listings Grid -->
+        <div class="col-lg-9 col-md-8">
+          <div class="broker-listings-grid">
+            <div class="broker-listings-header">
+              <h3 class="listings-count">{{ filtered().length }} Properties</h3>
+              <button class="btn-broker" [routerLink]="['/host/create']">
+                <i class="bi bi-plus-circle"></i> Add New Listing
+              </button>
+            </div>
+
+            <div class="broker-cards-grid">
+              <div class="broker-listing-card" *ngFor="let l of filtered(); trackBy: trackById">
+                <img [src]="l.mainImageUrl
+                    ? (l.mainImageUrl.indexOf('http') === 0
+                      ? l.mainImageUrl
+                      : 'http://localhost:5235' + l.mainImageUrl)
+                    : 'assets/default-listing.svg'" class="broker-card-image" />
+
+                <div class="broker-card-status">
+                  <span *ngIf="!l.isApproved" class="status-badge status-pending">Pending</span>
+                  <span *ngIf="l.isApproved" class="status-badge status-approved">Approved</span>
+                </div>
+
+                <div class="broker-card-content">
+                  <h5 class="broker-card-title">{{ l.title }}</h5>
+                  
+                  <div class="broker-card-details">
+                    <p class="broker-detail-item">
+                      <i class="bi bi-geo-alt"></i> {{ l.destination }}
+                    </p>
+                    <p class="broker-detail-item">
+                      <i class="bi bi-house"></i> {{ l.type }}
+                    </p>
+                    <p class="broker-detail-item">
+                      <i class="bi bi-door-open"></i> {{ l.bedrooms }} Bed • {{ l.bathrooms }} Bath
+                    </p>
+                    <p class="broker-detail-item">
+                      <i class="bi bi-star-fill"></i> {{ l.averageRating || 0 }} / 5 ({{ l.reviewCount }} reviews)
+                    </p>
+                  </div>
+
+                  <div class="broker-card-footer">
+                    <div class="broker-card-price">
+                      <span class="price-amount">${{ l.pricePerNight }}</span>
+                      <span class="price-period">/night</span>
+                    </div>
+
+                    <div class="broker-card-actions">
+                      <a class="action-btn action-view" [routerLink]="['/listings', l.id]" title="View">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                      <a class="action-btn action-edit" [routerLink]="['/host', l.id, 'edit']" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                      <button class="action-btn action-delete" (click)="onDelete(l.id)" title="Delete">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Loading State -->
+            <div *ngIf="loading()" class="broker-loading-state">
+              <div class="loading-spinner"></div>
+              <p>Loading your listings...</p>
+            </div>
+
+            <!-- Error State -->
+            <div *ngIf="error()" class="broker-error-state">
+              <i class="bi bi-exclamation-triangle"></i>
+              <p>{{ error() }}</p>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!loading() && !error() && filtered().length === 0" class="broker-empty-state">
+              <i class="bi bi-house-x"></i>
+              <h4>No Listings Found</h4>
+              <p>You haven't created any listings yet or they don't match your filters.</p>
+              <button class="btn-broker" [routerLink]="['/host/create']">Create Your First Listing</button>
+            </div>
+
+            <!-- Pagination -->
+            <div *ngIf="!loading() && !error() && filtered().length > 0 && totalPages() > 1" class="pagination-section">
+              <button *ngIf="currentPage() > 1" (click)="prevPage()" class="pagination-btn">Previous</button>
+              <span *ngFor="let page of paginationPages()" class="pagination-number">
+                <button *ngIf="typeof page === 'number'" (click)="goToPage(+page)" [class.active]="page === currentPage()" class="pagination-page-btn">{{ page }}</button>
+                <span *ngIf="typeof page === 'string'" class="pagination-ellipsis">{{ page }}</span>
+              </span>
+              <button *ngIf="currentPage() < totalPages()" (click)="nextPage()" class="pagination-btn">Next</button>
+              <div class="pagination-info">Page {{ currentPage() }} of {{ totalPages() }}</div>
+            </div>
+          </div>
         </div>
 
-        <div class="filter-block mb-3">
-          <select class="form-select fancy-input" [ngModel]="location()" (ngModelChange)="location.set($event)">
-            <option value="">All Locations</option>
-            <option *ngFor="let loc of locations()" [value]="loc">{{ loc }}</option>
-          </select>
+        <!-- Filters Sidebar -->
+        <div class="col-lg-3 col-md-4">
+          <div class="broker-sidebar">
+            <div class="broker-filters-section">
+              <div class="filters-header">
+                <h4>Filters</h4>
+                <i class="bi bi-funnel"></i>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Search</label>
+                <div class="broker-search-group">
+                  <i class="bi bi-search"></i>
+                  <input class="broker-filter-input" type="text" placeholder="Search listings..." 
+                         [ngModel]="search()" (ngModelChange)="search.set($event)" />
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Location</label>
+                <div class="broker-search-group">
+                  <i class="bi bi-geo-alt"></i>
+                  <select class="broker-filter-select" [ngModel]="location()" (ngModelChange)="location.set($event)">
+                    <option value="">All Locations</option>
+                    <option *ngFor="let loc of locations()" [value]="loc">{{ loc }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Status</label>
+                <div class="broker-search-group">
+                  <i class="bi bi-check-circle"></i>
+                  <select class="broker-filter-select" [ngModel]="isApproved()" (ngModelChange)="isApproved.set($event)">
+                    <option value="">All Status</option>
+                    <option value="approved">Approved</option>
+                    <option value="not-approved">Pending</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Max Price</label>
+                <div class="broker-search-group">
+                  <i class="bi bi-currency-dollar"></i>
+                  <input type="number" placeholder="Max Price" class="broker-filter-input" 
+                         [ngModel]="maxPrice()" (ngModelChange)="maxPrice.set($event === '' ? null : +$event)">
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <label class="filter-label">Min Rating</label>
+                <div class="broker-search-group">
+                  <i class="bi bi-star"></i>
+                  <input type="number" placeholder="Min Rating" class="broker-filter-input" 
+                         min="0" max="5" step="0.5" 
+                         [ngModel]="minRating()" (ngModelChange)="minRating.set($event === '' ? null : +$event)">
+                </div>
+              </div>
+
+              <div class="filter-results">
+                {{ filtered().length }} results
+              </div>
+
+              <button class="btn-broker-outline w-100" (click)="resetFilters()">
+                <i class="bi bi-arrow-clockwise"></i> Reset Filters
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div class="filter-block mb-3">
-          <select class="form-select fancy-input" [ngModel]="isApproved()" (ngModelChange)="isApproved.set($event)">
-            <option value="">Status</option>
-            <option value="approved">Approved</option>
-            <option value="not-approved">Not Approved</option>
-          </select>
-        </div>
-
-        <div class="filter-block mb-3">
-          <input type="number" placeholder="Max Price" class="form-control fancy-input" [ngModel]="maxPrice()"
-            (ngModelChange)="maxPrice.set($event === '' ? null : +$event)">
-        </div>
-
-        <div class="filter-block">
-          <input type="number" placeholder="Min Rate" class="form-control fancy-input" min="0" max="5" step="0.5" [ngModel]="minRating()"
-            (ngModelChange)="minRating.set($event === '' ? null : +$event)">
-        </div>
-
-        <div class="text-center text-white-50 small mt-2">
-          {{ filtered().length }} results
-        </div>
-
-        <!-- Reset at bottom -->
-        <button class="btn btn-outline-light w-100 mt-auto mb-2" (click)="resetFilters()">Reset</button>
       </div>
     </div>
-
-    <!-- Add Listing OUTSIDE the sidebar -->
-    <div class="mt-4">
-      <button class="search-wrap btn-outline-light w-100" [routerLink]="['/host/create']">
-        + Add Listing
-      </button>
-    </div>
-
   </div>
 </div>

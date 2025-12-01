@@ -129,6 +129,23 @@ namespace PL.Controllers
             return Ok(response);
         }
 
+        [HttpGet("has-listings")]
+        [Authorize(Roles = "Guest")]
+        public async Task<IActionResult> CheckUserHasListings(CancellationToken ct = default)
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return Unauthorized();
+
+            var hasListings = await _listingService.UserHasListingsAsync(userId.Value, ct);
+
+            return Ok(new
+            {
+                hasListings = hasListings,
+                message = "Check user listings status",
+                isError = false
+            });
+        }
+
         [HttpPut("{listingId:int}/image/{imageId:int}/main")]
         [Authorize(Roles = "Guest")]
         public async Task<IActionResult> SetMainImage(
