@@ -22,6 +22,10 @@
         public int Bedrooms { get; set; }
         public int Bathrooms { get; set; }
 
-
+        // Dynamic Priority & Engagement System
+        public int Priority { get; set; }
+        public int ViewCount { get; set; }
+        public int FavoriteCount { get; set; }
+        public int BookingCount { get; set; }
     }
 }

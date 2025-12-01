@@ -1,53 +1,71 @@
-<a [routerLink]="['/listings', listing.id]" class="text-decoration-none card-link">
-  <div class="card listing-card mx-auto">
+<a [routerLink]="['/listings', listing?.id]" class="broker-card-link">
+  <div class="broker-listing-card">
 
-    <!-- FIXED IMAGE WRAPPER ALWAYS ON TOP -->
-    <div class="image-wrapper position-relative">
-      <img [src]="imageSrc" class="card-img-top" [alt]="listing.title" />
+    <!-- Property Image Section -->
+    <div class="broker-image-wrapper">
+      <img [src]="imageSrc" class="broker-property-image" [alt]="listing?.title" />
 
-      <div class="overlay"></div>
+      <!-- Image Overlay -->
+      <div class="broker-image-overlay"></div>
 
-      <!-- <div class="position-absolute top-0 start-0 m-2 d-flex gap-2 flex-wrap">
-        <span class="badge">Listing</span>
-      </div> -->
-
-      <!--  FAVORITE BUTTON  -->
-      <div class="position-absolute" style="top: 0.75rem; right: 0.75rem; z-index: 10;">
-        <app-favorite-button [listingId]="listing!.id" [isFavorited]="isFavorited"
-          (favoriteChanged)="onFavoriteChanged($event)">
-        </app-favorite-button>
+      <!-- Property Badge -->
+      <div class="broker-property-badge">
+        <i class="bi bi-house"></i>
+        <span>{{ 'listings.property' | translate }}</span>
       </div>
 
-      <div class="rate position-absolute top-0 end-0 m-2 d-flex align-items-center" *ngIf="rating">
-        <i class="bi bi-star-fill"></i> {{ rating }}
+      <!-- Rating Badge -->
+      <div class="broker-rating-badge" *ngIf="rating > 0">
+        <i class="bi bi-star-fill"></i>
+        <span>{{ rating.toFixed(1) }}</span>
       </div>
-      
+
+      <!-- Favorite Button -->
+      <button class="broker-favorite-btn" type="button">
+        <i class="bi bi-heart"></i>
+      </button>
     </div>
 
-    <!-- ALWAYS BELOW THE IMAGE -->
-    <div class="card-body">
-      <h6 class="title fw-semibold">{{ listing.title || 'Untitled' }}</h6>
+    <!-- Property Details Section -->
+    <div class="broker-card-content">
+      <!-- Property Title -->
+      <h5 class="broker-property-title">{{ listing?.title || 'Untitled Property' }}</h5>
 
-      <p class="location text-muted medium">
-        {{ listing.destination || 'Destination not provided' }}
-      </p>
+      <!-- Location -->
+      <div class="broker-location-info">
+        <i class="bi bi-geo-alt"></i>
+        <span>{{ listing?.destination || 'Location not specified' }}</span>
+      </div>
 
-      <p class="type text-muted small">
-        {{ listing.type || 'Type not provided' }} � {{ listing.bedrooms || 0 }} Bed � {{ listing.bathrooms || 0 }}
-        Bath
-      </p>
+      <!-- Property Features -->
+      <div class="broker-features-row">
+        <div class="broker-feature-item">
+          <i class="bi bi-house-door"></i>
+          <span>{{ listing?.type || 'Property' }}</span>
+        </div>
+        <div class="broker-feature-item">
+          <i class="bi bi-bed"></i>
+          <span>{{ listing?.bedrooms || 0 }} {{ 'listings.beds' | translate }}</span>
+        </div>
+        <div class="broker-feature-item">
+          <i class="bi bi-droplet"></i>
+          <span>{{ listing?.bathrooms || 0 }} {{ 'listings.baths' | translate }}</span>
+        </div>
+      </div>
 
-      <p class="desc text-muted small">
-        {{ shortDescription }}
-      </p>
+      <!-- Description -->
+      <p class="broker-property-description">{{ shortDescription }}</p>
 
-      <div class="bottom d-flex justify-content-between align-items-center">
-        <span class="price fw-bold fs-6">
-          {{ price }} EGP
-          <span class="fs-7 fw-normal text-muted">/ night</span>
-        </span>
+      <!-- Price and Action Section -->
+      <div class="broker-price-section">
+        <div class="broker-price-info">
+          <span class="broker-price-amount">{{ price }} {{ 'listings.egp' | translate }}</span>
+          <span class="broker-price-period">/ {{ 'listings.night' | translate }}</span>
+        </div>
 
-        <i class="bi bi-arrow-up-right-circle-fill"></i>
+        <div class="broker-view-btn">
+          <i class="bi bi-arrow-right-circle-fill"></i>
+        </div>
       </div>
     </div>
 

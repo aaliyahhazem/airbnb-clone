@@ -1,12 +1,13 @@
 import { Component, OnInit, ViewChild, ElementRef, ChangeDetectorRef, NgZone, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
 // services are dynamically imported inside ngOnInit to avoid circular/undefined token issues
 
 @Component({
   selector: 'app-chat-window',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './chat-window.html',
   styleUrls: ['./chat-window.css']
 })
@@ -19,6 +20,7 @@ export class ChatWindow implements OnInit {
   currentUserId: string | null = null;
   selectedMessages: any[] = [];
   selectedUserName: string | null = null;
+  isTyping = false; // Add typing indicator property
 
   // services will be obtained from injector in ngOnInit to avoid circular injection/undefined-token issues
   private api: any;

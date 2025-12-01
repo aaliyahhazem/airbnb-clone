@@ -1,61 +1,111 @@
-<div class="notification-window-container">
-  <div class="notification-header">
-    <h2>Notifications</h2>
-    <span class="unread-count" *ngIf="unreadCount > 0">{{ unreadCount }} unread</span>
-  </div>
+<div class="broker-notification-container">
 
-  <div class="actions-bar">
-    <button class="mark-all-btn" (click)="markAll()" *ngIf="unreadCount > 0">
-      <i class="bi bi-check-all"></i> Mark all as read
-    </button>
-  </div>
+  <!-- Hero Section with Character -->
+  <div class="broker-notification-hero">
+    <div class="broker-notification-header">
+      <!-- Character Section -->
+      <div class="broker-character-section">
+        <div class="broker-character-container">
+          <img src="/3.png" alt="The Broker Character" class="notification-character" />
+          <div class="notification-accent-circle"></div>
+        </div>
+      </div>
 
-  <div class="notifications-list">
-    <div *ngIf="notifications.length > 0; else emptyList">
-      <div
-        *ngFor="let n of notifications; trackBy: trackById"
-        class="notification-item"
-        [class.unread]="!n.isRead"
-        [class.just-arrived]="newIds.has(n.id)"
-        (click)="markAsRead(n.id, $event)">
+      <!-- Header Content -->
+      <div class="broker-header-content">
+        <h2 class="notification-title">{{ 'notifications.title' | translate }}</h2>
+        <p class="notification-subtitle">{{ 'notifications.stayUpdated' | translate }}</p>
 
-        <div class="notification-icon">
-          <i class="bi bi-bell-fill" *ngIf="!n.isRead"></i>
-          <i class="bi bi-bell" *ngIf="n.isRead"></i>
+        <!-- Notification Stats -->
+        <div class="notification-stats">
+          <div class="stat-item total">
+            <i class="bi bi-bell"></i>
+            <span>{{ notifications.length }} {{ 'notifications.total' | translate }}</span>
+          </div>
+          <div class="stat-item unread" *ngIf="unreadCount > 0">
+            <i class="bi bi-bell-fill"></i>
+            <span>{{ unreadCount }} {{ 'notifications.unread' | translate }}</span>
+          </div>
         </div>
 
-        <div class="notification-content">
-          <div class="title-row">
-            <strong class="title">{{ n.title }}</strong>
-            <small class="time">{{ n.createdAt | date:'short' }}</small>
-          </div>
-          <p class="body">{{ n.body }}</p>
-
-          <!-- Action Button -->
-          <button
-            *ngIf="n.actionUrl && n.actionLabel"
-            class="action-btn"
-            (click)="handleAction(n.actionUrl, $event)"
-            aria-label="{{ n.actionLabel }}">
-            {{ n.actionLabel }} <i class="bi bi-arrow-right"></i>
+        <!-- Quick Actions -->
+        <div class="notification-actions" *ngIf="unreadCount > 0">
+          <button class="btn-broker-notification" (click)="markAll()">
+            <i class="bi bi-check-all"></i>
+            {{ 'notifications.markAllRead' | translate }}
           </button>
         </div>
-
-        <button
-          class="mark-read-btn"
-          (click)="markAsRead(n.id, $event)"
-          *ngIf="!n.isRead"
-          aria-label="Mark as read">
-          <i class="bi bi-check"></i>
-        </button>
       </div>
     </div>
-
-    <ng-template #emptyList>
-      <div class="empty-state">
-        <i class="bi bi-bell-slash"></i>
-        <p>No notifications yet</p>
-      </div>
-    </ng-template>
   </div>
+
+  <!-- Notifications Content -->
+  <div class="broker-notifications-content">
+    <div class="container-fluid">
+
+      <!-- Notifications List -->
+      <div class="notifications-wrapper">
+        <div *ngIf="notifications.length > 0; else emptyNotifications" class="notifications-grid">
+          <div
+            *ngFor="let n of notifications; trackBy: trackById"
+            class="broker-notification-item"
+            [class.unread]="!n.isRead"
+            [class.just-arrived]="newIds.has(n.id)"
+            (click)="markAsRead(n.id, $event)">
+
+            <!-- Notification Icon -->
+            <div class="notification-icon-wrapper">
+              <div class="notification-icon" [class.unread-icon]="!n.isRead">
+                <i class="bi" [class.bi-bell-fill]="!n.isRead" [class.bi-bell]="n.isRead"></i>
+              </div>
+            </div>
+
+            <!-- Notification Content -->
+            <div class="notification-body">
+              <div class="notification-header-row">
+                <h4 class="notification-item-title">{{ n.title }}</h4>
+                <span class="notification-time">{{ n.createdAt | date:'short' }}</span>
+              </div>
+
+              <p class="notification-message">{{ n.body }}</p>
+
+              <!-- Action Button -->
+              <div class="notification-action" *ngIf="n.actionUrl && n.actionLabel">
+                <button
+                  class="btn-broker-action"
+                  (click)="handleAction(n.actionUrl, $event)"
+                  [attr.aria-label]="n.actionLabel">
+                  {{ n.actionLabel }}
+                  <i class="bi bi-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Mark Read Button -->
+            <div class="notification-controls" *ngIf="!n.isRead">
+              <button
+                class="mark-read-btn"
+                (click)="markAsRead(n.id, $event)"
+                [attr.aria-label]="'notifications.markAsRead' | translate">
+                <i class="bi bi-check"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <ng-template #emptyNotifications>
+          <div class="broker-empty-notifications">
+            <div class="empty-icon">
+              <i class="bi bi-bell-slash"></i>
+            </div>
+            <h3>{{ 'notifications.noNotifications' | translate }}</h3>
+            <p>{{ 'notifications.allCaughtUp' | translate }}</p>
+          </div>
+        </ng-template>
+      </div>
+
+    </div>
+  </div>
+
 </div>

@@ -42,6 +42,10 @@ namespace BLL.Services.Impelementation
                 await _uow.Favorites.AddAsync(favorite);
                 await _uow.SaveChangesAsync();
 
+                // Increment favorite priority for engagement tracking
+                await _uow.Listings.IncrementFavoritePriorityAsync(listingId);
+                await _uow.SaveChangesAsync();
+
                 //listing details
                 var created = await _uow.Favorites.GetByUserAndListingAsync(userId, listingId);
                 var mappedFavorites = _mapper.Map<FavoriteVM>(created!);
@@ -237,6 +241,10 @@ namespace BLL.Services.Impelementation
                 //Check if it belongs to user
                 if (!favorite.BelongsToUser(userId))
                     return Response<bool>.FailResponse("Unauthorized to remove this favorite");
+
+                // Decrement favorite priority when removing
+                await _uow.Listings.DecrementFavoritePriorityAsync(listingId);
+
                 _uow.Favorites.Delete(favorite);
                 await _uow.SaveChangesAsync();
 

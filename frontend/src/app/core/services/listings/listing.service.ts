@@ -25,9 +25,9 @@ export class ListingService {
   // Create a new listing
   create(vm: ListingCreateVM): Observable<ListingsResponse<number>> {
     const formData = this.buildFormData(vm);
-    // debug: inspect form data
-    // for (const pair of formData.entries()) console.log('[Create] formData', pair[0], pair[1]);
-    return this.http.post<any>(`${this.apiUrl}`, formData).pipe(
+    return this.http.post<any>(`${this.apiUrl}`, formData, {
+      headers: { 'Accept-Language': 'en-US' }
+    }).pipe(
       map(response => ({
         ...response,
         data: response.result ?? response.data,
@@ -41,7 +41,7 @@ export class ListingService {
   getById(id: number): Observable<ListingsResponse<ListingDetailVM>> {
     return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
       map(response => {
-        // backend may return the payload under `data` or `result` depending on endpoint/version
+        // backend may return the payload under data or result depending on endpoint/version
         const payload = response?.data ?? response?.result ?? {};
         const res = {
           ...response,
@@ -85,7 +85,7 @@ export class ListingService {
 
     return this.http.get<any>(`${this.apiUrl}`, { params }).pipe(
       map(response => {
-      // Accept either `result` or `data` or the raw array
+      // Accept either result or data or the raw array
         const raw = response?.result ?? response?.data ?? response ?? [];
         const arr = Array.isArray(raw) ? raw : [];
 
@@ -185,17 +185,10 @@ export class ListingService {
   update(id: number, vm: ListingUpdateVM): Observable<ListingsResponse<ListingDetailVM>> {
     // Always send FormData for update to match backend [FromForm] binding
     const formData = this.buildFormData(vm);
-    // Debug: print FormData entries so you can inspect what is actually sent
-    try {
-      console.log('--- FormData entries for update ---');
-      for (const pair of (formData as any).entries()) {
-        console.log(pair[0], pair[1]);
-      }
-    } catch (e) {
-      console.log('Could not iterate FormData entries', e);
-    }
 
-    return this.http.put<any>(`${this.apiUrl}/${id}`, formData).pipe(
+    return this.http.put<any>(`${this.apiUrl}/${id}`, formData, {
+      headers: { 'Accept-Language': 'en-US' }
+    }).pipe(
       map(response => ({
         ...response,
         data: response.result ?? response.data ?? {},
@@ -262,43 +255,83 @@ export class ListingService {
   private buildFormData(vm: any): FormData {
     const formData = new FormData();
 
-    if (vm.title !== undefined) formData.append('title', String(vm.title));
-    if (vm.description !== undefined) formData.append('description', String(vm.description));
-    if (vm.pricePerNight !== undefined) formData.append('pricePerNight', String(vm.pricePerNight));
-    if (vm.location !== undefined) formData.append('location', String(vm.location));
-    if (vm.latitude !== undefined) formData.append('latitude', String(vm.latitude));
-    if (vm.longitude !== undefined) formData.append('longitude', String(vm.longitude));
-    if (vm.maxGuests !== undefined) formData.append('maxGuests', String(vm.maxGuests));
+    // Required string fields
+    if (vm.title) formData.append('title', String(vm.title).trim());
+    if (vm.description) formData.append('description', String(vm.description).trim());
+    if (vm.location) formData.append('location', String(vm.location).trim());
+    if (vm.destination) formData.append('destination', String(vm.destination).trim());
+    if (vm.type) formData.append('type', String(vm.type).trim());
 
-    // Destination & Type (required by backend)
-    if (vm.destination !== undefined) formData.append('destination', String(vm.destination));
-    if (vm.type !== undefined) formData.append('type', String(vm.type));
+    // Numeric fields - use locale-independent formatting
+    if (vm.pricePerNight !== undefined && vm.pricePerNight !== null) {
+      const price = Number(vm.pricePerNight);
+      if (!isNaN(price) && price > 0) {
+        // Use toLocaleString with en-US to ensure period as decimal separator
+        formData.append('pricePerNight', price.toLocaleString('en-US'));
+      }
+    }
 
-    if (vm.numberOfRooms !== undefined) formData.append('numberOfRooms', String(vm.numberOfRooms));
-    if (vm.numberOfBathrooms !== undefined) formData.append('numberOfBathrooms', String(vm.numberOfBathrooms));
+    if (vm.latitude !== undefined && vm.latitude !== null) {
+      const lat = Number(vm.latitude);
+      if (!isNaN(lat)) {
+        formData.append('latitude', lat.toLocaleString('en-US'));
+      }
+    }
 
-    // Amenities: append both repeated and indexed forms to maximize binder compatibility
-    if (vm.amenities && vm.amenities.length > 0) {
+    if (vm.longitude !== undefined && vm.longitude !== null) {
+      const lng = Number(vm.longitude);
+      if (!isNaN(lng)) {
+        formData.append('longitude', lng.toLocaleString('en-US'));
+      }
+    }
+
+    if (vm.maxGuests !== undefined && vm.maxGuests !== null) {
+      const guests = Number(vm.maxGuests);
+      if (!isNaN(guests) && guests > 0) {
+        formData.append('maxGuests', guests.toLocaleString('en-US'));
+      }
+    }
+
+    // Room/bathroom counts
+    if (vm.numberOfRooms !== undefined && vm.numberOfRooms !== null) {
+      const rooms = Number(vm.numberOfRooms);
+      if (!isNaN(rooms) && rooms > 0) {
+        formData.append('numberOfRooms', rooms.toLocaleString('en-US'));
+      }
+    }
+
+    if (vm.numberOfBathrooms !== undefined && vm.numberOfBathrooms !== null) {
+      const baths = Number(vm.numberOfBathrooms);
+      if (!isNaN(baths) && baths > 0) {
+        formData.append('numberOfBathrooms', baths.toLocaleString('en-US'));
+      }
+    }
+
+    // Amenities: use indexed format only (ASP.NET Core standard for list binding)
+    if (vm.amenities && Array.isArray(vm.amenities) && vm.amenities.length > 0) {
       vm.amenities.forEach((amenity: string, index: number) => {
-        formData.append(`amenities[${index}]`, amenity);
-        formData.append('amenities', amenity);
+        if (amenity) {
+          formData.append(`amenities[${index}]`, String(amenity).trim());
+        }
       });
     }
 
     // Files: images (create) or newImages (update)
-    if (vm.images && vm.images.length > 0) {
-      vm.images.forEach((file: File) => formData.append('images', file));
+    if (vm.images && Array.isArray(vm.images) && vm.images.length > 0) {
+      vm.images.forEach((file: File) => {
+        if (file instanceof File) formData.append('images', file);
+      });
     }
 
-    if (vm.newImages && vm.newImages.length > 0) {
-      vm.newImages.forEach((file: File) => formData.append('newImages', file));
+    if (vm.newImages && Array.isArray(vm.newImages) && vm.newImages.length > 0) {
+      vm.newImages.forEach((file: File) => {
+        if (file instanceof File) formData.append('newImages', file);
+      });
     }
 
     // removeImageIds: append repeated numeric values
-    if (vm.removeImageIds && vm.removeImageIds.length > 0) {
+    if (vm.removeImageIds && Array.isArray(vm.removeImageIds) && vm.removeImageIds.length > 0) {
       vm.removeImageIds.forEach((id: number) => formData.append('removeImageIds', String(id)));
-      // also send JSON if backend expects a single JSON string (safe extra)
-      formData.append('removeImageIdsJson', JSON.stringify(vm.removeImageIds));
     }
 
     return formData;
@@ -310,6 +343,4 @@ export class ListingService {
     if (u.startsWith('http://') || u.startsWith('https://')) return u;
     if (u.startsWith('/')) return `${this.backendOrigin}${u}`;
     return `${this.backendOrigin}/${u}`;
-  }
-}
-
+  }}

@@ -1,3 +1,46 @@
+<div class="broker-favorites-container">
+
+  <!-- Favorites Hero Section -->
+  <div class="broker-favorites-hero">
+    <div class="favorites-hero-content">
+      <!-- Character Section -->
+      <div class="broker-character-section">
+        <div class="broker-character-container">
+          <img src="/3.png" alt="The Broker Character" class="favorites-character" />
+          <div class="favorites-accent-circle"></div>
+        </div>
+      </div>
+
+      <!-- Header Content -->
+      <div class="favorites-header-content">
+        <h2 class="favorites-title">{{ 'favorites.myFavorites' | translate }}</h2>
+        <p class="favorites-subtitle">{{ 'favorites.savedProperties' | translate }}</p>
+
+        <!-- Favorites Stats -->
+        <div class="favorites-stats">
+          <div class="stat-item">
+            <i class="bi bi-heart-fill"></i>
+            <span>{{ listings.length }} {{ 'favorites.savedItems' | translate }}</span>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="favorites-actions">
+          <button class="btn-broker-favorites" (click)="goToListings()">
+            <i class="bi bi-search"></i>
+            {{ 'favorites.browseListings' | translate }}
+          </button>
+          <button
+            class="btn-broker-clear"
+            *ngIf="listings.length > 0"
+            (click)="clearAll()">
+            <i class="bi bi-trash"></i>
+            {{ 'favorites.clearAll' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 <div class="favorites-container">
   <!-- Header -->
   <div class="header">
@@ -22,26 +65,146 @@
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="loading" class="loading-state">
-    <div class="spinner"></div>
-    <p>Loading your favorites...</p>
+  <div *ngIf="loading" class="broker-loading-section">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <h3>{{ 'favorites.loadingFavorites' | translate }}</h3>
+      <p>{{ 'favorites.gatheringProperties' | translate }}</p>
+    </div>
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error && !loading" class="alert alert-error">
-    <i class="bi bi-exclamation-circle"></i>
-    {{ error }}
+  <div *ngIf="error && !loading" class="broker-error-section">
+    <div class="error-content">
+      <i class="bi bi-exclamation-triangle"></i>
+      <h3>{{ 'favorites.errorOccurred' | translate }}</h3>
+      <p>{{ error }}</p>
+      <button class="btn-broker" (click)="ngOnInit()">
+        <i class="bi bi-arrow-clockwise"></i>
+        {{ 'favorites.tryAgain' | translate }}
+      </button>
+    </div>
   </div>
 
   <!-- Empty State -->
-  <div *ngIf="!loading && !error && listings.length === 0" class="empty-state">
-    <i class="bi bi-heart"></i>
-    <h3>No Favorites Yet</h3>
-    <p>Start exploring and save your favorite listings here!</p>
-    <button class="btn btn-primary" (click)="goToListings()">
-      Browse Listings
-    </button>
+  <div *ngIf="!loading && !error && listings.length === 0" class="broker-empty-favorites">
+    <div class="empty-content">
+      <div class="empty-icon">
+        <i class="bi bi-heart"></i>
+      </div>
+      <h3>{{ 'favorites.noFavorites' | translate }}</h3>
+      <p>{{ 'favorites.startExploring' | translate }}</p>
+      <button class="btn-broker" (click)="goToListings()">
+        <i class="bi bi-search"></i>
+        {{ 'favorites.browseListings' | translate }}
+      </button>
+    </div>
   </div>
+
+  <!-- Favorites Grid -->
+  <div *ngIf="!loading && !error && listings.length > 0" class="broker-favorites-content">
+    <div class="container-fluid">
+
+      <!-- Favorites Header -->
+      <div class="favorites-content-header">
+        <h3>{{ 'favorites.yourSavedProperties' | translate }}</h3>
+        <div class="view-options">
+          <button class="view-btn grid-view active" title="{{ 'favorites.gridView' | translate }}">
+            <i class="bi bi-grid"></i>
+          </button>
+          <button class="view-btn list-view" title="{{ 'favorites.listView' | translate }}">
+            <i class="bi bi-list"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Properties Grid -->
+      <div class="broker-properties-grid">
+        <div
+          *ngFor="let listing of listings"
+          class="broker-favorite-card"
+          (click)="viewListing(listing.id)">
+
+          <!-- Property Image -->
+          <div class="favorite-image-container">
+            <img
+              [src]="normalizeImageUrl(listing.mainImageUrl)"
+              [alt]="listing.title"
+              class="favorite-property-image"
+            />
+
+            <!-- Image Overlay -->
+            <div class="favorite-image-overlay"></div>
+
+            <!-- Property Badge -->
+            <div class="property-badge">
+              <i class="bi bi-house"></i>
+              <span>{{ 'listings.property' | translate }}</span>
+            </div>
+
+            <!-- Favorite Count -->
+            <div class="favorite-count-badge">
+              <i class="bi bi-heart-fill"></i>
+              <span>{{ listing.favoriteCount }}</span>
+            </div>
+
+            <!-- Remove Favorite Button -->
+            <div class="remove-favorite-wrapper">
+              <app-favorite-button
+                [listingId]="listing.id"
+                [isFavorited]="true"
+                (favoriteChanged)="onFavoriteChanged(listing.id, $event)"
+                class="remove-favorite-btn">
+              </app-favorite-button>
+            </div>
+          </div>
+
+          <!-- Property Details -->
+          <div class="favorite-content">
+            <div class="property-header">
+              <h4 class="property-title">{{ listing.title }}</h4>
+              <!-- Rating removed as averageRating doesn't exist in model -->
+            </div>
+
+            <div class="property-location">
+              <i class="bi bi-geo-alt"></i>
+              <span>{{ listing.location }}</span>
+            </div>
+
+            <p class="property-description">{{ listing.description | slice:0:100 }}{{ listing.description.length > 100 ? '...' : '' }}</p>
+
+            <!-- Property Features -->
+            <div class="property-features">
+              <div class="feature-item">
+                <i class="bi bi-people"></i>
+                <span>{{ listing.maxGuests }} {{ 'listings.guests' | translate }}</span>
+              </div>
+              <!-- Removed bedrooms and bathrooms as they don't exist in FavoriteListingVM -->
+            </div>
+
+            <!-- Property Footer -->
+            <div class="property-footer">
+              <div class="price-info">
+                <span class="price-amount">{{ listing.pricePerNight }}</span>
+                <span class="price-currency">{{ 'listings.egp' | translate }}</span>
+                <span class="price-period">/ {{ 'listings.night' | translate }}</span>
+              </div>
+
+              <button class="view-property-btn" (click)="viewListing(listing.id); $event.stopPropagation()">
+                <i class="bi bi-eye"></i>
+                {{ 'favorites.viewProperty' | translate }}
+              </button>
+            </div>
+
+            <!-- Added Date -->
+            <div class="added-date">
+              <i class="bi bi-clock"></i>
+              <span>{{ 'favorites.addedToFavorites' | translate }}</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
 
   <!-- Favorites Grid using Listing Cards -->
   <div *ngIf="!loading && !error && listings.length > 0" class="favorites-grid">
@@ -52,4 +215,5 @@
       </app-listing-card>
     </div>
   </div>
+
 </div>

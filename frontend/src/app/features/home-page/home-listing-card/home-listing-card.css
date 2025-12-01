@@ -38,6 +38,34 @@
   white-space: nowrap;
 }
 
+/* Priority Badge Styles */
+.priority-badge {
+  font-weight: 600;
+  border-radius: 0.5em;
+  padding: 0.6em 1.2em;
+  font-size: 0.8em;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.badge-top-pick {
+  background: linear-gradient(135deg, #ff1744 0%, #ff5252 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 23, 68, 0.4);
+}
+
+.badge-trending {
+  background: linear-gradient(135deg, #00bcd4 0%, #26c6da 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 188, 212, 0.4);
+}
+
+.badge-popular {
+  background: linear-gradient(135deg, #ffd600 0%, #ffb300 100%);
+  color: #333333;
+  box-shadow: 0 4px 15px rgba(255, 214, 0, 0.4);
+}
+
 .rate {
   font-size: 0.85em;
   padding: 0.2em 0.3em;

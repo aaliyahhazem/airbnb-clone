@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { NotificationDto } from '../../core/models/notification';
 import { NotificationStoreService } from '../../core/services/notification-store';
 import { Subscription } from 'rxjs';
@@ -8,7 +9,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-notification-window',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './notification-window.html',
   styleUrls: ['./notification-window.css']
 })

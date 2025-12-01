@@ -35,6 +35,11 @@ namespace BLL.Services.Impelementation
 
                 // Use domain factory to ensure invariants and required fields are set
                 var entity = await _uow.Reviews.CreateAsync(model.BookingId, userId, model.Rating, model.Comment, DateTime.UtcNow);
+
+                // Adjust listing priority based on review rating
+                await _uow.Listings.AdjustPriorityByReviewRatingAsync(booking.ListingId, model.Rating);
+                await _uow.SaveChangesAsync();
+
                 var vm = _mapper.Map<ReviewVM>(entity);
                 return Response<ReviewVM>.SuccessResponse(vm);
             }
@@ -56,8 +61,26 @@ namespace BLL.Services.Impelementation
             {
                 var existing = await _uow.Reviews.GetByIdAsync(id);
                 if (existing == null) return Response<ReviewVM>.FailResponse("Review not found");
-                existing.Update(model.Rating, model.Comment); 
+
+                // Store old rating before updating
+                var oldRating = existing.Rating;
+
+                // Update review
+                existing.Update(model.Rating, model.Comment);
                 await _uow.Reviews.UpdateAsync(existing);
+
+                // Adjust listing priority: reverse old rating adjustment and apply new rating adjustment
+                if (oldRating != model.Rating)
+                {
+                    var booking = await _uow.Bookings.GetByIdAsync(existing.BookingId);
+                    if (booking != null)
+                    {
+                        await _uow.Listings.ReverseRatingPriorityAdjustmentAsync(booking.ListingId, oldRating);
+                        await _uow.Listings.AdjustPriorityByReviewRatingAsync(booking.ListingId, model.Rating);
+                        await _uow.SaveChangesAsync();
+                    }
+                }
+
                 var vm = _mapper.Map<ReviewVM>(existing);
                 return Response<ReviewVM>.SuccessResponse(vm);
             }

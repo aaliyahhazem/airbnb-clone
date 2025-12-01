@@ -1,34 +1,177 @@
-<div class="chat-container">
-  <div class="left">
-    <div class="new-conv">
-      <input [(ngModel)]="newReceiverId" placeholder="Enter receiver username" />
-      <button (click)="startNewConversation()">Start</button>
-    </div>
-    <div class="conversations">
-      <div *ngFor="let c of conversations" class="conv-item" [class.selected]="c.otherUserId === selectedUserId" (click)="selectConversation(c.otherUserId)">
-        <div class="conv-id">{{ c.otherUserName }}</div>
-        <div class="conv-snippet">{{ c.lastMessage | slice:0:40 }}</div>
-        <div class="conv-time">{{ c.lastSentAt | date:'short' }}</div>
-      </div>
-    </div>
-  </div>
+<div class="broker-chat-container">
 
-  <div class="right" *ngIf="selectedUserId">
-    <div class="header">Chat with {{ selectedUserDisplayName }}</div>
-    <div class="messages" #messagesContainer>
-      <div *ngFor="let m of selectedMessages" class="message-item" [class.me]="m.senderId === currentUserId">
-        <div class="msg-content">{{ m.content }}
-          <span *ngIf="m.senderId === currentUserId" class="tick" [class.read]="m.isRead" aria-hidden="true"></span>
+  <!-- Chat Hero Section -->
+  <div class="broker-chat-hero">
+    <div class="chat-hero-content">
+      <!-- Character Section -->
+      <div class="broker-character-section">
+        <div class="broker-character-container">
+          <img src="/3.png" alt="The Broker Character" class="chat-character" />
+          <div class="chat-accent-circle"></div>
         </div>
-        <div class="msg-meta">{{ m.senderDisplayName }} • {{ m.sentAt | date:'short' }}</div>
+      </div>
+
+      <!-- Chat Header -->
+      <div class="chat-header-content">
+        <h2 class="chat-title">{{ 'chat.messages' | translate }}</h2>
+        <p class="chat-subtitle">{{ 'chat.stayConnected' | translate }}</p>
       </div>
     </div>
-
-    <form class="send-form" (ngSubmit)="send()">
-      <input [(ngModel)]="newMessage" name="message" placeholder="Type a message..." />
-      <button type="submit">Send</button>
-    </form>
   </div>
 
-  <div class="right empty" *ngIf="!selectedUserId">Select or start a conversation</div>
+  <!-- Main Chat Interface -->
+  <div class="broker-chat-interface">
+    <div class="chat-layout">
+
+      <!-- Conversations Sidebar -->
+      <div class="conversations-sidebar">
+        <div class="sidebar-header">
+          <h3>{{ 'chat.conversations' | translate }}</h3>
+          <button class="new-chat-btn" title="{{ 'chat.newConversation' | translate }}">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </div>
+
+        <!-- New Conversation -->
+        <div class="new-conversation-section">
+          <div class="broker-input-group">
+            <i class="bi bi-person"></i>
+            <input
+              [(ngModel)]="newReceiverId"
+              [placeholder]="'chat.enterUsername' | translate"
+              class="broker-chat-input"
+            />
+          </div>
+          <button class="btn-broker-start" (click)="startNewConversation()">
+            <i class="bi bi-send"></i>
+            {{ 'chat.start' | translate }}
+          </button>
+        </div>
+
+        <!-- Conversations List -->
+        <div class="conversations-list">
+          <div
+            *ngFor="let c of conversations"
+            class="conversation-item"
+            [class.selected]="c.otherUserId === selectedUserId"
+            (click)="selectConversation(c.otherUserId)">
+
+            <div class="conversation-avatar">
+              <i class="bi bi-person-circle"></i>
+            </div>
+
+            <div class="conversation-content">
+              <div class="conversation-header">
+                <h4 class="conversation-name">{{ c.otherUserName }}</h4>
+                <span class="conversation-time">{{ c.lastSentAt | date:'short' }}</span>
+              </div>
+              <p class="conversation-preview">{{ c.lastMessage | slice:0:40 }}{{ c.lastMessage.length > 40 ? '...' : '' }}</p>
+            </div>
+
+            <div class="conversation-status" *ngIf="c.unreadCount > 0">
+              <span class="unread-badge">{{ c.unreadCount }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty Conversations -->
+        <div class="empty-conversations" *ngIf="conversations.length === 0">
+          <i class="bi bi-chat-dots"></i>
+          <p>{{ 'chat.noConversations' | translate }}</p>
+        </div>
+      </div>
+
+      <!-- Chat Messages Area -->
+      <div class="chat-messages-area">
+
+        <!-- Active Chat Header -->
+        <div class="active-chat-header" *ngIf="selectedUserId">
+          <div class="chat-user-info">
+            <div class="user-avatar">
+              <i class="bi bi-person-circle"></i>
+            </div>
+            <div class="user-details">
+              <h3>{{ selectedUserDisplayName }}</h3>
+              <span class="user-status">{{ 'chat.online' | translate }}</span>
+            </div>
+          </div>
+          <div class="chat-actions">
+            <button class="chat-action-btn" title="{{ 'chat.moreOptions' | translate }}">
+              <i class="bi bi-three-dots"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Messages Container -->
+        <div class="messages-container" #messagesContainer *ngIf="selectedUserId">
+          <div class="messages-list">
+            <div
+              *ngFor="let m of selectedMessages"
+              class="message-bubble"
+              [class.my-message]="m.senderId === currentUserId"
+              [class.other-message]="m.senderId !== currentUserId">
+
+              <div class="message-content">
+                <p class="message-text">{{ m.content }}</p>
+                <div class="message-meta">
+                  <span class="message-time">{{ m.sentAt | date:'HH:mm' }}</span>
+                  <span *ngIf="m.senderId === currentUserId" class="message-status">
+                    <i class="bi" [class.bi-check]="!m.isRead" [class.bi-check-all]="m.isRead" [class.read-status]="m.isRead"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Typing Indicator -->
+          <div class="typing-indicator" *ngIf="isTyping">
+            <div class="typing-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <span class="typing-text">{{ selectedUserDisplayName }} {{ 'chat.typing' | translate }}</span>
+          </div>
+        </div>
+
+        <!-- Message Input -->
+        <div class="message-input-area" *ngIf="selectedUserId">
+          <form class="message-form" (ngSubmit)="send()">
+            <div class="input-wrapper">
+              <button type="button" class="attachment-btn" title="{{ 'chat.attachFile' | translate }}">
+                <i class="bi bi-paperclip"></i>
+              </button>
+              <input
+                [(ngModel)]="newMessage"
+                name="message"
+                [placeholder]="'chat.typeMessage' | translate"
+                class="message-input"
+                autocomplete="off"
+              />
+              <button type="button" class="emoji-btn" title="{{ 'chat.emoji' | translate }}">
+                <i class="bi bi-emoji-smile"></i>
+              </button>
+            </div>
+            <button type="submit" class="send-message-btn" [disabled]="!newMessage.trim()">
+              <i class="bi bi-send"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- No Conversation Selected -->
+        <div class="no-conversation-selected" *ngIf="!selectedUserId">
+          <div class="no-chat-content">
+            <div class="no-chat-icon">
+              <i class="bi bi-chat-square-text"></i>
+            </div>
+            <h3>{{ 'chat.selectConversation' | translate }}</h3>
+            <p>{{ 'chat.chooseFromList' | translate }}</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
 </div>

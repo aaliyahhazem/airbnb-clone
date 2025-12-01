@@ -50,5 +50,13 @@ namespace DAL.Repo.Abstraction
         // Extends the promotion end date of a listing.by admin
         public Task<bool> ExtendPromotionAsync(int id, DateTime newPromotionEndDate, Guid performedByUserId, CancellationToken ct = default);
 
+        // Priority Management Methods
+        Task<bool> IncrementViewPriorityAsync(int listingId, CancellationToken ct = default);
+        Task<bool> IncrementFavoritePriorityAsync(int listingId, CancellationToken ct = default);
+        Task<bool> DecrementFavoritePriorityAsync(int listingId, CancellationToken ct = default);
+        Task<bool> IncrementBookingPriorityAsync(int listingId, CancellationToken ct = default);
+        Task<bool> AdjustPriorityByReviewRatingAsync(int listingId, int rating, CancellationToken ct = default);
+        Task<bool> ReverseRatingPriorityAdjustmentAsync(int listingId, int oldRating, CancellationToken ct = default);
+
     }
 }

@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { ListingOverviewVM } from '../../../core/models/listing.model';
 import { FavoriteButton } from '../../favorites/favorite-button/favorite-button';
 import { FavoriteStoreService } from '../../../core/services/favoriteService/favorite-store-service';
@@ -8,7 +9,7 @@ import { FavoriteStoreService } from '../../../core/services/favoriteService/fav
 @Component({
   selector: 'app-listing-card',
   standalone: true,
-  imports: [CommonModule, RouterLink, FavoriteButton],
+  imports: [CommonModule, RouterLink, TranslateModule],
   templateUrl: './listing-card.html',
   styleUrls: ['./listing-card.css']
 })

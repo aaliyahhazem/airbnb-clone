@@ -85,6 +85,11 @@ namespace BLL.Services.Impelementation
                             throw new Exception(paymentResp.errorMessage ?? "Payment initiation failed");
                     }
 
+                    // Increment booking priority for engagement tracking
+                    await _uow.Listings.IncrementBookingPriorityAsync(model.ListingId);
+                    await _uow.SaveChangesAsync();
+
+                    // load created booking for return
                     created = bookingEntity;
                 });
                 var vm = new GetBookingVM

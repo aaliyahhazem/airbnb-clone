@@ -1,83 +1,142 @@
-<div class="container-fluid">
+<div class="broker-listings-container">
+  <!-- Hero Search Section with Character -->
+  <div class="broker-search-hero">
+    <div class="container-fluid">
+      <div class="row align-items-center">
+        <!-- Character Section -->
+        <div class="col-md-3 d-flex justify-content-center">
+          <div class="broker-character-container">
+            <img src="/3.png" alt="The Broker Character" class="listings-character" />
+            <div class="listings-accent-circle"></div>
+          </div>
+        </div>
 
-  <div class="row filters-row mx-4 align-items-center">
+        <!-- Search Controls Section -->
+        <div class="col-md-9">
+          <div class="broker-search-section">
+            <div class="broker-branding-header">
+              <h2 class="broker-title">{{ 'listings.findProperty' | translate }}</h2>
+              <p class="broker-subtitle">{{ 'listings.discoverProperties' | translate }}</p>
+            </div>
 
-    <!-- Search -->
-    <div class="col-5">
-      <div class="search-wrap">
-        <i class="bi bi-search"></i>
-        <input class="search-input" type="text" placeholder="Title, location, or description" [ngModel]="search()"
-          (ngModelChange)="search.set($event)" />
+            <!-- Search Filters Row -->
+            <div class="broker-search-filters">
+              <!-- Main Search -->
+              <div class="broker-search-group">
+                <i class="bi bi-search"></i>
+                <input class="broker-search-input" type="text"
+                       [placeholder]="'listings.searchPlaceholder' | translate"
+                       [ngModel]="search()"
+                       (ngModelChange)="search.set($event)" />
+              </div>
+
+              <!-- Location Filter -->
+              <div class="broker-search-group">
+                <i class="bi bi-geo-alt"></i>
+                <select class="broker-search-select" [ngModel]="location()" (ngModelChange)="location.set($event)">
+                  <option value="">{{ 'listings.allLocations' | translate }}</option>
+                  <option *ngFor="let loc of locations()" [value]="loc">{{ loc }}</option>
+                </select>
+              </div>
+
+              <!-- Price Filter -->
+              <div class="broker-search-group">
+                <i class="bi bi-currency-dollar"></i>
+                <input type="number"
+                       [placeholder]="'listings.maxPrice' | translate"
+                       class="broker-search-input"
+                       [ngModel]="maxPrice()"
+                       (ngModelChange)="maxPrice.set($event === '' ? null : +$event)" />
+              </div>
+
+              <!-- Rating Filter -->
+              <div class="broker-search-group">
+                <i class="bi bi-star"></i>
+                <input type="number"
+                       [placeholder]="'listings.minRating' | translate"
+                       class="broker-search-input"
+                       min="0" max="5" step="0.5"
+                       [ngModel]="minRating()"
+                       (ngModelChange)="minRating.set($event === '' ? null : +$event)" />
+              </div>
+
+              <!-- Reset Button -->
+              <button class="btn-broker-reset" (click)="resetFilters()">
+                <i class="bi bi-arrow-clockwise"></i>
+                <span>{{ 'listings.reset' | translate }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- Location filter -->
-    <div class="col-2">
-      <select class="form-select search-wrap" [ngModel]="location()" (ngModelChange)="location.set($event)">
-        <option value="">All Locations</option>
-        <option *ngFor="let loc of locations()" [value]="loc">{{ loc }}</option>
-      </select>
-    </div>
-
-    <!-- Max Price -->
-    <div class="col-2">
-      <input type="number" placeholder="Max Price" class="form-control search-wrap" [ngModel]="maxPrice()"
-        (ngModelChange)="maxPrice.set($event === '' ? null : +$event)" />
-    </div>
-
-    <!-- Min Rating -->
-    <div class="col-2">
-      <input type="number" placeholder="Min Rating" class="form-control search-wrap" min="0" max="5" step="0.5"
-        [ngModel]="minRating()" (ngModelChange)="minRating.set($event === '' ? null : +$event)" />
-    </div>
-
-    <!-- Reset btn -->
-    <div class="col-1 d-flex justify-content-end">
-      <button class="btn glass-btn rounded-4 w-50" (click)="resetFilters()"><i
-          class="bi bi-arrow-clockwise"></i></button>
-    </div>
-
   </div>
 
-  <!-- MAIN ROW -->
-  <div class="row mx-4">
 
-    <!-- Listings -->
-    <div class="col-10 listings-row">
-      <div class="cards-list">
+  <!-- Main Content Area -->
+  <div class="broker-main-content">
+    <div class="container-fluid">
+      <div class="row">
 
-        <app-listing-card *ngFor="let listing of filtered(); trackBy: trackById" [listing]="listing">
-        </app-listing-card>
+        <!-- Listings Grid -->
+        <div class="col-lg-9 col-md-8">
+          <div class="broker-listings-grid">
+            <div class="broker-listings-header">
+              <h3 class="listings-count">{{ filtered().length }} {{ 'listings.propertiesFound' | translate }}</h3>
+            </div>
 
-      </div>
+            <div class="broker-cards-grid">
+              <app-listing-card *ngFor="let listing of filtered(); trackBy: trackById" [listing]="listing">
+              </app-listing-card>
+            </div>
 
-      <div *ngIf="loading" class="text-center my-3">
-        Loading listings...
-      </div>
+            <!-- Loading State -->
+            <div *ngIf="loading()" class="broker-loading-state">
+              <div class="loading-spinner"></div>
+              <p>{{ 'listings.loading' | translate }}</p>
+            </div>
 
-      <div *ngIf="error" class="alert alert-danger my-3">
-        {{ error() }}
-      </div>
-    </div>
+            <!-- Error State -->
+            <div *ngIf="error()" class="broker-error-state">
+              <i class="bi bi-exclamation-triangle"></i>
+              <p>{{ error() }}</p>
+            </div>
 
-    <!-- SIDEBAR -->
-    <div class="col-2">
-      <div class="listings-row glass-card p-3">
+            <!-- Empty State -->
+            <div *ngIf="!loading() && !error() && filtered().length === 0" class="broker-empty-state">
+              <i class="bi bi-house-x"></i>
+              <h4>{{ 'listings.noProperties' | translate }}</h4>
+              <p>{{ 'listings.tryDifferentFilters' | translate }}</p>
+              <button class="btn-broker" (click)="resetFilters()">{{ 'listings.clearFilters' | translate }}</button>
+            </div>
+          </div>
+        </div>
 
-        <!-- Amenities -->
-        <div class="section mb-2">
-          <h5 class="text-white mb-3">Amenities</h5>
-          <div class="amenities-grid">
-            <button *ngFor="let amenity of amenitiesList" type="button" class="amenity-btn"
-              [class.selected]="isAmenitySelected(amenity)" (click)="toggleAmenity(amenity)">
-              {{ amenity }}
-            </button>
+        <!-- Amenities Sidebar -->
+        <div class="col-lg-3 col-md-4">
+          <div class="broker-sidebar">
+            <div class="broker-amenities-section">
+              <div class="amenities-header">
+                <h4>{{ 'listings.amenities' | translate }}</h4>
+                <i class="bi bi-list-check"></i>
+              </div>
+
+              <div class="amenities-list">
+                <button *ngFor="let amenity of amenitiesList"
+                        type="button"
+                        class="broker-amenity-btn"
+                        [class.selected]="isAmenitySelected(amenity)"
+                        (click)="toggleAmenity(amenity)">
+                  <span class="amenity-text">{{ amenity }}</span>
+                  <i class="bi bi-check-circle-fill" *ngIf="isAmenitySelected(amenity)"></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
       </div>
     </div>
-
   </div>
 
 </div>

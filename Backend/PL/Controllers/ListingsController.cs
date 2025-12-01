@@ -32,7 +32,16 @@ namespace PL.Controllers
             var result = await _listingService.GetPagedOverviewAsync(page, pageSize, filter, ct);
             if (result.IsHaveErrorOrNo) return BadRequest(result);
 
-            return Ok(result);
+            // Return with totalCount for pagination (from database total, not current page count)
+            var response = new
+            {
+                data = result.result,
+                totalCount = result.TotalCount,
+                message = result.errorMessage,
+                isError = result.IsHaveErrorOrNo
+            };
+
+            return Ok(response);
         }
 
         [HttpGet("{id:int}")]
@@ -108,7 +117,16 @@ namespace PL.Controllers
             var result = await _listingService.GetByUserAsync(userId.Value, page, pageSize, ct);
             if (result.IsHaveErrorOrNo) return BadRequest(result);
 
-            return Ok(result);
+            // Return with totalCount for pagination
+            var response = new
+            {
+                data = result.result,
+                totalCount = result.TotalCount,
+                message = result.errorMessage,
+                isError = result.IsHaveErrorOrNo
+            };
+
+            return Ok(response);
         }
 
         [HttpPut("{listingId:int}/image/{imageId:int}/main")]
@@ -144,7 +162,16 @@ namespace PL.Controllers
             var result = await _listingService.GetAllForAdminAsync(page, pageSize, ct);
             if (result.IsHaveErrorOrNo) return BadRequest(result);
 
-            return Ok(result);
+            // Return with totalCount for pagination
+            var response = new
+            {
+                data = result.result,
+                totalCount = result.TotalCount,
+                message = result.errorMessage,
+                isError = result.IsHaveErrorOrNo
+            };
+
+            return Ok(response);
         }
 
 

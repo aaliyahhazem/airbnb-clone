@@ -26,12 +26,26 @@ export class HomeListingCard implements OnInit {
     return this.listing?.averageRating ?? 0;
   }
 
-  // get shortDescription(): string {
-  //   const text = this.listing?.description ?? '';
-  //   return text.length > 60 ? text.slice(0, 60) + '...' : text;
-  // }
-
   get price(): number {
     return this.listing?.pricePerNight ?? 0;
+  }
+
+  // Priority Badge Logic
+  get priorityBadge(): { label: string; emoji: string; class: string } | null {
+    const priority = this.listing?.priority ?? 0;
+
+    if (priority >= 100) {
+      return { label: 'Top Pick', emoji: '🔥', class: 'badge-top-pick' };
+    } else if (priority >= 50) {
+      return { label: 'Trending', emoji: '⭐', class: 'badge-trending' };
+    } else if (priority >= 20) {
+      return { label: 'Popular', emoji: '✨', class: 'badge-popular' };
+    }
+
+    return null;
+  }
+
+  get hasPriorityBadge(): boolean {
+    return this.priorityBadge !== null;
   }
 }

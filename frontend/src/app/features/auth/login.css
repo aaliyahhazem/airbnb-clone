@@ -1,7 +1,229 @@
-.auth-card{max-width:380px;margin:40px auto;padding:20px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.08);background:#fff}
-.auth-card h3{margin:0 0 12px;font-size:1.25rem}
-.auth-form{display:flex;flex-direction:column;gap:8px}
-.auth-input{padding:10px;border:1px solid #ddd;border-radius:4px;font-size:0.95rem}
-.auth-btn{padding:10px;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer}
-.auth-btn:hover{background:#0069d9}
-.links{margin-top:10px;font-size:0.9rem;text-align:center}
+/* ===========================
+   THE BROKER AUTH STYLING
+=========================== */
+.broker-auth-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #FFFFFF 0%, #F8F8F8 100%);
+    background-image: url('/bg1.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+}
+
+.broker-auth-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.85);
+    z-index: 1;
+}
+
+.broker-auth-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    max-width: 1200px;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+    align-items: center;
+}
+
+/* Character Section */
+.broker-character-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 2rem;
+}
+
+.auth-character-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-character {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    animation: gentleFloat 4s ease-in-out infinite;
+    filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.2));
+    z-index: 2;
+    position: relative;
+}
+
+.auth-accent-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle at 30% 30%,
+                rgba(220, 20, 60, 0.1) 0%,
+                rgba(220, 20, 60, 0.05) 50%,
+                transparent 80%);
+    border-radius: 50%;
+    animation: slowRotate 25s linear infinite;
+    z-index: 1;
+}
+
+.auth-branding {
+    color: var(--broker-black);
+}
+
+.auth-title {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--broker-black);
+    margin: 0;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+}
+
+.auth-title-ar {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--broker-red);
+    margin: 0.5rem 0;
+    font-family: 'Cairo', sans-serif !important;
+    letter-spacing: 2px;
+}
+
+.auth-subtitle {
+    font-size: 1.2rem;
+    color: #666;
+    margin: 1rem 0 0 0;
+}
+
+/* Form Section */
+.broker-auth-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(220, 20, 60, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.auth-card-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--broker-black);
+    margin: 0 0 2rem 0;
+    text-align: center;
+}
+
+.broker-auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-group i {
+    position: absolute;
+    left: 1rem;
+    color: var(--broker-red);
+    font-size: 1.1rem;
+    z-index: 2;
+}
+
+.broker-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 2px solid #E0E0E0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.broker-input:focus {
+    outline: none;
+    border-color: var(--broker-red);
+    box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.1);
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #666;
+}
+
+.broker-link {
+    color: var(--broker-red);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.broker-link:hover {
+    text-decoration: underline;
+}
+
+/* Animations */
+@keyframes gentleFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes slowRotate {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .broker-auth-wrapper {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .auth-character-container {
+        width: 200px;
+        height: 200px;
+    }
+
+    .auth-accent-circle {
+        width: 250px;
+        height: 250px;
+    }
+
+    .auth-title {
+        font-size: 2rem;
+    }
+
+    .auth-title-ar {
+        font-size: 1.5rem;
+    }
+
+    .broker-auth-card {
+        padding: 2rem;
+    }
+}

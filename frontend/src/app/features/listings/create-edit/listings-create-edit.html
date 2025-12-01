@@ -1,4 +1,22 @@
-﻿<div class="listing-form-container">
+﻿<div class="broker-create-container">
+  <!-- Background Elements -->
+  <div class="create-background-pattern"></div>
+  <div class="create-floating-elements">
+    <div class="floating-element element-1"></div>
+    <div class="floating-element element-2"></div>
+    <div class="floating-element element-3"></div>
+  </div>
+
+  <!-- Character Section -->
+  <div class="create-character-section">
+    <div class="create-character-container">
+      <img src="/3.png" alt="The Broker Character" class="create-character" />
+      <div class="create-accent-circle"></div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="listing-form-container">
     <div class="form-header">
         <h2>{{ editMode ? 'Edit Listing' : 'Create New Listing' }}</h2>
         <!-- <button class="btn-back" (click)="goBack()">← Back</button> -->
@@ -15,10 +33,10 @@
 
             <div class="form-group">
                 <label for="title">Title *</label>
-                <input 
-                    id="title" 
-                    type="text" 
-                    formControlName="title" 
+                <input
+                    id="title"
+                    type="text"
+                    formControlName="title"
                     placeholder="e.g., Cozy Apartment in Downtown"
                     [class.is-invalid]="isInvalid('title')"
                 />
@@ -29,9 +47,9 @@
 
             <div class="form-group">
                 <label for="description">Description *</label>
-                <textarea 
-                    id="description" 
-                    formControlName="description" 
+                <textarea
+                    id="description"
+                    formControlName="description"
                     placeholder="Describe your listing in detail..."
                     rows="5"
                     [class.is-invalid]="isInvalid('description')"
@@ -44,10 +62,10 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="pricePerNight">Price Per Night (EGP) *</label>
-                    <input 
-                        id="pricePerNight" 
-                        type="number" 
-                        formControlName="pricePerNight" 
+                    <input
+                        id="pricePerNight"
+                        type="number"
+                        formControlName="pricePerNight"
                         placeholder="0"
                         [class.is-invalid]="isInvalid('pricePerNight')"
                     />
@@ -58,10 +76,10 @@
 
                 <div class="form-group">
                     <label for="maxGuests">Max Guests *</label>
-                    <input 
-                        id="maxGuests" 
-                        type="number" 
-                        formControlName="maxGuests" 
+                    <input
+                        id="maxGuests"
+                        type="number"
+                        formControlName="maxGuests"
                         placeholder="1"
                         [class.is-invalid]="isInvalid('maxGuests')"
                     />
@@ -78,10 +96,10 @@
 
             <div class="form-group">
                 <label for="location">Location *</label>
-                <input 
-                    id="location" 
-                    type="text" 
-                    formControlName="location" 
+                <input
+                    id="location"
+                    type="text"
+                    formControlName="location"
                     placeholder="e.g., Cairo, Egypt"
                     [class.is-invalid]="isInvalid('location')"
                 />
@@ -93,10 +111,10 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="destination">Destination *</label>
-                    <input 
-                        id="destination" 
-                        type="text" 
-                        formControlName="destination" 
+                    <input
+                        id="destination"
+                        type="text"
+                        formControlName="destination"
                         placeholder="e.g., Downtown Cairo"
                         [class.is-invalid]="isInvalid('destination')"
                     />
@@ -107,8 +125,8 @@
 
                 <div class="form-group">
                     <label for="type">Property Type *</label>
-                    <select 
-                        id="type" 
+                    <select
+                        id="type"
                         formControlName="type"
                         [class.is-invalid]="isInvalid('type')"
                     >
@@ -128,10 +146,10 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="latitude">Latitude *</label>
-                    <input 
-                        id="latitude" 
-                        type="number" 
-                        formControlName="latitude" 
+                    <input
+                        id="latitude"
+                        type="number"
+                        formControlName="latitude"
                         step="0.0001"
                         placeholder="30.0444"
                         [class.is-invalid]="isInvalid('latitude')"
@@ -143,10 +161,10 @@
 
                 <div class="form-group">
                     <label for="longitude">Longitude *</label>
-                    <input 
-                        id="longitude" 
-                        type="number" 
-                        formControlName="longitude" 
+                    <input
+                        id="longitude"
+                        type="number"
+                        formControlName="longitude"
                         step="0.0001"
                         placeholder="31.2357"
                         [class.is-invalid]="isInvalid('longitude')"
@@ -160,10 +178,10 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="bedrooms">Bedrooms *</label>
-                    <input 
-                        id="bedrooms" 
-                        type="number" 
-                        formControlName="bedrooms" 
+                    <input
+                        id="bedrooms"
+                        type="number"
+                        formControlName="bedrooms"
                         placeholder="1"
                         min="1"
                         [class.is-invalid]="isInvalid('bedrooms')"
@@ -175,10 +193,10 @@
 
                 <div class="form-group">
                     <label for="bathrooms">Bathrooms *</label>
-                    <input 
-                        id="bathrooms" 
-                        type="number" 
-                        formControlName="bathrooms" 
+                    <input
+                        id="bathrooms"
+                        type="number"
+                        formControlName="bathrooms"
                         placeholder="1"
                         min="1"
                         [class.is-invalid]="isInvalid('bathrooms')"
@@ -208,7 +226,7 @@
         <div class="section">
             <h3>Amenities</h3>
             <div class="amenities-grid">
-                <button 
+                <button
                     *ngFor="let amenity of amenitiesList"
                     type="button"
                     class="amenity-btn"
@@ -230,9 +248,9 @@
                 <div class="images-grid">
                     <div *ngFor="let img of existingImages" class="image-item">
                         <img [src]="img.url" [alt]="'Listing image'" />
-                        <button 
-                            type="button" 
-                            class="btn-remove" 
+                        <button
+                            type="button"
+                            class="btn-remove"
                             (click)="removeExistingImage(img.id)"
                         >
                             ✕
@@ -244,10 +262,10 @@
             <!-- New Images -->
             <div class="image-section">
                 <label for="images">{{ editMode ? 'Add New Images' : 'Upload Images' }}</label>
-                <input 
-                    id="images" 
-                    type="file" 
-                    multiple 
+                <input
+                    id="images"
+                    type="file"
+                    multiple
                     accept="image/*"
                     (change)="onFileChange($event)"
                 />
@@ -260,9 +278,9 @@
                 <div class="images-grid">
                     <div *ngFor="let preview of imagePreviews; let i = index" class="image-item">
                         <img [src]="preview" [alt]="'Preview ' + (i + 1)" />
-                        <button 
-                            type="button" 
-                            class="btn-remove" 
+                        <button
+                            type="button"
+                            class="btn-remove"
                             (click)="removeNewImage(i)"
                         >
                             ✕
@@ -274,26 +292,26 @@
 
         <!-- Form Actions -->
         <div class="form-actions">
-            <button 
-                type="submit" 
+            <button
+                type="submit"
                 class="btn btn-primary"
                 [disabled]="loading || form.invalid"
             >
                 {{ loading ? 'Saving...' : (editMode ? 'Update' : 'Create') }}
             </button>
 
-            <button 
+            <button
                 *ngIf="editMode"
-                type="button" 
+                type="button"
                 class="btn btn-danger"
                 (click)="onDelete()"
-                
+
             >
                 Delete
             </button>
 
-            <button 
-                type="button" 
+            <button
+                type="button"
                 class="btn btn-secondary"
                 (click)="goBack()"
             >
@@ -301,4 +319,6 @@
             </button>
         </div>
     </form>
+</div>
+
 </div>

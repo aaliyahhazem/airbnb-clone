@@ -1,28 +1,99 @@
 /* ===========================
-   NAVBAR BASE STYLE
+   THE BROKER NAVBAR STYLE
+   Modern, Clean, Egyptian Theme
 =========================== */
-.navbar {
-    margin: 1.2vw 2vw;
+.navbar-broker {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%);
+    border-bottom: 3px solid #DC143C;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 1rem 2rem;
+    margin: 0;
 }
 
-.navbar-brand {
-    margin-right: 2em;
-    font-size: 1.6em;
-    color: rgb(255, 253, 240);
+.broker-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
 }
 
-img {
-    height: 30px;
-    margin-bottom: 4px;
+.broker-character {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.broker-logo:hover .broker-character {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.brand-name,
+.brand-name-ar {
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+    display: block;
+}
+
+.brand-name.primary {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #1a1a1a;
+    letter-spacing: -0.5px;
+    order: 1;
+}
+
+.brand-name.secondary {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    order: 2;
+}
+
+.brand-name-ar.primary {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #DC143C;
+    font-family: 'Cairo', sans-serif !important;
+    letter-spacing: 1px;
+    order: 1;
+}
+
+.brand-name-ar.secondary {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #DC143C;
+    font-family: 'Cairo', sans-serif !important;
+    order: 2;
 }
 
 .nav-item {
-    font-size: 1.2em;
-    margin: 0 0.2em;
+    font-size: 1rem;
+    margin: 0 0.3rem;
 }
 
 .nav-link {
-    color: rgb(255, 253, 240);
+    color: #1a1a1a !important;
+    font-weight: 600;
+    padding: 0.8rem 1.2rem !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-link:hover {
+    background-color: rgba(220, 20, 60, 0.05);
+    color: #DC143C !important;
+}
+
+.nav-link.active {
+    color: #DC143C !important;
+    background-color: rgba(220, 20, 60, 0.1);
 }
 
 .navbar .dropdown-toggle::after {
@@ -30,26 +101,33 @@ img {
 }
 
 .left:hover,
-.right{
+.right {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 5vw;
-    background: rgba(224, 202, 169, 0.233);
-    box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.35);
-    transition: all 0.25s ease;
+    border-radius: 8px;
+    background: rgba(220, 20, 60, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
 .left {
-    padding: 0em 0.5em;
+    padding: 0.5rem 1rem;
+}
+
+.left:hover {
+    background: rgba(220, 20, 60, 0.1);
+    transform: translateY(-2px);
 }
 
 .right {
-    margin: 0em 0.35em;
-    padding: 0em 0.5em;
+    margin: 0 0.5rem;
+    padding: 0.6rem 1rem;
     height: 45px;
     min-height: 45px;
     flex-shrink: 0;
+    background: white;
+    border: 1px solid #E0E0E0;
 }
 
 .right.notification-bell,
@@ -57,12 +135,66 @@ img {
     width: 45px;
     min-width: 45px;
     padding: 0;
+    border-radius: 50%;
+    background: white;
+}
+
+.right.favorites-bell {
+    width: 45px;
+    min-width: 45px;
+    padding: 0;
+    border-radius: 50%;
+    background: white;
+    text-decoration: none;
+}
+
+.right.favorites-bell:hover {
+    background: #DC143C;
+    border-color: #DC143C;
+}
+
+.right.favorites-bell:hover .bell-btn {
+    color: white;
+}
+
+.favorites-bell .bell-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.right.notification-bell:hover,
+.right.message-bell:hover {
+    background: #DC143C;
+    border-color: #DC143C;
+}
+
+.right.notification-bell:hover .bell-btn,
+.right.message-bell:hover .bell-btn {
+    color: white;
 }
 
 .right.dropdown.user-dropdown {
     width: auto;
     min-width: auto;
     padding: 0 1em;
+    background: white;
+    border: 1px solid #E0E0E0;
+}
+
+.right.dropdown.user-dropdown:hover {
+    background: rgba(220, 20, 60, 0.05);
+    border-color: #DC143C;
 }
 
 .right.dropdown:not(.user-dropdown) {
@@ -72,31 +204,34 @@ img {
 }
 
 /* ===========================
-   BELL / BADGE STYLE
+   BELL / BADGE STYLE - RED ACCENT
 =========================== */
 .bell-btn {
     background: transparent;
     border: none;
     font-size: 20px;
     cursor: pointer;
-    color: white;
+    color: #1a1a1a;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     height: 100%;
     position: relative;
+    transition: all 0.3s ease;
 }
 
 .badge {
-    background: #dc3545;
+    background: #DC143C;
     color: #fff;
     border-radius: 12px;
     padding: 2px 7px;
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 700;
     position: absolute;
     top: -6px;
     right: -8px;
+    box-shadow: 0 2px 4px rgba(220, 20, 60, 0.4);
 }
 
 .notification-bell {
@@ -107,16 +242,14 @@ img {
     position: absolute;
     right: 0;
     top: 3.5em;
-    width: 220px;
-    max-height: 420px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-    border-radius: 1.5em;
-    background: rgba(255, 255, 255, 0.22);
-    backdrop-filter: blur(14px) saturate(160%);
-    -webkit-backdrop-filter: blur(14px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    width: 320px;
+    max-height: 480px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    background: white;
+    border: 1px solid #E0E0E0;
     z-index: 1000;
-    color: #222;
+    color: #1a1a1a;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -125,15 +258,18 @@ img {
 .notification-bell .dropdown-content {
     flex: 1;
     overflow-y: auto;
-    padding: 8px;
-    max-height: 320px;
+    padding: 12px;
+    max-height: 360px;
 }
 
 .notification-bell .dropdown .item {
-    padding: 10px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 12px;
+    border-bottom: 1px solid #F5F5F5;
     background: transparent;
     cursor: pointer;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
 }
 
 .notification-bell .dropdown .item:last-child {
@@ -142,10 +278,13 @@ img {
 
 .notification-bell .dropdown .item.unread {
     font-weight: 600;
+    background: rgba(220, 20, 60, 0.05);
+    border-left: 3px solid #DC143C;
 }
 
 .notification-bell .dropdown .item:hover {
-    background: rgba(0, 0, 0, 0.02);
+    background: rgba(220, 20, 60, 0.08);
+    transform: translateX(-2px);
 }
 
 .notification-bell .item-content .title-row {
@@ -179,9 +318,9 @@ img {
 .notification-bell .dropdown-actions {
     display: flex;
     gap: 8px;
-    padding: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.15);
+    padding: 12px;
+    border-top: 1px solid #E0E0E0;
+    background: #F5F5F5;
     flex-shrink: 0;
 }
 
@@ -191,33 +330,36 @@ img {
     padding: 10px;
     border: none;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 600;
     border-radius: 8px;
     transition: all 0.3s ease;
-    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .notification-bell .mark-all {
-    background: #f0f8ff;
-    color: #007bff;
+    background: white;
+    color: #1a1a1a;
+    border: 2px solid #E0E0E0;
 }
 
 .notification-bell .view-all {
-    background: linear-gradient(135deg, #ff385c 0%, #e00b41 100%);
+    background: #DC143C;
     color: white;
-    box-shadow: 0 2px 8px rgba(255, 56, 92, 0.3);
+    box-shadow: 0 2px 8px rgba(220, 20, 60, 0.3);
 }
 
 .notification-bell .mark-all:hover {
-    background: #d9ecff;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.2);
+    background: #F5F5F5;
+    border-color: #DC143C;
+    transform: translateY(-2px);
 }
 
 .notification-bell .view-all:hover {
-    background: linear-gradient(135deg, #e00b41 0%, #c00937 100%);
-    box-shadow: 0 4px 12px rgba(255, 56, 92, 0.4);
-    transform: translateY(-1px);
+    background: #B71C1C;
+    box-shadow: 0 4px 12px rgba(220, 20, 60, 0.4);
+    transform: translateY(-2px);
 }
 
 .notification-bell .mark-all:hover {
@@ -241,16 +383,14 @@ img {
     position: absolute;
     right: 0;
     top: 3.5em;
-    width: 280px;
-    max-height: 420px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-    border-radius: 1.5em;
-    background: rgba(255, 255, 255, 0.22);
-    backdrop-filter: blur(14px) saturate(160%);
-    -webkit-backdrop-filter: blur(14px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    width: 320px;
+    max-height: 480px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    background: white;
+    border: 1px solid #E0E0E0;
     z-index: 1000;
-    color: #222;
+    color: #1a1a1a;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -259,25 +399,28 @@ img {
 .message-bell .dropdown-content {
     flex: 1;
     overflow-y: auto;
-    padding: 8px;
-    max-height: 320px;
+    padding: 12px;
+    max-height: 360px;
 }
 
 .message-bell .dropdown .item {
-    padding: 10px;
+    padding: 12px;
     margin: 4px 0;
     border-radius: 8px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
 }
 
 .message-bell .dropdown .item:hover {
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(220, 20, 60, 0.05);
+    border-color: rgba(220, 20, 60, 0.2);
 }
 
 .message-bell .dropdown .item.unread {
-    background: rgba(255, 56, 92, 0.08);
-    border-left: 3px solid #ff385c;
+    background: rgba(220, 20, 60, 0.08);
+    border-left: 3px solid #DC143C;
+    font-weight: 600;
 }
 
 .message-bell .item-content .title-row {
@@ -369,42 +512,22 @@ img {
 .user-menu {
     display: flex;
     align-items: center;
-    gap: 0.5em;
-    white-space: nowrap;
-}
-
-.user-menu .user-name {
-    font-size: 0.95em;
-    font-weight: 500;
-    max-width: 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.user-menu i {
-    font-size: 1.3em;
-}
-
-/* ===========================
-   USER MENU STYLE
-=========================== */
-.user-menu {
-    display: flex;
-    align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem !important;
     border-radius: 50px;
     transition: all 0.3s ease;
+    color: #1a1a1a !important;
 }
 
 .user-menu:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(220, 20, 60, 0.05);
+    color: #DC143C !important;
 }
 
 .user-menu .user-name {
     font-size: 0.95rem;
-    font-weight: 500;
-    color: rgb(255, 253, 240);
+    font-weight: 600;
+    color: #DC143C !important;
     max-width: 150px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -413,6 +536,7 @@ img {
 
 .user-menu i {
     font-size: 1.5rem;
+    color: #DC143C !important;
 }
 
 .dropdown-header {
@@ -433,6 +557,11 @@ img {
     display: flex;
     align-items: center;
     justify-content: center;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 0.5rem;
+    box-shadow: none !important;
+    border: none !important;
 }
 
 .language-switcher-container app-language-switcher {

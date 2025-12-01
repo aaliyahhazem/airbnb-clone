@@ -1,176 +1,347 @@
-<div class="listing-detail-container">
-  <!-- Loading state -->
-  <div *ngIf="loading" class="loading glass-card">
-    <div class="spinner"></div>
-    <p>Loading listing details...</p>
+<div class="broker-detail-container">
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="broker-loading-section">
+    <div class="broker-character-container">
+      <img src="/3.png" alt="The Broker Character" class="loading-character" />
+      <div class="loading-accent-circle"></div>
+    </div>
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <h3>{{ 'listings.loadingProperty' | translate }}</h3>
+      <p>{{ 'listings.preparingDetails' | translate }}</p>
+    </div>
   </div>
 
-  <!-- Error state -->
-  <div *ngIf="error && !loading" class="error glass-card">
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="broker-error-section">
+    <div class="broker-character-container">
+      <img src="/3.png" alt="The Broker Character" class="error-character" />
+      <div class="error-accent-circle"></div>
+    </div>
     <div class="error-content">
       <i class="bi bi-exclamation-triangle"></i>
+      <h3>{{ 'listings.errorOccurred' | translate }}</h3>
       <p>{{ error }}</p>
-    </div>
-    <button class="glass-btn" (click)="goBack()">
-      <i class="bi bi-arrow-left"></i>Back to Listings
-    </button>
-  </div>
-
-  <!-- Content -->
-  <div *ngIf="listing && !loading && !error" class="detail-content">
-    <!-- Header -->
-    <div class="detail-header glass-card">
-      <!-- <button class="glass-btn" (click)="goBack()">
-        <i class="bi bi-arrow-left"></i>Back
-      </button> -->
-      <h1 >{{ listing.title }}</h1>
-      <button class="glass-btn" (click)="editListing()">
-        <i class="bi bi-pencil"></i>Edit
+      <button class="btn-broker" (click)="goBack()">
+        <i class="bi bi-arrow-left"></i>
+        {{ 'listings.backToListings' | translate }}
       </button>
     </div>
+  </div>
 
-    <div class="content-grid">
-      <!-- Images Section -->
-      <div class="images-section glass-card">
-        <div class="main-image">
-          <img [src]="listing.images && listing.images.length > 0 
-              ? listing.images[currentImageIndex].imageUrl 
-              : 'https://via.placeholder.com/800x600?text=No+Image'" [alt]="listing.title" />
+  <!-- Main Content -->
+  <div *ngIf="listing && !loading && !error" class="broker-detail-content">
 
-          <button *ngIf="listing.images && listing.images.length > 1" class="nav-btn prev" (click)="prevImage()">
-            <i class="bi bi-chevron-left"></i>
-          </button>
-          <button *ngIf="listing.images && listing.images.length > 1" class="nav-btn next" (click)="nextImage()">
-            <i class="bi bi-chevron-right"></i>
-          </button>
-        </div>
+    <!-- Hero Section with Character -->
+    <div class="broker-detail-hero">
+      <div class="container-fluid">
+        <div class="row align-items-center">
+          <!-- Character Section -->
+          <div class="col-md-3 d-flex justify-content-center">
+            <div class="broker-character-container">
+              <img src="/3.png" alt="The Broker Character" class="detail-character" />
+              <div class="detail-accent-circle"></div>
+            </div>
+          </div>
 
-        <!-- Thumbnails -->
-        <div *ngIf="listing.images && listing.images.length > 1" class="thumbnails">
-          <button *ngFor="let img of listing.images; let i = index" class="thumbnail"
-            [class.active]="i === currentImageIndex" (click)="selectImage(i)">
-            <img [src]="img.imageUrl" [alt]="'Image ' + (i + 1)" />
-          </button>
+          <!-- Property Header Section -->
+          <div class="col-md-9">
+            <div class="broker-property-header">
+              <!-- Navigation -->
+              <nav class="property-breadcrumb">
+                <a [routerLink]="['/listings']" class="breadcrumb-link">
+                  <i class="bi bi-house-door"></i>
+                  {{ 'listings.allProperties' | translate }}
+                </a>
+                <i class="bi bi-chevron-right"></i>
+                <span class="current-page">{{ listing.title }}</span>
+              </nav>
+
+              <!-- Property Title & Status -->
+              <div class="property-title-section">
+                <h1 class="property-title">{{ listing.title }}</h1>
+                <div class="property-status" [class.approved]="listing.isApproved" [class.pending]="!listing.isApproved">
+                  <i class="bi" [class.bi-check-circle-fill]="listing.isApproved" [class.bi-clock-fill]="!listing.isApproved"></i>
+                  {{ listing.isApproved ? ('listings.approved' | translate) : ('listings.pending' | translate) }}
+                </div>
+              </div>
+
+              <!-- Property Meta Info -->
+              <div class="property-meta">
+                <div class="meta-item location">
+                  <i class="bi bi-geo-alt-fill"></i>
+                  <span>{{ listing.location }}</span>
+                </div>
+                <div class="meta-item rating" *ngIf="listing.averageRating">
+                  <i class="bi bi-star-fill"></i>
+                  <span>{{ listing.averageRating.toFixed(1) }} ({{ listing.reviewCount }} {{ 'listings.reviews' | translate }})</span>
+                </div>
+                <div class="meta-item rating" *ngIf="!listing.averageRating">
+                  <i class="bi bi-star"></i>
+                  <span>{{ 'listings.noReviewsYet' | translate }}</span>
+                </div>
+              </div>
+
+              <!-- Quick Actions -->
+              <div class="quick-actions">
+                <button class="btn-broker-primary" [routerLink]="['/booking/create', listing.id]">
+                  <i class="bi bi-calendar-check"></i>
+                  {{ 'listings.bookNow' | translate }}
+                </button>
+                <button class="btn-broker-outline" (click)="editListing()" *ngIf="canEdit">
+                  <i class="bi bi-pencil"></i>
+                  {{ 'listings.edit' | translate }}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- Main Info -->
-      <div class="main-info glass-card">
-        <div class="info-header">
-          <div class="location-rating">
-            <p class="location">
-              <i class="bi bi-geo-alt"></i>{{ listing.location }}
-            </p>
-            <div class="rating" *ngIf="listing.averageRating">
-              <span class="stars">
-                <i class="bi bi-star-fill"></i>{{ listing.averageRating.toFixed(1) }}
-              </span>
-              <span class="count">({{ listing.reviewCount }} reviews)</span>
+    <!-- Property Showcase Section -->
+    <div class="broker-showcase-section">
+      <div class="container-fluid">
+        <div class="row">
+
+          <!-- Image Gallery -->
+          <div class="col-lg-8">
+            <div class="broker-image-gallery">
+
+              <!-- Main Image Display -->
+              <div class="main-image-container">
+                <img [src]="listing.images && listing.images.length > 0
+                    ? listing.images[currentImageIndex].imageUrl
+                    : '/assets/images/placeholder-listing.jpg'"
+                     [alt]="listing.title"
+                     class="main-property-image" />
+
+                <!-- Image Navigation -->
+                <button *ngIf="listing.images && listing.images.length > 1"
+                        class="image-nav-btn prev"
+                        (click)="prevImage()">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+                <button *ngIf="listing.images && listing.images.length > 1"
+                        class="image-nav-btn next"
+                        (click)="nextImage()">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+
+                <!-- Image Counter -->
+                <div class="image-counter" *ngIf="listing.images && listing.images.length > 1">
+                  {{ currentImageIndex + 1 }} / {{ listing.images.length }}
+                </div>
+              </div>
+
+              <!-- Thumbnails -->
+              <div class="image-thumbnails" *ngIf="listing.images && listing.images.length > 1">
+                <button *ngFor="let img of listing.images; let i = index"
+                        class="thumbnail-btn"
+                        [class.active]="i === currentImageIndex"
+                        (click)="selectImage(i)">
+                  <img [src]="img.imageUrl" [alt]="'Image ' + (i + 1)" class="thumbnail-image" />
+                </button>
+              </div>
             </div>
-            <div class="no-rating" *ngIf="!listing.averageRating">
-              <i class="bi bi-star"></i>No reviews yet
+          </div>
+
+          <!-- Property Details -->
+          <div class="col-lg-4">
+            <div class="broker-property-details">
+
+              <!-- Price Section -->
+              <div class="price-section">
+                <div class="price-main">
+                  <span class="price-amount">{{ listing.pricePerNight }}</span>
+                  <span class="price-currency">{{ 'listings.egp' | translate }}</span>
+                </div>
+                <div class="price-period">{{ 'listings.perNight' | translate }}</div>
+              </div>
+
+              <!-- Property Features -->
+              <div class="features-grid">
+                <div class="feature-item">
+                  <i class="bi bi-house-door"></i>
+                  <div class="feature-content">
+                    <span class="feature-label">{{ 'listings.propertyType' | translate }}</span>
+                    <span class="feature-value">{{ listing.type }}</span>
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <i class="bi bi-geo-alt"></i>
+                  <div class="feature-content">
+                    <span class="feature-label">{{ 'listings.destination' | translate }}</span>
+                    <span class="feature-value">{{ listing.destination }}</span>
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <i class="bi bi-bed"></i>
+                  <div class="feature-content">
+                    <span class="feature-label">{{ 'listings.bedrooms' | translate }}</span>
+                    <span class="feature-value">{{ listing.bedrooms || 'N/A' }}</span>
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <i class="bi bi-droplet"></i>
+                  <div class="feature-content">
+                    <span class="feature-label">{{ 'listings.bathrooms' | translate }}</span>
+                    <span class="feature-value">{{ listing.bathrooms || 'N/A' }}</span>
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <i class="bi bi-people"></i>
+                  <div class="feature-content">
+                    <span class="feature-label">{{ 'listings.maxGuests' | translate }}</span>
+                    <span class="feature-value">{{ listing.maxGuests }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Main Action Button -->
+              <button class="btn-broker-book" [routerLink]="['/booking/create', listing.id]">
+                <i class="bi bi-calendar-check"></i>
+                <span>{{ 'listings.bookThisProperty' | translate }}</span>
+              </button>
+
             </div>
           </div>
 
-          <div class="status" [class.approved]="listing.isApproved" [class.pending]="!listing.isApproved">
-            {{ listing.isApproved ? '✓ Approved' : '⏳ Pending' }}
-          </div>
         </div>
+      </div>
+    </div>
 
-        <h2 class="price">
-          {{ listing.pricePerNight }} EGP
-          <span class="per-night">per night</span>
-        </h2>
- <!-- Booking Success Message -->
-        <div *ngIf="bookingSuccess" class="alert alert-success">
-          <i class="bi bi-check-circle"></i>
-          <strong>Booking Created Successfully!</strong>
-          <p>Redirecting to payment...</p>
-        </div>
+    <!-- Property Description & Amenities -->
+    <div class="broker-content-section">
+      <div class="container-fluid">
+        <div class="row">
 
-        <!-- Booking Form Section -->
-        <div *ngIf="showBookingForm" class="booking-form-section">
-          <div class="booking-form-header">
-            <h3>Book This Listing</h3>
-            <button class="glass-btn" (click)="toggleBookingForm()">
-              <i class="bi bi-x"></i>Close
-            </button>
-          </div>
-          
-          <!-- Integrated Create Booking Component -->
-          <app-create-booking 
-            [listingId]="listing.id"
-            [listingPrice]="listing.pricePerNight"
-            [listingMaxGuests]="listing.maxGuests"
-            (bookingCreated)="onBookingCreated($event)"
-            (bookingCancelled)="onBookingCancelled()">
-          </app-create-booking>
-        </div>
+          <!-- Description -->
+          <div class="col-lg-8">
+            <div class="broker-description-card">
+              <div class="section-header">
+                <h3>{{ 'listings.aboutProperty' | translate }}</h3>
+                <i class="bi bi-house-heart"></i>
+              </div>
+              <div class="description-content">
+                <p>{{ listing.description }}</p>
+              </div>
+            </div>
 
-        <!-- Show Book Now button when form is hidden -->
-        <div *ngIf="!showBookingForm && !bookingSuccess" class="booking-actions">
-          <button class="glass-btn primary large" (click)="toggleBookingForm()">
-            <i class="bi bi-calendar-check"></i>Book Now
-          </button>
-        </div>
+            <!-- Amenities -->
+            <div class="broker-amenities-card" *ngIf="listing.amenities && listing.amenities.length > 0">
+              <div class="section-header">
+                <h3>{{ 'listings.amenities' | translate }}</h3>
+                <i class="bi bi-check2-all"></i>
+              </div>
+              <div class="amenities-grid">
+                <div class="amenity-item" *ngFor="let amenity of listing.amenities">
+                  <i class="bi bi-check-circle-fill"></i>
+                  <span>{{ amenity }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <div class="description">
-          <h3>About this listing</h3>
-          <p>{{ listing.description }}</p>
-        </div>
+          <!-- Additional Info Sidebar -->
+          <div class="col-lg-4">
+            <div class="broker-info-sidebar">
 
-        <!-- Details Grid -->
-        <div class="details-grid">
-          <div class="detail-item">
-            <span class="label">Destination</span>
-            <span class="value">{{ listing.destination }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Property Type</span>
-            <span class="value">{{ listing.type }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Bedrooms</span>
-            <span class="value">{{ listing.bedrooms || 'N/A' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Bathrooms</span>
-            <span class="value">{{ listing.bathrooms || 'N/A' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Max Guests</span>
-            <span class="value">{{ listing.maxGuests }}</span>
-          </div>
-        </div>
+              <!-- Host Information -->
+              <div class="host-section">
+                <div class="section-header">
+                  <h4>{{ 'listings.hostedBy' | translate }}</h4>
+                  <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="host-info">
+                  <div class="host-avatar">
+                    <i class="bi bi-person-circle"></i>
+                  </div>
+                  <div class="host-details">
+                    <h5>{{ 'listings.hostName' | translate }}</h5>
+                    <p>{{ 'listings.verifiedHost' | translate }}</p>
+                  </div>
+                </div>
+              </div>
 
-        <!-- Amenities -->
-        <div *ngIf="listing.amenities && listing.amenities.length > 0" class="amenities">
-          <h3>Amenities</h3>
-          <div class="amenities-list">
-            <span *ngFor="let amenity of listing.amenities" class="amenity-tag">
-              {{ amenity }}
-            </span>
-          </div>
-        </div>
+              <!-- Safety Features -->
+              <div class="safety-section">
+                <div class="section-header">
+                  <h4>{{ 'listings.safetyFeatures' | translate }}</h4>
+                  <i class="bi bi-shield-check"></i>
+                </div>
+                <div class="safety-list">
+                  <div class="safety-item">
+                    <i class="bi bi-check-circle"></i>
+                    <span>{{ 'listings.verifiedProperty' | translate }}</span>
+                  </div>
+                  <div class="safety-item">
+                    <i class="bi bi-check-circle"></i>
+                    <span>{{ 'listings.secureBooking' | translate }}</span>
+                  </div>
+                  <div class="safety-item">
+                    <i class="bi bi-check-circle"></i>
+                    <span>{{ 'listings.customerSupport' | translate }}</span>
+                  </div>
+                </div>
+              </div>
 
-        <!-- Actions -->
-        <div class="actions">
-          <button class="glass-btn primary" [routerLink]="['/booking/create', listing.id]">
-            <i class="bi bi-calendar-check"></i>Book Now
-          </button>
-          <button class="glass-btn" (click)="goBack()">
-            <i class="bi bi-arrow-left"></i>Back to Listings
-          </button>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
 
     <!-- Location Section -->
-    <div class="location-info glass-card">
-      <h3><i class="bi bi-map"></i>Location: {{ listing.location }}</h3>
-      <div id="detail-map" class="detail-map"></div>
+    <div class="broker-location-section">
+      <div class="container-fluid">
+        <div class="broker-location-card">
+          <div class="section-header">
+            <h3>
+              <i class="bi bi-geo-alt-fill"></i>
+              {{ 'listings.location' | translate }}: {{ listing.location }}
+            </h3>
+            <div class="location-badge">
+              <i class="bi bi-map"></i>
+              {{ 'listings.viewOnMap' | translate }}
+            </div>
+          </div>
+          <div class="map-container">
+            <div id="detail-map" class="detail-map"></div>
+          </div>
+          <div class="location-description">
+            <p>{{ 'listings.locationDescription' | translate }}</p>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Bottom Actions -->
+    <div class="broker-bottom-actions">
+      <div class="container-fluid">
+        <div class="actions-row">
+          <button class="btn-broker-secondary" (click)="goBack()">
+            <i class="bi bi-arrow-left"></i>
+            {{ 'listings.backToListings' | translate }}
+          </button>
+          <div class="primary-actions">
+            <button class="btn-broker-outline" *ngIf="canEdit" (click)="editListing()">
+              <i class="bi bi-pencil"></i>
+              {{ 'listings.editProperty' | translate }}
+            </button>
+            <button class="btn-broker-primary" [routerLink]="['/booking/create', listing.id]">
+              <i class="bi bi-calendar-check"></i>
+              {{ 'listings.bookNow' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
+
 </div>
 
 
@@ -200,8 +371,8 @@
 
     <div class="images-section">
       <div class="main-image">
-        <img [src]="listing.images && listing.images.length > 0 
-            ? listing.images[currentImageIndex].imageUrl 
+        <img [src]="listing.images && listing.images.length > 0
+            ? listing.images[currentImageIndex].imageUrl
             : 'https://via.placeholder.com/800x600?text=No+Image'" [alt]="listing.title" />
         <button *ngIf="listing.images && listing.images.length > 1" class="nav-btn prev" (click)="prevImage()">
           ❮

@@ -1,21 +1,41 @@
 @import "bootstrap/dist/css/bootstrap.min.css";
-@import url("https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&family=Lora:ital,wght@0,400..700;1,400..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap");
 @import "./styles/rtl.css";
+
+/* ===========================
+   THE BROKER THEME - EGYPTIAN DESIGN
+   Color Palette: White, Black, Red (#DC143C)
+   =========================== */
+
+:root {
+    --broker-red: #DC143C;
+    --broker-red-hover: #B71C1C;
+    --broker-black: #1a1a1a;
+    --broker-white: #FFFFFF;
+    --broker-light-gray: #F5F5F5;
+    --broker-gray: #757575;
+    --broker-border: #E0E0E0;
+    --broker-shadow: rgba(0, 0, 0, 0.1);
+    --broker-shadow-hover: rgba(220, 20, 60, 0.2);
+}
 
 html,
 body {
     margin: 0;
     height: 100%;
+    background-color: var(--broker-white);
 }
 
 * {
-    font-family: 'Elms Sans', sans-serif !important;
+    font-family: 'Poppins', sans-serif !important;
+    box-sizing: border-box;
 }
 
 /* Arabic font override */
 [dir="rtl"] * {
-    font-family: 'Cairo', 'Elms Sans', sans-serif !important;
+    font-family: 'Cairo', 'Tajawal', sans-serif !important;
 }
 
 app-root {
@@ -34,19 +54,119 @@ body {
     position: relative;
     overflow-x: hidden;
     min-height: 100vh;
+    color: var(--broker-black);
 }
 
+/* Egyptian Background with Broker Character */
 body::before {
     content: "";
     position: fixed;
-    top: -100px;
-    left: -100px;
-    right: -100px;
-    bottom: -100px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background:
-        linear-gradient(135deg, rgba(65, 35, 11, 0.774), rgba(94, 87, 87, 0.8)),
-        url("../public/beige.jpg") center/cover no-repeat;
-    background-blend-mode: soft-light;
-    filter: blur(30px) brightness(0.6);
+        linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%),
+        url("/bg1.png") center/cover no-repeat;
+    z-index: -2;
+}
+
+/* Subtle Pattern Overlay */
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(220,20,60,.02) 35px, rgba(220,20,60,.02) 70px);
     z-index: -1;
+    pointer-events: none;
+}
+
+/* Global Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    color: var(--broker-black);
+    letter-spacing: -0.5px;
+}
+
+p {
+    color: var(--broker-gray);
+    line-height: 1.6;
+}
+
+/* Red Accent Brush Stroke Effect */
+.red-accent {
+    color: var(--broker-red) !important;
+    position: relative;
+}
+
+.red-accent::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--broker-red);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.red-accent:hover::after {
+    transform: scaleX(1);
+}
+
+/* Modern Card Style */
+.broker-card {
+    background: var(--broker-white);
+    border: 1px solid var(--broker-border);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px var(--broker-shadow);
+    transition: all 0.3s ease;
+}
+
+.broker-card:hover {
+    box-shadow: 0 8px 16px var(--broker-shadow-hover);
+    transform: translateY(-4px);
+    border-color: var(--broker-red);
+}
+
+/* CTA Button - Red Accent */
+.btn-broker {
+    background-color: var(--broker-red);
+    color: var(--broker-white);
+    border: none;
+    padding: 12px 32px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 8px rgba(220, 20, 60, 0.3);
+}
+
+.btn-broker:hover {
+    background-color: var(--broker-red-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(220, 20, 60, 0.4);
+    color: var(--broker-white);
+}
+
+.btn-broker-outline {
+    background-color: transparent;
+    color: var(--broker-red);
+    border: 2px solid var(--broker-red);
+    padding: 12px 32px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-broker-outline:hover {
+    background-color: var(--broker-red);
+    color: var(--broker-white);
 }

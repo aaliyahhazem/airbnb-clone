@@ -99,6 +99,12 @@ export interface ListingOverviewVM {
   type: string;
   bedrooms: number;
   bathrooms: number;
+  createdAt: string;
+  // Dynamic Priority & Engagement System
+  priority: number;
+  viewCount: number;
+  favoriteCount: number;
+  bookingCount: number;
 }
 
 export interface ListingsResponse<T> {

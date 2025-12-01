@@ -65,66 +65,77 @@ interface LanguageOption {
     .language-button {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 8px 12px;
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 24px;
+      gap: 8px;
+      padding: 10px 10px;
+      background: linear-gradient(135deg, #DC143C 0%, #B71C1C 100%);
+      border: none;
+      border-radius: 8px;
       color: white;
       cursor: pointer;
       font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s;
-      min-width: 80px;
-      max-width: 80px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      min-width: 90px;
       justify-content: center;
       white-space: nowrap;
       overflow: hidden;
+      box-shadow: 0 2px 8px rgba(220, 20, 60, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .language-button:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.3);
+      background: linear-gradient(135deg, #B71C1C 0%, #8B0000 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(220, 20, 60, 0.5);
+    }
+
+    .language-button:active {
+      transform: translateY(0px);
+      box-shadow: 0 2px 8px rgba(220, 20, 60, 0.3);
     }
 
     .flag {
-      font-size: 18px;
+      font-size: 20px;
       line-height: 1;
       flex-shrink: 0;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
     }
 
     .language-code {
-      text-transform: uppercase;
       font-size: 13px;
       flex-shrink: 0;
+      font-weight: 700;
     }
 
     .dropdown-icon {
-      transition: transform 0.2s;
+      transition: transform 0.3s ease;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
     }
 
     .language-button:hover .dropdown-icon {
-      transform: translateY(1px);
+      transform: translateY(2px);
     }
 
     .dropdown-menu-custom {
       position: absolute;
-      top: calc(100% + 8px);
+      top: calc(100% + 12px);
       right: 0;
       background: white;
       border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      min-width: 200px;
-      max-width: 200px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      border: 2px solid #DC143C;
+      min-width: 220px;
+      max-width: 220px;
       overflow: hidden;
       z-index: 9999;
-      animation: fadeIn 0.15s ease-out;
+      animation: fadeIn 0.2s ease-out;
     }
 
     @keyframes fadeIn {
       from {
         opacity: 0;
-        transform: translateY(-4px);
+        transform: translateY(-8px);
       }
       to {
         opacity: 1;
@@ -137,21 +148,26 @@ interface LanguageOption {
       align-items: center;
       gap: 12px;
       width: 100%;
-      padding: 12px 16px;
+      padding: 14px 18px;
       background: white;
       border: none;
+      border-left: 3px solid transparent;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s ease;
       text-align: left;
       color: #222;
     }
 
     .language-option:hover {
-      background: #f7f7f7;
+      background: rgba(220, 20, 60, 0.05);
+      border-left-color: #DC143C;
+      transform: translateX(4px);
     }
 
     .language-option.active {
-      background: #f0f0f0;
+      background: rgba(220, 20, 60, 0.1);
+      border-left-color: #DC143C;
+      font-weight: 600;
     }
 
     .language-info {
@@ -182,7 +198,8 @@ interface LanguageOption {
     }
 
     .check-icon {
-      color: #FF385C;
+      color: #DC143C;
+      filter: drop-shadow(0 1px 2px rgba(220, 20, 60, 0.3));
     }
 
     /* RTL Support */

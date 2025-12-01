@@ -1,59 +1,622 @@
-.row {
-    margin-bottom: 2.5em;
+/* ===========================
+   THE BROKER HOMEPAGE - EGYPTIAN THEME
+=========================== */
+.broker-homepage {
+    width: 100%;
+    overflow-x: hidden;
 }
 
-.col-6 {
+/* Hero Section with Character */
+.broker-hero {
+    padding: 80px 0;
+    background: linear-gradient(180deg, #FFFFFF 0%, #F5F5F5 100%);
     position: relative;
+    overflow: hidden;
 }
 
-.filters {
+.broker-hero::before {
+    content: '';
     position: absolute;
-    bottom: 0;
-    left: 5%;
-    width: 90%;
-    text-align: center;
+    top: -50%;
+    right: -20%;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(220, 20, 60, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 0;
 }
 
-h5 {
-    margin: 1em 0em;
-}
-
-.bi-arrow-right-short {
+.hero-content {
     position: relative;
-    top: 0.12em;
+    z-index: 1;
+    padding: 2rem;
 }
 
-.listings-row {
-    background: rgba(245, 245, 220, 0.082);
-    border-radius: 1.5vw;
-    padding: 0em 1em 1.5em 1.5em;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: -2px -2px 20px rgba(2, 6, 23, 0.45);
+.hero-title {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.5rem;
+}
+
+.title-main {
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--broker-gray);
+    margin-bottom: 0.5rem;
+}
+
+.title-broker,
+.title-ar {
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+    display: block;
+}
+
+.title-broker.primary-title {
+    font-size: 4.5rem;
+    font-weight: 900;
+    color: var(--broker-black);
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    order: 1;
+}
+
+.title-broker.secondary-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--broker-black);
+    letter-spacing: -1px;
+    text-transform: uppercase;
+    order: 2;
+}
+
+.title-ar.primary-title {
+    font-size: 4.5rem;
+    font-weight: 900;
+    color: var(--broker-red);
+    font-family: 'Cairo', sans-serif !important;
+    letter-spacing: 3px;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    order: 1;
+}
+
+.title-ar.secondary-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--broker-red);
+    font-family: 'Cairo', sans-serif !important;
+    letter-spacing: 2px;
+    order: 2;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: var(--broker-gray);
+    margin-bottom: 2.5rem;
+    max-width: 500px;
+    line-height: 1.8;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* ===== THE BROKER BUTTONS ===== */
+
+.btn-broker,
+.btn-broker-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+    min-width: 180px;
+}
+
+.btn-broker {
+    background: linear-gradient(135deg, var(--broker-red, #DC143C), #8B0000);
+    color: white;
+    box-shadow: 0 8px 25px rgba(220, 20, 60, 0.4);
+}
+
+.btn-broker::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-broker:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(220, 20, 60, 0.5);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-broker:hover::before {
+    left: 100%;
+}
+
+.btn-broker-outline {
+    background: transparent;
+    color: var(--broker-red, #DC143C);
+    border: 2px solid var(--broker-red, #DC143C);
+    box-shadow: 0 4px 15px rgba(220, 20, 60, 0.2);
+}
+
+.btn-broker-outline:hover {
+    background: var(--broker-red, #DC143C);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(220, 20, 60, 0.4);
+    text-decoration: none;
+}
+
+.btn-broker:active,
+.btn-broker-outline:active {
+    transform: translateY(-1px);
+}
+
+/* ===== THE BROKER BUTTONS ===== */
+
+.btn-broker,
+.btn-broker-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+    min-width: 180px;
+}
+
+.btn-broker {
+    background: linear-gradient(135deg, var(--broker-red, #DC143C), #8B0000);
+    color: white;
+    box-shadow: 0 8px 25px rgba(220, 20, 60, 0.4);
+}
+
+.btn-broker::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-broker:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(220, 20, 60, 0.5);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-broker:hover::before {
+    left: 100%;
+}
+
+.btn-broker-outline {
+    background: transparent;
+    color: var(--broker-red, #DC143C);
+    border: 2px solid var(--broker-red, #DC143C);
+    box-shadow: 0 4px 15px rgba(220, 20, 60, 0.2);
+}
+
+.btn-broker-outline:hover {
+    background: var(--broker-red, #DC143C);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(220, 20, 60, 0.4);
+    text-decoration: none;
+}
+
+.btn-broker:active,
+.btn-broker-outline:active {
+    transform: translateY(-1px);
+}
+
+/* Broker Character Showcase */
+.broker-character-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 700px;
+    perspective: 1200px;
+    transform-style: preserve-3d;
+}
+
+.broker-character-container::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: url('/bg1.png') center center / cover no-repeat;
+    opacity: 0.15;
+    border-radius: 50%;
+    z-index: 1;
+    filter: blur(2px);
+}
+
+.broker-character-main {
+    position: relative;
+    z-index: 2;
+    max-width: 100%;
+    max-height: 700px;
+    object-fit: contain;
+    animation: magicFloat 6s ease-in-out infinite, gentleGlow 4s ease-in-out infinite alternate;
+    filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.25))
+            drop-shadow(0 15px 30px rgba(220, 20, 60, 0.3))
+            drop-shadow(0 0 40px rgba(220, 20, 60, 0.1));
+    transform-style: preserve-3d;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.broker-character-main:hover {
+    animation-play-state: paused;
+    transform: perspective(1500px) translateY(-20px) translateZ(30px) rotateY(12deg) rotateX(-5deg) scale(1.06);
+    filter: drop-shadow(0 35px 70px rgba(0, 0, 0, 0.3))
+            drop-shadow(0 20px 40px rgba(220, 20, 60, 0.4))
+            drop-shadow(0 0 60px rgba(220, 20, 60, 0.3))
+            brightness(1.1) contrast(1.05);
+}@keyframes floatCharacter {
+    0%, 100% {
+        transform: perspective(1000px) translateY(0px) rotateY(0deg);
+    }
+    25% {
+        transform: perspective(1000px) translateY(-10px) rotateY(-3deg);
+    }
+    50% {
+        transform: perspective(1000px) translateY(-20px) rotateY(0deg);
+    }
+    75% {
+        transform: perspective(1000px) translateY(-10px) rotateY(3deg);
+    }
+}
+
+@keyframes tilt3D {
+    0%, 100% {
+        transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+    }
+    25% {
+        transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
+    }
+    50% {
+        transform: perspective(1000px) rotateY(0deg) rotateX(-2deg);
+    }
+    75% {
+        transform: perspective(1000px) rotateY(5deg) rotateX(2deg);
+    }
+}
+
+.character-accent-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    height: 500px;
+    background:
+        radial-gradient(circle at 25% 25%, rgba(220, 20, 60, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(220, 20, 60, 0.05) 0%, transparent 80%);
+    border-radius: 50%;
+    z-index: 1;
+    animation: mysticalRotation 20s linear infinite, auraGlow 8s ease-in-out infinite alternate;
+    transform-style: preserve-3d;
+    backdrop-filter: blur(1px);
+}
+
+.character-accent-circle::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 20%;
+    right: 20%;
+    bottom: 20%;
+    background: radial-gradient(circle at 30% 30%,
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.02) 70%,
+                transparent 100%);
+    border-radius: 50%;
+    animation: innerPulse 5s ease-in-out infinite;
+    filter: blur(0.5px);
+}
+
+.character-accent-circle::after {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    right: -15px;
+    bottom: -15px;
+    border: 3px solid transparent;
+    border-top: 3px solid rgba(220, 20, 60, 0.4);
+    border-right: 3px solid rgba(220, 20, 60, 0.2);
+    border-left: 3px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: orbitSpin 12s linear infinite reverse;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1) translateZ(0);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.15) translateZ(20px);
+        opacity: 0.8;
+    }
+}
+
+@keyframes rotate3D {
+    0% {
+        transform: rotateZ(0deg);
+    }
+    100% {
+        transform: rotateZ(360deg);
+    }
+}
+
+@keyframes pulseInner {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.3;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.6;
+    }
+}
+
+@keyframes expandRing {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.3;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 0;
+    }
+}
+
+/* Search Section */
+.broker-search {
+    padding: 60px 0;
+    background: white;
+}
+
+.search-card {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Listings Sections */
+.broker-listings {
+    padding: 60px 0;
+}
+
+.bg-light-section {
+    background: var(--broker-light-gray);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--broker-black);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.view-all-link {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--broker-red);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     transition: all 0.3s ease;
 }
 
+.view-all-link:hover {
+    color: var(--broker-red-hover);
+    gap: 1rem;
+}
+
+.cards-list {
+    display: flex;
+    gap: 2rem;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    scroll-behavior: smooth;
+}
+
+.cards-list::-webkit-scrollbar {
+    height: 8px;
+}
+
+.cards-list::-webkit-scrollbar-track {
+    background: #F5F5F5;
+    border-radius: 10px;
+}
+
+.cards-list::-webkit-scrollbar-thumb {
+    background: var(--broker-red);
+    border-radius: 10px;
+}
+
+.cards-list::-webkit-scrollbar-thumb:hover {
+    background: var(--broker-red-hover);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .broker-hero {
+        padding: 60px 0;
+    }
+
+    .title-broker {
+        font-size: 3rem;
+    }
+
+    .title-ar {
+        font-size: 2.2rem;
+    }
+
+    .broker-character-container {
+        height: 500px;
+        margin-top: 2rem;
+    }
+
+    .broker-character-main {
+        max-height: 450px;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .title-broker {
+        font-size: 2.5rem;
+    }
+
+    .title-ar {
+        font-size: 1.7rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+    }
+
+    .hero-actions .btn-broker,
+    .hero-actions .btn-broker-outline {
+        width: 100%;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .broker-character-container {
+        height: 400px;
+    }
+
+    .broker-character-main {
+        max-height: 380px;
+    }
+}
+
 /* RTL Support for Arabic */
-[dir="rtl"] .filters {
-    left: auto;
-    right: 5%;
+[dir="rtl"] .hero-title {
+    align-items: flex-end;
 }
 
-[dir="rtl"] h5 {
+[dir="rtl"] .hero-subtitle {
     text-align: right;
-    direction: rtl;
 }
 
-[dir="rtl"] .bi-arrow-right-short {
-    transform: scaleX(-1);
+[dir="rtl"] .hero-actions {
+    justify-content: flex-end;
 }
 
-[dir="rtl"] .listings-row {
-    padding: 0em 1.5em 1.5em 1em;
+[dir="rtl"] .section-header {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .section-title {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .view-all-link {
+    flex-direction: row-reverse;
 }
 
 [dir="rtl"] .cards-list {
     direction: rtl;
+}
+
+/* Mirror character in RTL */
+[dir="rtl"] .broker-character-main {
+    transform: scaleX(-1);
+}
+
+[dir="rtl"] .broker-character-main:hover {
+    transform: perspective(1000px) rotateY(-10deg) rotateX(-5deg) scale(1.05) scaleX(-1);
+}
+
+[dir="rtl"] .broker-character-main {
+    animation: magicFloatRTL 6s ease-in-out infinite, gentleGlow 4s ease-in-out infinite alternate;
+}
+
+[dir="rtl"] .broker-character-main:hover {
+    transform: perspective(1500px) translateY(-20px) translateZ(30px) rotateY(-12deg) rotateX(-5deg) scale(1.06) scaleX(-1);
+}
+
+@keyframes magicFloatRTL {
+    0% {
+        transform: perspective(1000px) translateY(0px) translateZ(0px) rotateY(0deg) rotateZ(0deg) scaleX(-1);
+    }
+    20% {
+        transform: perspective(1000px) translateY(-8px) translateZ(5px) rotateY(-2deg) rotateZ(-0.5deg) scaleX(-1);
+    }
+    40% {
+        transform: perspective(1000px) translateY(-12px) translateZ(8px) rotateY(0deg) rotateZ(0deg) scaleX(-1);
+    }
+    60% {
+        transform: perspective(1000px) translateY(-16px) translateZ(12px) rotateY(2deg) rotateZ(0.5deg) scaleX(-1);
+    }
+    80% {
+        transform: perspective(1000px) translateY(-8px) translateZ(5px) rotateY(-1deg) rotateZ(-0.2deg) scaleX(-1);
+    }
+    100% {
+        transform: perspective(1000px) translateY(0px) translateZ(0px) rotateY(0deg) rotateZ(0deg) scaleX(-1);
+    }
 }
 

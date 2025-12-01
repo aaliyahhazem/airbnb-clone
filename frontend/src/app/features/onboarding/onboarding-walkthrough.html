@@ -1,55 +1,92 @@
-<div class="onboarding-container">
-  <div class="onboarding-card">
-    <!-- Progress Bar -->
-    <div class="progress-container">
-      <div class="progress-bar" [style.width.%]="progress"></div>
-    </div>
-
-    <!-- Step Counter -->
-    <div class="step-counter">
-      {{ 'onboarding.stepCounter' | translate: {current: currentStep + 1, total: steps.length} }}
-    </div>
-
-    <!-- Current Step Content -->
-    <div class="step-content" *ngIf="steps[currentStep]">
-      <div class="step-icon">{{ steps[currentStep].icon }}</div>
-      <h1 class="step-title">{{ steps[currentStep].titleKey | translate }}</h1>
-      <p class="step-description">{{ steps[currentStep].descriptionKey | translate }}</p>
-    </div>
-
-    <!-- Navigation Buttons -->
-    <div class="navigation-buttons">
-      <button
-        class="btn btn-secondary"
-        (click)="previousStep()"
-        [disabled]="currentStep === 0">
-        {{ 'onboarding.previous' | translate }}
-      </button>
-
-      <button
-        class="btn btn-skip"
-        (click)="skipOnboarding()">
-        {{ 'onboarding.skip' | translate }}
-      </button>
-
-      <button
-        class="btn btn-primary"
-        (click)="nextStep()">
-        {{ (currentStep === steps.length - 1 ? 'onboarding.getStarted' : 'onboarding.next') | translate }}
-      </button>
-    </div>
-
-    <!-- Step Indicators (Dots) -->
-    <div class="step-indicators">
-      <span
-        *ngFor="let step of steps; let i = index"
-        class="indicator-dot"
-        [class.active]="i === currentStep"
-        [class.completed]="i < currentStep">
-      </span>
-    </div>
+<div class="broker-onboarding-container">
+  <!-- Background Elements -->
+  <div class="onboarding-background-pattern"></div>
+  <div class="onboarding-floating-elements">
+    <div class="floating-element element-1"></div>
+    <div class="floating-element element-2"></div>
+    <div class="floating-element element-3"></div>
   </div>
 
-  <!-- Background Decoration -->
-  <div class="background-decoration"></div>
+  <div class="broker-onboarding-content">
+
+    <!-- Character Section -->
+    <div class="onboarding-character-section">
+      <div class="onboarding-character-container">
+        <img src="/3.png" alt="The Broker Character" class="onboarding-character" />
+        <div class="onboarding-accent-circle"></div>
+      </div>
+    </div>
+
+    <!-- Main Onboarding Card -->
+    <div class="broker-onboarding-card">
+
+      <!-- Progress Bar -->
+      <div class="broker-progress-container">
+        <div class="broker-progress-bar" [style.width.%]="progress"></div>
+        <div class="progress-glow" [style.left.%]="progress - 5"></div>
+      </div>
+
+      <!-- Step Counter -->
+      <div class="broker-step-counter">
+        {{ 'onboarding.stepCounter' | translate: {current: currentStep + 1, total: steps.length} }}
+      </div>
+
+      <!-- Current Step Content -->
+      <div class="broker-step-content" *ngIf="steps[currentStep]">
+        <div class="step-icon-container">
+          <div class="step-icon">{{ steps[currentStep].icon }}</div>
+          <div class="icon-glow"></div>
+        </div>
+        <h1 class="broker-step-title">{{ steps[currentStep].titleKey | translate }}</h1>
+        <p class="broker-step-description">{{ steps[currentStep].descriptionKey | translate }}</p>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="broker-navigation-buttons">
+        <button
+          class="btn-broker-secondary"
+          (click)="previousStep()"
+          [disabled]="currentStep === 0">
+          <i class="bi bi-arrow-left"></i>
+          {{ 'onboarding.previous' | translate }}
+        </button>
+
+        <button
+          class="btn-broker-skip"
+          (click)="skipOnboarding()">
+          <i class="bi bi-x-lg"></i>
+          {{ 'onboarding.skip' | translate }}
+        </button>
+
+        <button
+          class="btn-broker-primary"
+          (click)="nextStep()">
+          {{ (currentStep === steps.length - 1 ? 'onboarding.getStarted' : 'onboarding.next') | translate }}
+          <i class="bi" [class]="currentStep === steps.length - 1 ? 'bi-rocket-takeoff' : 'bi-arrow-right'"></i>
+        </button>
+      </div>
+
+      <!-- Step Indicators -->
+      <div class="broker-step-indicators">
+        <span
+          *ngFor="let step of steps; let i = index"
+          class="broker-indicator-dot"
+          [class.active]="i === currentStep"
+          [class.completed]="i < currentStep"
+          (click)="currentStep = i">
+          <span class="dot-inner"></span>
+        </span>
+      </div>
+
+      <!-- Brand Footer -->
+      <div class="onboarding-brand-footer">
+        <div class="brand-text">
+          <span class="brand-name">The Broker</span>
+          <span class="brand-tagline">Your trusted property partner</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
 </div>

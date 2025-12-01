@@ -115,6 +115,9 @@ public class ListingService : IListingService
             var listing = await unitOfWork.Listings.GetListingByIdAsync(id, ct);
             if (listing == null) return new Response<ListingDetailVM?>(null, "Not found", true);
 
+            // Increment view count and priority for engagement tracking
+            await unitOfWork.Listings.IncrementViewPriorityAsync(id, ct);
+
             var vm = mapper.Map<ListingDetailVM>(listing);
             return new Response<ListingDetailVM?>(vm, null, false);
         }
@@ -133,7 +136,13 @@ public class ListingService : IListingService
         {
             var (listings, total) = await unitOfWork.Listings.GetUserViewAsync(filter, page, pageSize, ct);
             var vms = mapper.Map<List<ListingOverviewVM>>(listings);
-            return new Response<List<ListingOverviewVM>>(vms, null, false);
+            
+            // Create a response that includes totalCount metadata
+            var response = new Response<List<ListingOverviewVM>>(vms, null, false);
+            // Store totalCount in a way that the controller can access it
+            response.TotalCount = total;
+            
+            return response;
         }
         catch (Exception ex)
         {
@@ -148,7 +157,9 @@ public class ListingService : IListingService
         {
             var (listings, total) = await unitOfWork.Listings.GetHostViewAsync(userId, null, page, pageSize, ct);
             var vms = mapper.Map<List<ListingOverviewVM>>(listings);
-            return new Response<List<ListingOverviewVM>>(vms, null, false);
+            var response = new Response<List<ListingOverviewVM>>(vms, null, false);
+            response.TotalCount = total;
+            return response;
         }
         catch (Exception ex)
         {
@@ -173,8 +184,9 @@ public class ListingService : IListingService
             );
 
             var vms = mapper.Map<List<ListingOverviewVM>>(listings);
-
-            return new Response<List<ListingOverviewVM>>(vms, null, false);
+            var response = new Response<List<ListingOverviewVM>>(vms, null, false);
+            response.TotalCount = total;
+            return response;
         }
         catch (Exception ex)
         {
@@ -194,12 +206,12 @@ public class ListingService : IListingService
     CancellationToken ct = default)
     {
         if (vm == null)
-            return new Response<ListingUpdateVM>(null, "Input is null", true);
+            return new Response<ListingUpdateVM>(null!, "Input is null", true);
 
         // 1. Owner check
         var isOwner = await unitOfWork.Listings.IsOwnerAsync(listingId, hostId, ct);
         if (!isOwner)
-            return new Response<ListingUpdateVM>(null, "Not owner", true);
+            return new Response<ListingUpdateVM>(null!, "Not owner", true);
 
         try
         {
@@ -208,20 +220,20 @@ public class ListingService : IListingService
             // Fetch existing listing to preserve Destination and Type
             var existingListing = await unitOfWork.Listings.GetByIdAsync(listingId, ct);
             if (existingListing == null)
-                return new Response<ListingUpdateVM>(null, "Listing not found", true);
+                return new Response<ListingUpdateVM>(null!, "Listing not found", true);
 
             // Validate provided values (only if they are provided)
             if (vm.PricePerNight.HasValue && (vm.PricePerNight < 1 || vm.PricePerNight > 100000))
-                return new Response<ListingUpdateVM>(null, "PricePerNight must be between 1 and 100000", true);
+                return new Response<ListingUpdateVM>(null!, "PricePerNight must be between 1 and 100000", true);
 
             if (vm.MaxGuests.HasValue && (vm.MaxGuests < 1 || vm.MaxGuests > 50))
-                return new Response<ListingUpdateVM>(null, "MaxGuests must be between 1 and 50", true);
+                return new Response<ListingUpdateVM>(null!, "MaxGuests must be between 1 and 50", true);
 
             if (vm.Latitude.HasValue && (vm.Latitude < -90 || vm.Latitude > 90))
-                return new Response<ListingUpdateVM>(null, "Latitude must be between -90 and 90", true);
+                return new Response<ListingUpdateVM>(null!, "Latitude must be between -90 and 90", true);
 
             if (vm.Longitude.HasValue && (vm.Longitude < -180 || vm.Longitude > 180))
-                return new Response<ListingUpdateVM>(null, "Longitude must be between -180 and 180", true);
+                return new Response<ListingUpdateVM>(null!, "Longitude must be between -180 and 180", true);
 
             // 2. Handle image removal
             if (vm.RemoveImageIds != null && vm.RemoveImageIds.Any())
@@ -233,7 +245,7 @@ public class ListingService : IListingService
 
                     // Validation checks
                     if (image.ListingId != listingId)
-                        return new Response<ListingUpdateVM>(null, "Image does not belong to this listing", true);
+                        return new Response<ListingUpdateVM>(null!, "Image does not belong to this listing", true);
 
                     if (image.Listing.UserId != hostId)
                         continue;
@@ -257,7 +269,7 @@ public class ListingService : IListingService
 
                     // Check if upload failed
                     if (Upload.IsError(fileName))
-                        return new Response<ListingUpdateVM>(null, fileName, true);
+                        return new Response<ListingUpdateVM>(null!, fileName, true);
 
                     newImageUrls.Add(fileName);
                 }
@@ -295,7 +307,7 @@ public class ListingService : IListingService
             );
 
             if (!ok)
-                return new Response<ListingUpdateVM>(null, "Update failed", true);
+                return new Response<ListingUpdateVM>(null!, "Update failed", true);
 
             // 6. Return updated data
             var finalListing = await unitOfWork.Listings.GetListingByIdAsync(listingId, ct);
@@ -317,7 +329,7 @@ public class ListingService : IListingService
         }
         catch (Exception ex)
         {
-            return new Response<ListingUpdateVM>(null, ex.Message, true);
+            return new Response<ListingUpdateVM>(null!, ex.Message, true);
         }
     }
 

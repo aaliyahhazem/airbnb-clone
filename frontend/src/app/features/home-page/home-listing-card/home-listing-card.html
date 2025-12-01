@@ -5,10 +5,16 @@
       <img [src]="imageSrc" class="card-img-top rounded-4" [alt]="listing?.title" />
       <div class="overlay"></div>
 
+      <!-- Priority Badge -->
       <div class="position-absolute top-0 start-0 m-2 d-flex gap-1 flex-wrap">
-        <span class="badge">{{ 'home.listing.topRated' | translate }}</span>
+        <span *ngIf="hasPriorityBadge" 
+              class="badge priority-badge" 
+              [ngClass]="priorityBadge?.class">
+          {{ priorityBadge?.emoji }} {{ priorityBadge?.label }}
+        </span>
       </div>
 
+      <!-- Rating Badge -->
       <div class="rate position-absolute top-0 end-0 m-2 d-flex align-items-center" *ngIf="rating">
         <i class="bi bi-star-fill"></i>
        {{ rating }}

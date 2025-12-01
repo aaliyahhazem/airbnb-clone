@@ -1,10 +1,102 @@
-<footer class="footer text-center py-3">
-    <div class="container">
-        <p class="mb-2">Airbnb © 2025</p>
-        <div class="d-flex justify-content-center gap-3">
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-            <a href="#">Sitemap</a>
+<footer class="broker-footer">
+  <div class="footer-background">
+    <div class="footer-container">
+
+      <!-- Footer Character Section -->
+      <div class="footer-character-section">
+        <div class="footer-character-container">
+          <img src="/3.png" [alt]="'footer.title' | translate" class="footer-character" />
+          <div class="footer-accent-circle"></div>
         </div>
+      </div>
+
+      <!-- Footer Main Content -->
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3 class="footer-title">{{ 'footer.title' | translate }}</h3>
+          <p class="footer-subtitle">{{ 'footer.subtitle' | translate }}</p>
+        </div>
+
+        <div class="footer-grid">
+          <!-- Company Links -->
+          <div class="footer-section">
+            <h4 class="footer-section-title">{{ 'footer.company.title' | translate }}</h4>
+            <ul class="footer-links">
+              <li><a href="#">{{ 'footer.company.aboutUs' | translate }}</a></li>
+              <li><a href="#">{{ 'footer.company.careers' | translate }}</a></li>
+              <li><a href="#">{{ 'footer.company.press' | translate }}</a></li>
+              <li><a href="#">{{ 'footer.company.blog' | translate }}</a></li>
+            </ul>
+          </div>
+
+          <!-- Support Links -->
+          <div class="footer-section">
+            <h4 class="footer-section-title">{{ 'footer.support.title' | translate }}</h4>
+            <ul class="footer-links">
+              <li><a href="#">{{ 'footer.support.helpCenter' | translate }}</a></li>
+              <li><a href="#">{{ 'footer.support.safety' | translate }}</a></li>
+              <li><a href="#">{{ 'footer.support.cancellation' | translate }}</a></li>
+              <li><a href="#">{{ 'footer.support.contactUs' | translate }}</a></li>
+            </ul>
+          </div>
+
+          <!-- Legal Links -->
+          <div class="footer-section">
+            <h4 class="footer-section-title">{{ 'footer.legal.title' | translate }}</h4>
+            <ul class="footer-links">
+              <li><a href="#">{{ 'footer.legal.privacyPolicy' | translate }}</a></li>
+              <li><a href="#">{{ 'footer.legal.termsOfService' | translate }}</a></li>
+              <li><a href="#">{{ 'footer.legal.sitemap' | translate }}</a></li>
+              <li><a href="#">{{ 'footer.legal.cookies' | translate }}</a></li>
+            </ul>
+          </div>
+
+          <!-- Social & Connect -->
+          <div class="footer-section">
+            <h4 class="footer-section-title">{{ 'footer.connect.title' | translate }}</h4>
+            <div class="footer-social">
+              <a href="#" class="social-link" [title]="'footer.social.facebook' | translate">
+                <i class="bi bi-facebook"></i>
+              </a>
+              <a href="#" class="social-link" [title]="'footer.social.twitter' | translate">
+                <i class="bi bi-twitter"></i>
+              </a>
+              <a href="#" class="social-link" [title]="'footer.social.instagram' | translate">
+                <i class="bi bi-instagram"></i>
+              </a>
+              <a href="#" class="social-link" [title]="'footer.social.linkedin' | translate">
+                <i class="bi bi-linkedin"></i>
+              </a>
+            </div>
+            <div class="footer-newsletter">
+              <p class="newsletter-text">{{ 'footer.connect.stayUpdated' | translate }}</p>
+              <button class="newsletter-btn">
+                <i class="bi bi-envelope"></i>
+                {{ 'footer.connect.subscribe' | translate }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+          <div class="footer-copy">
+            <p>{{ 'footer.copyright' | translate }}</p>
+            <p class="footer-tagline">{{ 'footer.tagline' | translate }}</p>
+          </div>
+          <div class="footer-badges">
+            <div class="trust-badge">
+              <i class="bi bi-shield-check"></i>
+              <span>{{ 'footer.badges.verifiedPlatform' | translate }}</span>
+            </div>
+            <div class="trust-badge">
+              <i class="bi bi-award"></i>
+              <span>{{ 'footer.badges.trustedByThousands' | translate }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
+  </div>
 </footer>

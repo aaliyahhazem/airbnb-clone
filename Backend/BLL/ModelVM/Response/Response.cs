@@ -7,6 +7,7 @@
             this.result = result;
             this.errorMessage = errorMessage;
             this.IsHaveErrorOrNo = IsHaveErrorOrNo;
+            this.TotalCount = 0;
         }
 
         // Primary data (use lowercase names to match existing code and JSON naming)
@@ -14,6 +15,9 @@
         public string? errorMessage { get; init; }
         // Existing code expects this exact name
         public bool IsHaveErrorOrNo { get; init; }
+
+        // Pagination metadata
+        public int TotalCount { get; set; }
 
         // Convenience property (not serialized specially)
         public bool Success => !IsHaveErrorOrNo;

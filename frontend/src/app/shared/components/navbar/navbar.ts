@@ -11,6 +11,7 @@ import { MessageDto } from '../../../core/models/message';
 import { FavoriteStoreService } from '../../../core/services/favoriteService/favorite-store-service';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageSwitcherComponent } from '../language-switcher/language-switcher.component';
+import { LanguageService } from '../../../core/services/language.service';
 
 
 @Component({
@@ -33,6 +34,10 @@ export class Navbar implements OnInit, OnDestroy {
   messageOpen = false;
   favoriteCount = 0;
   private favoriteStore = inject(FavoriteStoreService);
+  notificationService = inject(NotificationStoreService);
+  messageService = inject(MessageStoreService);
+  languageService = inject(LanguageService);
+  currentLang: string = 'en';
 
   isAuthenticated = false;
   userFullName: string | null = null;
@@ -42,6 +47,11 @@ export class Navbar implements OnInit, OnDestroy {
   constructor(private store: NotificationStoreService, private cdr: ChangeDetectorRef, private messageStore: MessageStoreService, public auth: AuthService, private router: Router, private el: ElementRef, private renderer: Renderer2) {}
 
   ngOnInit() {
+    this.currentLang = this.languageService.getCurrentLanguage();
+    this.languageService.currentLanguage$.subscribe(lang => {
+      this.currentLang = lang;
+    });
+
     // Debug: Check current token on init
     const currentFullName = this.auth.getUserFullName();
     console.log('Navbar ngOnInit: Current user full name from token:', currentFullName);

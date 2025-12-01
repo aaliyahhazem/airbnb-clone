@@ -58,10 +58,10 @@ export class OnboardingWalkthrough implements OnInit {
   ngOnInit() {
     // Check if user should see onboarding
     const isFirstLogin = localStorage.getItem('isFirstLogin');
-    if (isFirstLogin !== 'true') {
-      // User has already completed onboarding, redirect to home
-      this.router.navigate(['/home']);
-    }
+    // if (isFirstLogin !== 'true') {
+    //   // User has already completed onboarding, redirect to home
+    //   this.router.navigate(['/home']);
+    // }
   }
 
   nextStep() {

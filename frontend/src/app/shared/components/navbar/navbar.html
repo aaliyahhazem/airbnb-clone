@@ -1,9 +1,12 @@
-<nav class="navbar navbar-expand-sm">
+<nav class="navbar navbar-expand-sm navbar-broker">
   <div class="container-fluid">
 
-    <a class="navbar-brand d-flex align-items-center" routerLink="/home">
-      <img src="logo.png" alt="logo" class="me-3">
-      Airbnb
+    <a class="navbar-brand d-flex align-items-center broker-logo" routerLink="/home">
+      <img src="/3.png" alt="The Broker" class="broker-character me-2">
+      <div class="brand-text" [attr.dir]="currentLang">
+        <span class="brand-name" [class.primary]="currentLang === 'en'" [class.secondary]="currentLang === 'ar'">The Broker</span>
+        <span class="brand-name-ar" [class.primary]="currentLang === 'ar'" [class.secondary]="currentLang === 'en'">السمسارة</span>
+      </div>
     </a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
@@ -106,12 +109,12 @@
             </div>
           </div>
           <!-- ❤️ FAVORITES -->
-          <li class="right nav-item favorites-link">
-            <a class="nav-link" routerLink="/favorites" title="My Favorites">
+          <div class="right favorites-bell">
+            <a class="bell-btn" routerLink="/favorites" title="My Favorites" aria-label="Favorites">
               <i class="bi bi-heart"></i>
               <span *ngIf="favoriteCount > 0" class="badge">{{ favoriteCount }}</span>
             </a>
-          </li>
+          </div>
           <!-- 🌐 Language Switcher -->
           <li class="right nav-item language-switcher-container">
             <app-language-switcher></app-language-switcher>

@@ -240,12 +240,44 @@ namespace DAL.Repo.Implementation
                         var t = filter.TitleContains.Trim();
                         query = query.Where(l => l.Title != null && l.Title.Contains(t));
                     }
+
+                    // Dynamic Priority & Engagement System Filters
+                    if (filter.MinPriority.HasValue)
+                    {
+                        var minPriority = filter.MinPriority.Value;
+                        query = query.Where(l => l.Priority >= minPriority);
+                    }
+
+                    if (filter.MinBookingCount.HasValue)
+                    {
+                        var minBookings = filter.MinBookingCount.Value;
+                        query = query.Where(l => l.BookingCount >= minBookings);
+                    }
+
+                    if (filter.MinFavoriteCount.HasValue)
+                    {
+                        var minFavorites = filter.MinFavoriteCount.Value;
+                        query = query.Where(l => l.FavoriteCount >= minFavorites);
+                    }
+                    //search by type
+                    if (!string.IsNullOrWhiteSpace(filter.Type))
+                    {
+                        var type = filter.Type.Trim();
+                        query = query.Where(l => l.Type != null && l.Type.Contains(type));
+                    }
+                    //search by destination 
+                    if (!string.IsNullOrWhiteSpace(filter.Destination))
+                    {
+                        var destination = filter.Destination.Trim();
+                        query = query.Where(l => l.Destination != null && l.Destination.Contains(destination));
+                    }
+                    
                 }
 
                 var totalCount = await query.CountAsync(ct);
 
                 var items = await query
-                    .OrderByDescending(l => l.IsPromoted)
+                    .OrderByDescending(l => l.Priority)
                     .ThenByDescending(l => l.CreatedAt)
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
@@ -586,6 +618,109 @@ namespace DAL.Repo.Implementation
             catch (Exception ex)
             {
                 throw new Exception("Error extending promotion in repository.", ex);
+            }
+        }
+
+        // Priority Management Methods
+        public async Task<bool> IncrementViewPriorityAsync(int listingId, CancellationToken ct = default)
+        {
+            try
+            {
+                var listing = await GetByIdAsync(listingId);
+                if (listing == null) return false;
+
+                listing.IncrementViewPriority();
+                await _context.SaveChangesAsync(ct);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> IncrementFavoritePriorityAsync(int listingId, CancellationToken ct = default)
+        {
+            try
+            {
+                var listing = await GetByIdAsync(listingId);
+                if (listing == null) return false;
+
+                listing.IncrementFavoritePriority();
+                await _context.SaveChangesAsync(ct);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> DecrementFavoritePriorityAsync(int listingId, CancellationToken ct = default)
+        {
+            try
+            {
+                var listing = await GetByIdAsync(listingId);
+                if (listing == null) return false;
+
+                listing.DecrementFavoritePriority();
+                await _context.SaveChangesAsync(ct);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> IncrementBookingPriorityAsync(int listingId, CancellationToken ct = default)
+        {
+            try
+            {
+                var listing = await GetByIdAsync(listingId);
+                if (listing == null) return false;
+
+                listing.IncrementBookingPriority();
+                await _context.SaveChangesAsync(ct);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> AdjustPriorityByReviewRatingAsync(int listingId, int rating, CancellationToken ct = default)
+        {
+            try
+            {
+                var listing = await GetByIdAsync(listingId);
+                if (listing == null) return false;
+
+                listing.AdjustPriorityByReviewRating(rating);
+                await _context.SaveChangesAsync(ct);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ReverseRatingPriorityAdjustmentAsync(int listingId, int oldRating, CancellationToken ct = default)
+        {
+            try
+            {
+                var listing = await GetByIdAsync(listingId);
+                if (listing == null) return false;
+
+                listing.ReverseRatingPriorityAdjustment(oldRating);
+                await _context.SaveChangesAsync(ct);
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

@@ -48,11 +48,17 @@
         public bool IsDeleted { get; private set; }
 
         //additional property
-        public string Destination { get; set; } 
-        public string Type { get; set; }
+        public string Destination { get; set; } = null!;
+        public string Type { get; set; } = null!;
 
         public int NumberOfRooms { get; set; }        //#of rooms
         public int NumberOfBathrooms { get; set; }   //#of bathrooms
+
+        // Dynamic Priority & Engagement System
+        public int Priority { get; private set; }      // Overall ranking score
+        public int ViewCount { get; private set; }     // Total views
+        public int FavoriteCount { get; private set; } // Total favorites
+        public int BookingCount { get; private set; }  // Total bookings
 
         // Private constructor for EF
         private Listing() { }
@@ -103,7 +109,13 @@
                 // Auditing
                 CreatedBy = createdBy,
                 CreatedAt = DateTime.UtcNow,
-                IsDeleted = false
+                IsDeleted = false,
+
+                // Dynamic Priority & Engagement System - initialize to zero
+                Priority = 0,
+                ViewCount = 0,
+                FavoriteCount = 0,
+                BookingCount = 0
             };
 
             // Attach keywords owned by this listing
@@ -368,6 +380,64 @@ public void SetMainImage(int imageId, string performedBy)
             UpdatedOn = DateTime.UtcNow;
         }
 
+
+     
+        internal void IncrementViewPriority()
+        {
+            ViewCount++;
+            Priority += 1;
+        }
+
+      
+        internal void IncrementFavoritePriority()
+        {
+            FavoriteCount++;
+            Priority += 2;
+        }
+
+    
+        internal void DecrementFavoritePriority()
+        {
+            if (FavoriteCount > 0)
+                FavoriteCount--;
+            Priority -= 2;
+        }
+
+  
+        internal void IncrementBookingPriority()
+        {
+            BookingCount++;
+            Priority += 3;
+        }
+
+        internal void AdjustPriorityByReviewRating(int rating)
+        {
+            var adjustment = rating switch
+            {
+                5 => 2,
+                4 => 1,
+                3 => 0,
+                2 => -1,
+                1 => -2,
+                _ => 0
+            };
+            Priority += adjustment;
+        }
+
+        // Reverse a previous rating adjustment when updating/deleting reviews
+        internal void ReverseRatingPriorityAdjustment(int oldRating)
+        {
+            var reverseAdjustment = oldRating switch
+            {
+                5 => -2,
+                4 => -1,
+                3 => 0,
+                2 => 1,
+                1 => 2,
+                _ => 0
+            };
+            Priority += reverseAdjustment;
+        }
 
     }
 }

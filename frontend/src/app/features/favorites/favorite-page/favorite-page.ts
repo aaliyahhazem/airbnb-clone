@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import { FavoriteStoreService } from '../../../core/services/favoriteService/favorite-store-service';
 import { Router } from '@angular/router';
 import { FavoriteListingVM, FavoriteVM } from '../../../core/models/favorite';
@@ -8,7 +9,8 @@ import { ListingOverviewVM } from '../../../core/models/listing.model';
 
 @Component({
   selector: 'app-favorite-page',
-  imports: [CommonModule, ListingCard],
+  standalone: true,
+  imports: [CommonModule, FavoriteButton, TranslateModule],
   templateUrl: './favorite-page.html',
   styleUrl: './favorite-page.css',
 })
@@ -24,7 +26,7 @@ export class FavoritePage implements OnInit {
 
   ngOnInit(): void {
     this.loadFavorites();
-    
+
     // Subscribe to store updates
     this.store.favorites$.subscribe({
       next: (favorites) => {
@@ -76,7 +78,7 @@ export class FavoritePage implements OnInit {
 
   removeFavorite(listingId: number, event: Event): void {
     event.stopPropagation();
-    
+
     if (!confirm('Remove this listing from your favorites?')) return;
 
     // Optimistic UI update: remove from view immediately, then call API.

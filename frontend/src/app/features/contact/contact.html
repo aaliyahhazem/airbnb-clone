@@ -1,0 +1,163 @@
+<div class="broker-contact-container">
+  <!-- Background Elements -->
+  <div class="contact-background-pattern"></div>
+  <div class="contact-floating-elements">
+    <div class="floating-element element-1"></div>
+    <div class="floating-element element-2"></div>
+    <div class="floating-element element-3"></div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="contact-hero">
+    <div class="contact-hero-content">
+      <div class="hero-character-section">
+        <div class="hero-character-container">
+          <img src="/3.png" [alt]="'contact.title' | translate" class="hero-character" />
+          <div class="hero-accent-circle"></div>
+        </div>
+      </div>
+
+      <div class="hero-text">
+        <h1 class="hero-title">{{ 'contact.hero.title' | translate }}</h1>
+        <p class="hero-subtitle">{{ 'contact.hero.subtitle' | translate }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Methods Section -->
+  <section class="contact-methods">
+    <div class="methods-container">
+      <h2 class="section-title">{{ 'contact.methods.title' | translate }}</h2>
+      <div class="methods-grid">
+        <div class="method-card" *ngFor="let method of contactMethods">
+          <div class="method-icon">
+            <i [class]="method.icon"></i>
+          </div>
+          <h3 class="method-title">{{ method.titleKey | translate }}</h3>
+          <p class="method-value">{{ method.value }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Form Section -->
+  <section class="contact-form-section">
+    <div class="form-container">
+      <div class="form-content">
+        <div class="form-header">
+          <h2 class="section-title">{{ 'contact.form.title' | translate }}</h2>
+          <p class="form-subtitle">{{ 'contact.form.subtitle' | translate }}</p>
+        </div>
+
+        <!-- Success Message -->
+        <div class="success-message" *ngIf="submitSuccess">
+          <div class="success-content">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>{{ 'contact.form.successMessage' | translate }}</span>
+          </div>
+        </div>
+
+        <!-- Contact Form -->
+        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">{{ 'contact.form.name' | translate }} *</label>
+              <input
+                type="text"
+                id="name"
+                formControlName="name"
+                [class.error]="getFieldError('name')"
+                [placeholder]="'contact.form.namePlaceholder' | translate">
+              <span class="error-message" *ngIf="getFieldError('name')">
+                {{ getFieldError('name')! | translate }}
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="email">{{ 'contact.form.email' | translate }} *</label>
+              <input
+                type="email"
+                id="email"
+                formControlName="email"
+                [class.error]="getFieldError('email')"
+                [placeholder]="'contact.form.emailPlaceholder' | translate">
+              <span class="error-message" *ngIf="getFieldError('email')">
+                {{ getFieldError('email')! | translate }}
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="subject">{{ 'contact.form.subject' | translate }} *</label>
+            <input
+              type="text"
+              id="subject"
+              formControlName="subject"
+              [class.error]="getFieldError('subject')"
+              [placeholder]="'contact.form.subjectPlaceholder' | translate">
+            <span class="error-message" *ngIf="getFieldError('subject')">
+              {{ getFieldError('subject')! | translate }}
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="message">{{ 'contact.form.message' | translate }} *</label>
+            <textarea
+              id="message"
+              formControlName="message"
+              rows="6"
+              [class.error]="getFieldError('message')"
+              [placeholder]="'contact.form.messagePlaceholder' | translate"></textarea>
+            <span class="error-message" *ngIf="getFieldError('message')">
+              {{ getFieldError('message')! | translate }}
+            </span>
+          </div>
+
+          <button type="submit" class="btn-broker-primary" [disabled]="isSubmitting">
+            <span *ngIf="!isSubmitting">
+              <i class="bi bi-send"></i>
+              {{ 'contact.form.send' | translate }}
+            </span>
+            <span *ngIf="isSubmitting">
+              <i class="bi bi-arrow-repeat spin"></i>
+              {{ 'contact.form.sending' | translate }}
+            </span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="contact-faq">
+    <div class="faq-container">
+      <h2 class="section-title">{{ 'contact.faqs.title' | translate }}</h2>
+      <div class="faq-list">
+        <div class="faq-item" *ngFor="let faq of faqs">
+          <h3 class="faq-question">{{ faq.questionKey | translate }}</h3>
+          <p class="faq-answer">{{ faq.answerKey | translate }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Location Section -->
+  <section class="contact-location">
+    <div class="location-container">
+      <h2 class="section-title">{{ 'contact.location.title' | translate }}</h2>
+      <div class="location-content">
+        <div class="location-info">
+          <h3>{{ 'contact.location.office' | translate }}</h3>
+          <p>{{ 'contact.location.address' | translate }}</p>
+          <p>{{ 'contact.location.description' | translate }}</p>
+        </div>
+        <div class="location-map">
+          <div class="map-placeholder">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>{{ 'contact.location.mapPlaceholder' | translate }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,9 +1,36 @@
-<div class="auth-card">
-  <h3>Login</h3>
-  <form (ngSubmit)="submit()" class="auth-form">
-    <input name="email" [(ngModel)]="email" placeholder="Email" class="auth-input" />
-    <input name="password" [(ngModel)]="password" type="password" placeholder="Password" class="auth-input" />
-    <button type="submit" class="auth-btn">Login</button>
-  </form>
-  <div class="links">No account? <a routerLink="/auth/register">Register</a></div>
+<div class="broker-auth-container">
+  <div class="broker-auth-wrapper">
+    <!-- Character Section -->
+    <div class="broker-character-section">
+      <div class="auth-character-container">
+        <img src="/3.png" alt="The Broker" class="auth-character">
+        <div class="auth-accent-circle"></div>
+      </div>
+      <div class="auth-branding">
+        <h1 class="auth-title">The Broker</h1>
+        <h2 class="auth-title-ar">السمسارة</h2>
+        <p class="auth-subtitle">{{ 'auth.welcomeBack' | translate }}</p>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="broker-auth-card">
+      <h3 class="auth-card-title">{{ 'navbar.logIn' | translate }}</h3>
+      <form (ngSubmit)="submit()" class="broker-auth-form">
+        <div class="input-group">
+          <i class="bi bi-envelope"></i>
+          <input name="email" [(ngModel)]="email" placeholder="{{ 'auth.email' | translate }}" class="broker-input" type="email" />
+        </div>
+        <div class="input-group">
+          <i class="bi bi-lock"></i>
+          <input name="password" [(ngModel)]="password" type="password" placeholder="{{ 'auth.password' | translate }}" class="broker-input" />
+        </div>
+        <button type="submit" class="btn-broker">{{ 'navbar.logIn' | translate }}</button>
+      </form>
+      <div class="auth-links">
+        {{ 'auth.dontHaveAccount' | translate }}
+        <a routerLink="/auth/register" class="broker-link">{{ 'navbar.signUp' | translate }}</a>
+      </div>
+    </div>
+  </div>
 </div>

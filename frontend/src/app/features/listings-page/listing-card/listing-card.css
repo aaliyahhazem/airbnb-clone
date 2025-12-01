@@ -1,74 +1,318 @@
-.listing-card {
-  width: 280px;
-  height: 340px;
-  padding: 0.5rem;
+/* ===== THE BROKER LISTING CARD STYLES ===== */
+
+.broker-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.broker-listing-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(220, 20, 60, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 1.2rem;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.broker-listing-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 40px rgba(220, 20, 60, 0.15);
+  border-color: var(--broker-red);
+}
+
+/* ===== IMAGE SECTION ===== */
+
+.broker-image-wrapper {
+  position: relative;
+  height: 200px;
   overflow: hidden;
-  transition: .3s;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
 }
 
-.listing-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
-}
-
-/* ⬇ Image wrapper always reserves space */
-.image-wrapper {
-  height: 180px;
+.broker-property-image {
   width: 100%;
-  border-radius: 1.2rem;
-  overflow: hidden;
-  background: #fceded3a;
-  /* visible even when no image loads */
-}
-
-/* ⬇ Image always fits inside reserved space */
-.card-img-top {
   height: 100%;
-  width: 100%;
   object-fit: cover;
-  display: block;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.title,
-.price {
-  color: #333333;
+.broker-listing-card:hover .broker-property-image {
+  transform: scale(1.05);
 }
 
-p {
-  margin: 5px 0;
+.broker-image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0.05) 50%,
+    rgba(0, 0, 0, 0.3) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.badge {
-  display: inline-flex;
-  padding: 0.5em 1em;
-  background: rgba(231, 230, 226, 0.3);
-  color: #333;
-  border-radius: 0.6vw;
-  backdrop-filter: blur(6px);
+.broker-listing-card:hover .broker-image-overlay {
+  opacity: 1;
 }
 
-.rate {
-  font-size: 0.85em;
-  color: rgb(255, 253, 240);
+/* ===== BADGES AND BUTTONS ===== */
+
+.broker-property-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, var(--broker-red), #8B0000);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  box-shadow: 0 2px 8px rgba(220, 20, 60, 0.3);
+  backdrop-filter: blur(10px);
 }
 
-.bi-arrow-up-right-circle-fill {
-  font-size: 2em;
-  color: rgba(255, 253, 240, 0.76);
+.broker-rating-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #ffc107;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 193, 7, 0.2);
 }
 
-.bottom {
-  margin-bottom: -10px;
+.broker-rating-badge span {
+  color: var(--broker-black);
+}
+
+.broker-favorite-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 1.1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transform: translateY(10px);
+  backdrop-filter: blur(10px);
+}
+
+.broker-listing-card:hover .broker-favorite-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.broker-favorite-btn:hover {
+  background: var(--broker-red);
+  color: white;
+  transform: scale(1.1);
+}
+
+/* ===== CONTENT SECTION ===== */
+
+.broker-card-content {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.broker-property-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--broker-black);
+  margin: 0 0 0.8rem 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.broker-location-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.broker-location-info i {
+  color: var(--broker-red);
+  font-size: 0.9rem;
+}
+
+/* ===== FEATURES ROW ===== */
+
+.broker-features-row {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.broker-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #6c757d;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: rgba(220, 20, 60, 0.05);
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  border: 1px solid rgba(220, 20, 60, 0.1);
+}
+
+.broker-feature-item i {
+  color: var(--broker-red);
+  font-size: 0.8rem;
+}
+
+/* ===== DESCRIPTION ===== */
+
+.broker-property-description {
+  color: #6c757d;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-bottom: 1.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+/* ===== PRICE SECTION ===== */
+
+.broker-price-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(220, 20, 60, 0.1);
+}
+
+.broker-price-info {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.broker-price-amount {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--broker-red);
+}
+
+.broker-price-period {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.broker-view-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--broker-red), #8B0000);
+  border-radius: 50%;
+  color: white;
+  font-size: 1.2rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 3px 10px rgba(220, 20, 60, 0.3);
+}
+
+.broker-listing-card:hover .broker-view-btn {
+  transform: scale(1.1) rotate(45deg);
+  box-shadow: 0 5px 15px rgba(220, 20, 60, 0.4);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+@media (max-width: 768px) {
+  .broker-listing-card {
+    margin-bottom: 1rem;
+  }
+
+  .broker-card-content {
+    padding: 1.2rem;
+  }
+
+  .broker-property-title {
+    font-size: 1.1rem;
+  }
+
+  .broker-features-row {
+    gap: 0.5rem;
+  }
+
+  .broker-feature-item {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
 }
 
 @media (max-width: 576px) {
-  .listing-card {
-    width: 60%;
+  .broker-image-wrapper {
+    height: 180px;
   }
+
+  .broker-card-content {
+    padding: 1rem;
+  }
+
+  .broker-price-amount {
+    font-size: 1.2rem;
+  }
+
+  .broker-view-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+}
+
+/* ===== HOVER ANIMATIONS ===== */
+
+@keyframes cardPulse {
+  0%, 100% { box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08); }
+  50% { box-shadow: 0 15px 40px rgba(220, 20, 60, 0.15); }
+}
+
+.broker-listing-card:hover {
+  animation: cardPulse 2s ease-in-out infinite;
 }

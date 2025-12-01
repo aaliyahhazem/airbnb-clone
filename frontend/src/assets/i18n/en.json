@@ -93,6 +93,10 @@
     "featuredForYou": "Featured for You",
     "beachfrontStays": "Beachfront Stays",
     "popularInCairo": "Popular in Cairo",
+    "welcomeTo": "Welcome to",
+    "discoverEgypt": "Discover the finest properties across Egypt. Your perfect stay awaits.",
+    "exploreListing": "Explore Listings",
+    "listProperty": "List Your Property",
     "hero": {
       "popular": "Popular",
       "description": "Explore a wide range of properties",
@@ -134,6 +138,49 @@
     "availability": "Availability",
     "bookNow": "Book Now",
     "contactHost": "Contact Host",
+    "findProperty": "Find Your Perfect Property",
+    "discoverProperties": "Discover exceptional properties across Egypt with The Broker",
+    "searchPlaceholder": "Title, location, or description",
+    "allLocations": "All Locations",
+    "maxPrice": "Max Price",
+    "minRating": "Min Rating",
+    "reset": "Reset",
+    "propertiesFound": "properties found",
+    "loading": "Loading properties...",
+    "noProperties": "No Properties Found",
+    "tryDifferentFilters": "Try adjusting your search filters",
+    "clearFilters": "Clear All Filters",
+    "property": "Property",
+    "beds": "Beds",
+    "baths": "Baths",
+    "egp": "EGP",
+    "night": "night",
+    "loadingProperty": "Loading Property Details",
+    "preparingDetails": "Preparing the perfect property showcase for you",
+    "errorOccurred": "Oops! Something went wrong",
+    "backToListings": "Back to Listings",
+    "allProperties": "All Properties",
+    "approved": "Approved",
+    "pending": "Pending Review",
+    "reviews": "reviews",
+    "noReviewsYet": "No reviews yet",
+    "edit": "Edit",
+    "perNight": "per night",
+    "propertyType": "Property Type",
+    "destination": "Destination",
+    "maxGuests": "Max Guests",
+    "bookThisProperty": "Book This Property",
+    "aboutProperty": "About this Property",
+    "hostedBy": "Hosted By",
+    "hostName": "Property Host",
+    "verifiedHost": "Verified Host",
+    "safetyFeatures": "Safety & Trust",
+    "verifiedProperty": "Verified Property",
+    "secureBooking": "Secure Booking",
+    "customerSupport": "24/7 Support",
+    "viewOnMap": "View on Map",
+    "locationDescription": "Explore this amazing location and nearby attractions",
+    "editProperty": "Edit Property",
     "shareLink": "Share",
     "addToFavorites": "Add to Favorites",
     "removeFromFavorites": "Remove from Favorites",
@@ -180,8 +227,14 @@
   },
   "notifications": {
     "title": "Notifications",
+    "stayUpdated": "Stay updated with all your latest activity",
+    "total": "total",
+    "unread": "unread",
+    "markAllRead": "Mark All Read",
+    "markAsRead": "Mark as read",
     "markAllAsRead": "Mark all as read",
-    "noNotifications": "No notifications",
+    "noNotifications": "No Notifications",
+    "allCaughtUp": "You're all caught up! No new notifications.",
     "newBooking": "New booking request",
     "bookingConfirmed": "Booking confirmed",
     "bookingCancelled": "Booking cancelled",
@@ -189,6 +242,41 @@
     "reviewReceived": "New review received",
     "paymentReceived": "Payment received",
     "clearAll": "Clear all"
+  },
+  "chat": {
+    "messages": "Messages",
+    "stayConnected": "Stay connected with hosts and travelers",
+    "conversations": "Conversations",
+    "newConversation": "New Conversation",
+    "enterUsername": "Enter username...",
+    "start": "Start",
+    "noConversations": "No conversations yet. Start chatting!",
+    "online": "Online",
+    "moreOptions": "More Options",
+    "typing": "is typing...",
+    "attachFile": "Attach File",
+    "typeMessage": "Type your message...",
+    "emoji": "Add Emoji",
+    "selectConversation": "Select a Conversation",
+    "chooseFromList": "Choose from your conversations or start a new one"
+  },
+  "favorites": {
+    "myFavorites": "My Favorites",
+    "savedProperties": "Your curated collection of dream properties",
+    "savedItems": "saved items",
+    "browseListings": "Browse Listings",
+    "clearAll": "Clear All",
+    "loadingFavorites": "Loading Your Favorites",
+    "gatheringProperties": "Gathering your saved properties",
+    "errorOccurred": "Error Loading Favorites",
+    "tryAgain": "Try Again",
+    "noFavorites": "No Favorites Yet",
+    "startExploring": "Start exploring and save your favorite listings here!",
+    "yourSavedProperties": "Your Saved Properties",
+    "gridView": "Grid View",
+    "listView": "List View",
+    "viewProperty": "View Property",
+    "addedToFavorites": "Added to favorites"
   },
   "profile": {
     "title": "Profile",
@@ -273,6 +361,182 @@
     "step5": {
       "title": "Become a Host",
       "description": "Have a property? List it and start earning! Switch to host mode anytime from your profile."
+    }
+  },
+  "footer": {
+    "title": "The Broker",
+    "subtitle": "Your trusted partner in finding perfect stays",
+    "company": {
+      "title": "Company",
+      "aboutUs": "About Us",
+      "careers": "Careers",
+      "press": "Press",
+      "blog": "Blog"
+    },
+    "support": {
+      "title": "Support",
+      "helpCenter": "Help Center",
+      "safety": "Safety",
+      "cancellation": "Cancellation",
+      "contactUs": "Contact Us"
+    },
+    "legal": {
+      "title": "Legal",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "sitemap": "Sitemap",
+      "cookies": "Cookies"
+    },
+    "connect": {
+      "title": "Connect",
+      "stayUpdated": "Stay updated",
+      "subscribe": "Subscribe"
+    },
+    "social": {
+      "facebook": "Facebook",
+      "twitter": "Twitter",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn"
+    },
+    "copyright": "© 2025 The Broker. All rights reserved.",
+    "tagline": "Crafted with ❤️ for exceptional stays",
+    "badges": {
+      "verifiedPlatform": "Verified Platform",
+      "trustedByThousands": "Trusted by Thousands"
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "hero": {
+      "title": "Discover The Broker Story",
+      "subtitle": "We're revolutionizing the way people find and book accommodations across Egypt, building trust and creating exceptional experiences."
+    },
+    "stats": {
+      "properties": "Properties",
+      "users": "Happy Users",
+      "cities": "Cities",
+      "bookings": "Bookings"
+    },
+    "story": {
+      "title": "Our Story",
+      "paragraph1": "Founded in 2023, The Broker emerged from a simple vision: to make property booking in Egypt transparent, reliable, and accessible to everyone. Our journey began when our founders experienced the challenges of finding trustworthy accommodations firsthand.",
+      "paragraph2": "Today, we've grown into Egypt's leading property booking platform, connecting thousands of travelers with verified hosts and exceptional properties. Our commitment to quality and security has made us the go-to choice for both domestic and international travelers.",
+      "paragraph3": "We believe that every stay should be memorable, every host should be trusted, and every booking should be seamless. This philosophy drives everything we do, from our rigorous verification process to our 24/7 customer support.",
+      "imageAlt": "The Broker office and team"
+    },
+    "features": {
+      "title": "Why Choose The Broker",
+      "smartSearch": {
+        "title": "Smart Search",
+        "description": "Advanced filtering and AI-powered recommendations to find your perfect stay in seconds."
+      },
+      "secureBooking": {
+        "title": "Secure Booking",
+        "description": "End-to-end encryption and secure payment processing for complete peace of mind."
+      },
+      "verifiedHosts": {
+        "title": "Verified Hosts",
+        "description": "All our hosts undergo thorough verification to ensure quality and reliability."
+      },
+      "support247": {
+        "title": "24/7 Support",
+        "description": "Round-the-clock customer support in multiple languages whenever you need us."
+      }
+    },
+    "team": {
+      "title": "Meet Our Team",
+      "ceo": {
+        "title": "CEO & Founder"
+      },
+      "cto": {
+        "title": "Chief Technology Officer"
+      },
+      "designer": {
+        "title": "Head of Design"
+      }
+    },
+    "mission": {
+      "title": "Our Mission",
+      "description": "To democratize travel in Egypt by providing a trusted platform where hosts and guests can connect with confidence, creating memorable experiences and fostering cultural exchange."
+    },
+    "values": {
+      "trust": "Trust",
+      "security": "Security",
+      "excellence": "Excellence",
+      "community": "Community"
+    },
+    "cta": {
+      "title": "Ready to Start Your Journey?",
+      "description": "Join thousands of satisfied travelers who trust The Broker for their accommodation needs.",
+      "exploreListings": "Explore Listings",
+      "hostProperty": "Host Your Property"
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "hero": {
+      "title": "Get in Touch with The Broker",
+      "subtitle": "We're here to help you with any questions, concerns, or feedback. Reach out to us anytime!"
+    },
+    "methods": {
+      "title": "Contact Methods",
+      "phone": {
+        "title": "Phone Support",
+        "value": "+20 123 456 789"
+      },
+      "email": {
+        "title": "Email Support",
+        "value": "support@thebroker.com"
+      },
+      "address": {
+        "title": "Office Location",
+        "value": "Cairo, Egypt"
+      },
+      "hours": {
+        "title": "Support Hours",
+        "value": "24/7 Available"
+      }
+    },
+    "form": {
+      "title": "Send us a Message",
+      "subtitle": "Fill out the form below and we'll get back to you as soon as possible.",
+      "name": "Full Name",
+      "namePlaceholder": "Enter your full name",
+      "email": "Email Address",
+      "emailPlaceholder": "Enter your email address",
+      "subject": "Subject",
+      "subjectPlaceholder": "What is this regarding?",
+      "message": "Message",
+      "messagePlaceholder": "Tell us how we can help you...",
+      "send": "Send Message",
+      "sending": "Sending...",
+      "successMessage": "Thank you! Your message has been sent successfully. We'll get back to you soon."
+    },
+    "faqs": {
+      "title": "Frequently Asked Questions",
+      "booking": {
+        "question": "How do I cancel or modify my booking?",
+        "answer": "You can cancel or modify your booking through your account dashboard up to 24 hours before check-in, subject to the property's cancellation policy."
+      },
+      "cancellation": {
+        "question": "What is your cancellation policy?",
+        "answer": "Cancellation policies vary by property. Most hosts offer flexible cancellation up to 24 hours before check-in. Check the specific policy on each listing."
+      },
+      "payment": {
+        "question": "What payment methods do you accept?",
+        "answer": "We accept all major credit cards, PayPal, and local Egyptian payment methods. All transactions are secure and encrypted."
+      },
+      "hosting": {
+        "question": "How can I become a host?",
+        "answer": "Getting started as a host is easy! Simply create an account, list your property with photos and details, and start earning. We provide full support throughout the process."
+      }
+    },
+    "location": {
+      "title": "Visit Our Office",
+      "office": "Main Office",
+      "address": "123 Nile Street, Downtown Cairo, Egypt",
+      "description": "Located in the heart of Cairo, our office is open for meetings and consultations.",
+      "mapPlaceholder": "Interactive Map Coming Soon"
     }
   }
 }

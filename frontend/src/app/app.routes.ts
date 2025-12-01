@@ -15,6 +15,8 @@ import { AdminListingsComponent } from './features/listings/admin-listings/admin
 import { MapComponent } from './features/Map/map/map';
 import { Listings } from './features/listings-page/listings/listings';
 import { AdminDashboard } from './features/admin/admin-dashboard/admin-dashboard';
+import { AboutComponent } from './features/about/about';
+import { ContactComponent } from './features/contact/contact';
 
 import { FavoritePage } from './features/favorites/favorite-page/favorite-page';
 import { OnboardingWalkthrough } from './features/onboarding/onboarding-walkthrough';
@@ -22,6 +24,8 @@ import { OnboardingWalkthrough } from './features/onboarding/onboarding-walkthro
 export const routes: Routes = [
   { path: 'home', component: Home },
   { path: 'map', component: MapComponent },
+  { path: 'about', component: AboutComponent },
+  { path: 'contact', component: ContactComponent },
 
   { path: '', pathMatch: 'full', redirectTo: 'home' },
   { path: 'auth/login', component: Login },

@@ -1,0 +1,129 @@
+<div class="broker-about-container">
+  <!-- Background Elements -->
+  <div class="about-background-pattern"></div>
+  <div class="about-floating-elements">
+    <div class="floating-element element-1"></div>
+    <div class="floating-element element-2"></div>
+    <div class="floating-element element-3"></div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="about-hero">
+    <div class="about-hero-content">
+      <div class="hero-character-section">
+        <div class="hero-character-container">
+          <img src="/3.png" [alt]="'about.title' | translate" class="hero-character" />
+          <div class="hero-accent-circle"></div>
+        </div>
+      </div>
+
+      <div class="hero-text">
+        <h1 class="hero-title">{{ 'about.hero.title' | translate }}</h1>
+        <p class="hero-subtitle">{{ 'about.hero.subtitle' | translate }}</p>
+        <div class="hero-stats">
+          <div class="stat-item" *ngFor="let stat of stats">
+            <span class="stat-value">{{ stat.value }}</span>
+            <span class="stat-label">{{ ('about.stats.' + stat.key) | translate }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Our Story Section -->
+  <section class="about-story">
+    <div class="story-container">
+      <div class="story-content">
+        <h2 class="section-title">{{ 'about.story.title' | translate }}</h2>
+        <div class="story-grid">
+          <div class="story-text">
+            <p class="story-paragraph">{{ 'about.story.paragraph1' | translate }}</p>
+            <p class="story-paragraph">{{ 'about.story.paragraph2' | translate }}</p>
+            <p class="story-paragraph">{{ 'about.story.paragraph3' | translate }}</p>
+          </div>
+          <div class="story-image">
+            <img src="/bg1.png" [alt]="'about.story.imageAlt' | translate" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="about-features">
+    <div class="features-container">
+      <h2 class="section-title">{{ 'about.features.title' | translate }}</h2>
+      <div class="features-grid">
+        <div class="feature-card" *ngFor="let feature of features">
+          <div class="feature-icon">{{ feature.icon }}</div>
+          <h3 class="feature-title">{{ feature.titleKey | translate }}</h3>
+          <p class="feature-description">{{ feature.descriptionKey | translate }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="about-team">
+    <div class="team-container">
+      <h2 class="section-title">{{ 'about.team.title' | translate }}</h2>
+      <div class="team-grid">
+        <div class="team-member" *ngFor="let member of team">
+          <div class="member-image">
+            <img [src]="member.image" [alt]="member.name" />
+          </div>
+          <div class="member-info">
+            <h3 class="member-name">{{ member.name }}</h3>
+            <p class="member-title">{{ member.titleKey | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mission Section -->
+  <section class="about-mission">
+    <div class="mission-container">
+      <div class="mission-content">
+        <h2 class="section-title">{{ 'about.mission.title' | translate }}</h2>
+        <p class="mission-text">{{ 'about.mission.description' | translate }}</p>
+        <div class="mission-values">
+          <div class="value-item">
+            <i class="bi bi-heart-fill"></i>
+            <span>{{ 'about.values.trust' | translate }}</span>
+          </div>
+          <div class="value-item">
+            <i class="bi bi-shield-check"></i>
+            <span>{{ 'about.values.security' | translate }}</span>
+          </div>
+          <div class="value-item">
+            <i class="bi bi-star-fill"></i>
+            <span>{{ 'about.values.excellence' | translate }}</span>
+          </div>
+          <div class="value-item">
+            <i class="bi bi-people-fill"></i>
+            <span>{{ 'about.values.community' | translate }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="about-cta">
+    <div class="cta-container">
+      <h2 class="cta-title">{{ 'about.cta.title' | translate }}</h2>
+      <p class="cta-description">{{ 'about.cta.description' | translate }}</p>
+      <div class="cta-buttons">
+        <button class="btn-broker-primary">
+          <i class="bi bi-search"></i>
+          {{ 'about.cta.exploreListings' | translate }}
+        </button>
+        <button class="btn-broker-secondary">
+          <i class="bi bi-house-add"></i>
+          {{ 'about.cta.hostProperty' | translate }}
+        </button>
+      </div>
+    </div>
+  </section>
+</div>

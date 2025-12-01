@@ -26,7 +26,11 @@ namespace BLL.AutoMapper
                        : s.Images.Where(i => !i.IsDeleted).OrderBy(i => i.Id).Select(i => $"/listings/{i.ImageUrl}").FirstOrDefault()))
                         .ForMember(d => d.Amenities, opt => opt.MapFrom(s => s.Amenities.Select(k => k.Word)))
                         .ForMember(d => d.Bedrooms, opt => opt.MapFrom(s => s.NumberOfRooms))
-                        .ForMember(d => d.Bathrooms, opt => opt.MapFrom(s => s.NumberOfBathrooms));
+                        .ForMember(d => d.Bathrooms, opt => opt.MapFrom(s => s.NumberOfBathrooms))
+                        .ForMember(d => d.Priority, opt => opt.MapFrom(s => s.Priority))
+                        .ForMember(d => d.ViewCount, opt => opt.MapFrom(s => s.ViewCount))
+                        .ForMember(d => d.FavoriteCount, opt => opt.MapFrom(s => s.FavoriteCount))
+                        .ForMember(d => d.BookingCount, opt => opt.MapFrom(s => s.BookingCount));
 
 
             /// Listing → ListingDetailVM
@@ -44,7 +48,11 @@ namespace BLL.AutoMapper
                             .ForMember(d => d.Amenities, opt => opt.MapFrom(s =>
                                 s.Amenities.Select(k => k.Word).ToList()))
                             .ForMember(d => d.  Bedrooms, opt => opt.MapFrom(s => s.NumberOfRooms))
-                            .ForMember(d => d.Bathrooms, opt => opt.MapFrom(s => s.NumberOfBathrooms));
+                            .ForMember(d => d.Bathrooms, opt => opt.MapFrom(s => s.NumberOfBathrooms))
+                            .ForMember(d => d.Priority, opt => opt.MapFrom(s => s.Priority))
+                            .ForMember(d => d.ViewCount, opt => opt.MapFrom(s => s.ViewCount))
+                            .ForMember(d => d.FavoriteCount, opt => opt.MapFrom(s => s.FavoriteCount))
+                            .ForMember(d => d.BookingCount, opt => opt.MapFrom(s => s.BookingCount));
 
             CreateMap<ListingImage, ListingImageVM>()
                             .ForMember(d => d.Id, opt => opt.MapFrom(s => s.Id))
