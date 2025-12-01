@@ -1,0 +1,10 @@
+.card-element {
+  padding: 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+button {
+  font-size: 1.2rem;
+}

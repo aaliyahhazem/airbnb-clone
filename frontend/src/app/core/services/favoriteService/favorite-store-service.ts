@@ -40,46 +40,63 @@ export class FavoriteStoreService {
       tap({
         next: (res) => {
           if (!res.isError) {
+            // Update id cache quickly
             this.favoriteListingIds.add(listingId);
-            this.loadFavorites(); // Reload to get complete data
+            this.favoriteCountSubject.next(this.favoriteCountSubject.value + 1);
+            // If server returned the created favorite object, append it to the list
+            if (res.result) {
+              const current = this.favoritesSubject.value;
+              this.favoritesSubject.next([...current, res.result]);
+            }
           }
         }
       })
     );
   }
-   // Remove from favorites
+  // Remove from favorites
   removeFavorite(listingId: number): Observable<any> {
     return this.api.removeFavorite(listingId).pipe(
       tap({
         next: (res) => {
           if (!res.isError) {
             this.favoriteListingIds.delete(listingId);
-            const current = this.favoritesSubject.value;
-            this.favoritesSubject.next(current.filter(f => f.listingId !== listingId));
-            this.favoriteCountSubject.next(this.favoriteCountSubject.value - 1);
+            const currentFavorites = this.favoritesSubject.value;
+            const updatedFavorites = currentFavorites.filter(f => f.listingId !== listingId);
+            this.favoritesSubject.next(updatedFavorites);
+
+            // Update count immediately
+            this.favoriteCountSubject.next(updatedFavorites.length);
           }
         }
       })
     );
   }
-   // Toggle favorite
+  // Toggle favorite
   toggleFavorite(listingId: number): Observable<any> {
     return this.api.toggleFavorite(listingId).pipe(
       tap({
         next: (res) => {
-          if (!res.isError) {
-            if (res.result) {
-              this.favoriteListingIds.add(listingId);
-            } else {
-              this.favoriteListingIds.delete(listingId);
+          if (!res.isError && res.result !== undefined) {
+            // Apply server result to our local state; no full reload here to avoid
+            // overwriting optimistic UI changes. The favorites list can be synced
+            // explicitly elsewhere if needed.
+            this.updateFavoriteState(listingId, res.result);
+            // If the server indicates the listing is now favorited, refresh
+            // the full favorites list so the favorites Subject contains
+            // the listing objects (required by Favorites page UI).
+            // This keeps the Favorites page in sync after toggles.
+            if (res.result === true) {
+              try { this.loadFavorites(); } catch { /* best-effort */ }
             }
-            this.loadFavorites();
+            // Consider whether you want to call loadFavorites() here
+            // this.loadFavorites();
           }
-        }
+        },
+        error: (err) => console.error('Failed to toggle favorite', err)
       })
     );
   }
- // Check if listing is favorited (from cache)
+  // Check if listing is favorited (from cache)
   isFavorited(listingId: number): boolean {
     return this.favoriteListingIds.has(listingId);
   }
@@ -96,5 +113,29 @@ export class FavoriteStoreService {
         }
       })
     );
+  }
+  // Apply an optimistic clear locally (UI-level only) - does not call the API
+  setOptimisticClearAll(): void {
+    this.favoritesSubject.next([]);
+    this.favoriteCountSubject.next(0);
+    this.favoriteListingIds.clear();
+  }
+  updateFavoriteState(listingId: number, isFavorited: boolean): void {
+    if (isFavorited) {
+      // Mark id as favorited and increment count
+      if (!this.favoriteListingIds.has(listingId)) {
+        this.favoriteListingIds.add(listingId);
+        this.favoriteCountSubject.next(this.favoriteCountSubject.value + 1);
+      }
+    } else {
+      if (this.favoriteListingIds.has(listingId)) {
+        this.favoriteListingIds.delete(listingId);
+      }
+      const currentFavorites = this.favoritesSubject.value;
+      const updatedFavorites = currentFavorites.filter(f => f.listingId !== listingId);
+
+      this.favoritesSubject.next(updatedFavorites);
+      this.favoriteCountSubject.next(updatedFavorites.length);
+    }
   }
 }

@@ -21,7 +21,7 @@
         public async Task<IEnumerable<Booking>> GetActiveBookingsAsync()
         {
             return await _context.Bookings
-                .Where(b => b.BookingStatus == BookingStatus.Active)
+                .Where(b => b.BookingStatus == BookingStatus.Pending)
                 .ToListAsync();
         }
 

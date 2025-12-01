@@ -13,6 +13,22 @@ namespace PL.Controllers
             _identityService = identityService;
             _messageService = messageService;
         }
+
+        // Dev helper: return the decoded token payload / user id from claims
+        [Authorize]
+        [HttpGet("me/token-payload")]
+        public IActionResult GetTokenPayload()
+        {
+            var payload = new Dictionary<string, string?>();
+            var possible = new[] { ClaimTypes.NameIdentifier, "sub", JwtRegisteredClaimNames.Sub, "id", "uid" };
+            foreach (var name in possible)
+            {
+                payload[name] = User.FindFirst(name)?.Value;
+            }
+            var nameClaim = User.Identity?.Name;
+            payload["name"] = nameClaim;
+            return Ok(payload);
+        }
         //any user regester as a guest
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterVM vm)

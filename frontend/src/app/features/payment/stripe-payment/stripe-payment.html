@@ -1,0 +1,42 @@
+<div class="container mt-4">
+
+  <h2 class="mb-4">Complete Your Payment</h2>
+
+  <div class="alert alert-info">
+    Booking ID: <strong>{{ bookingId }}</strong><br>
+    Amount: <strong>{{ amount | currency:'USD' }}</strong>
+  </div>
+
+  <div class="card shadow p-4 mb-3">
+    <label class="form-label">Card Information</label>
+    <div id="card-element" class="card-element"></div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+  <div *ngIf="showLoginCTA" class="mb-3">
+    <button class="btn btn-outline-primary" (click)="loginRedirect()">Log in to view this booking</button>
+  </div>
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+
+  <div *ngIf="intentCreationFailed && !successMessage" class="mb-3">
+    <div class="alert alert-warning small">Failed to create a payment intent — you can retry.</div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-primary" (click)="retryCreateIntent()" [disabled]="intentCreationInProgress">
+        <span *ngIf="!intentCreationInProgress">Retry Create Payment Intent</span>
+        <span *ngIf="intentCreationInProgress">Creating...</span>
+      </button>
+      <button class="btn btn-outline-secondary" (click)="pay()" [disabled]="isLoading | async">Try Pay Anyway</button>
+    </div>
+  </div>
+
+  <button 
+    class="btn btn-primary w-100 py-2"
+    (click)="pay()"
+    [disabled]="isLoading | async"
+  >
+    <span *ngIf="!(isLoading | async)">Pay Now</span>
+    <span *ngIf="isLoading | async">Processing...</span>
+  </button>
+
+</div>

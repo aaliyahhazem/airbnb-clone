@@ -58,7 +58,7 @@ namespace DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Active");
+                        .HasDefaultValue("Pending");
 
                     b.Property<DateTime>("CheckInDate")
                         .HasColumnType("datetime2");

@@ -9,5 +9,7 @@ namespace BLL.ModelVM.Booking
         public decimal TotalPrice { get; set; }
         public string BookingStatus { get; set; } = null!;
         public string PaymentStatus { get; set; } = null!;
+        public string? ClientSecret { get; set; }
+        public string? PaymentIntentId { get; set; }
     }
 }

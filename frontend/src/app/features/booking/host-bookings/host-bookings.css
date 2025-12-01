@@ -1,0 +1,84 @@
+/* Page Header */
+.host-header h2 {
+  font-weight: 600;
+  color: #333;
+}
+
+.host-header .btn {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Stats Cards */
+.stats-card {
+  border: none;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.stats-card .card-body {
+  padding: 1.5rem;
+}
+
+.stats-card h5 {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.stats-card h2 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+/* General Cards */
+.card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Table */
+.table-responsive {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table th {
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+/* Badges */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.45em 0.7em;
+  border-radius: 6px;
+}
+
+/* Empty State */
+.empty-icon {
+  font-size: 4rem;
+  opacity: 0.3;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .host-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+}

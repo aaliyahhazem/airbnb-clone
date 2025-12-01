@@ -6,6 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { ListingOverviewVM } from '../../../core/models/listing.model';
 import { ListingService } from '../../../core/services/listings/listing.service';
 import { ListingCard } from '../listing-card/listing-card';
+import { FavoriteStoreService } from '../../../core/services/favoriteService/favorite-store-service';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
@@ -40,10 +41,26 @@ export class Listings implements OnInit {
     private router: Router,
     private cdr: ChangeDetectorRef,
     private fb: FormBuilder
+    ,
+    public favoriteStore: FavoriteStoreService
   ) {
     this.form = this.fb.group({
       amenities: [[]]
     });
+  }
+
+  onListingFavoriteChanged(payload: { listingId: number; isFavorited: boolean }) {
+    // Parent receives event from child listing card when favorite toggles.
+    // Keep UI in sync: ensure local listings signal doesn't contain stale favorite markers.
+    try {
+      const idx = this.listings().findIndex(l => l.id === payload.listingId);
+      if (idx >= 0) {
+        const copy = [...this.listings()];
+        // attach a transient isFavorited flag so the card can pick it up if needed
+        (copy[idx] as any).isFavorited = payload.isFavorited;
+        this.listings.set(copy);
+      }
+    } catch (e) { console.warn('Failed to update listing favorite state in parent', e); }
   }
 
   // list of amenities

@@ -19,5 +19,12 @@ namespace BLL.ModelVM.Favorite
         public bool IsPromoted { get; set; }
         public string? MainImageUrl { get; set; }
         public int FavoriteCount { get; set; } // How many users favorited this
+        public string Destination { get; set; }
+        public string Type { get; set; }
+        public int Bedrooms { get; set; }
+        public int Bathrooms { get; set; }
+        public double? AverageRating { get; set; }
+        public int ReviewCount { get; set; }
+        public bool IsApproved { get; set; }
     }
 }

@@ -41,6 +41,28 @@
       </div>
     </div>
   </div>
+<div class="favorites-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-title">
+      <div class="favorite-count-badge">
+        <span class="count">{{ favoriteCount }}</span>
+        <span class="label">Saved Listings</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" (click)="goToListings()">
+        <i class="bi bi-search"></i> Browse Listings
+      </button>
+      <button 
+        *ngIf="favoriteCount > 0" 
+        class="btn btn-danger-outline" 
+        (click)="clearAll()"
+      >
+        <i class="bi bi-trash"></i> Clear All
+      </button>
+    </div>
+  </div>
 
   <!-- Loading State -->
   <div *ngIf="loading" class="broker-loading-section">
@@ -125,16 +147,6 @@
               <i class="bi bi-heart-fill"></i>
               <span>{{ listing.favoriteCount }}</span>
             </div>
-
-            <!-- Remove Favorite Button -->
-            <div class="remove-favorite-wrapper">
-              <app-favorite-button
-                [listingId]="listing.id"
-                [isFavorited]="true"
-                (favoriteChanged)="onFavoriteChanged(listing.id, $event)"
-                class="remove-favorite-btn">
-              </app-favorite-button>
-            </div>
           </div>
 
           <!-- Property Details -->
@@ -149,13 +161,12 @@
               <span>{{ listing.location }}</span>
             </div>
 
-            <p class="property-description">{{ listing.description | slice:0:100 }}{{ listing.description.length > 100 ? '...' : '' }}</p>
+            <p class="property-description">{{ listing.description | slice:0:100 }}</p>
 
             <!-- Property Features -->
             <div class="property-features">
               <div class="feature-item">
                 <i class="bi bi-people"></i>
-                <span>{{ listing.maxGuests }} {{ 'listings.guests' | translate }}</span>
               </div>
               <!-- Removed bedrooms and bathrooms as they don't exist in FavoriteListingVM -->
             </div>
@@ -184,6 +195,14 @@
         </div>
       </div>
 
+  <!-- Favorites Grid using Listing Cards -->
+  <div *ngIf="!loading && !error && listings.length > 0" class="favorites-grid">
+    <div *ngFor="let listing of listings; trackBy: trackByListingId" class="listing-card-wrapper">
+      <app-listing-card
+        [listing]="listing"
+        [isFavorited]="true"
+        (favoriteChanged)="onFavoriteChanged($event.listingId ?? listing.id, $event.isFavorited ?? true)">
+      </app-listing-card>
     </div>
   </div>
 

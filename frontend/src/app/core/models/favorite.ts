@@ -18,6 +18,13 @@ export interface FavoriteListingVM {
   isPromoted: boolean;
   mainImageUrl?: string;
   favoriteCount: number;
+  destination: string;
+  type: string;
+  bedrooms: number;
+  bathrooms: number;
+  averageRating?: number;
+  reviewCount: number;
+  isApproved: boolean;
 }
 
 export interface PaginatedFavoritesVM {

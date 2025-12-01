@@ -1,0 +1,13 @@
+.booking-card {
+  border-radius: 12px;
+}
+
+.card-header {
+  border-radius: 12px 12px 0 0 !important;
+}
+
+@media (max-width: 768px) {
+  .booking-card {
+    margin: 0;
+  }
+}

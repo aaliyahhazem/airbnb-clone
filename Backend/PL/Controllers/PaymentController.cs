@@ -5,10 +5,12 @@ namespace PL.Controllers
     public class PaymentController : BaseController
     {
         private readonly IPaymentService _paymentService;
+        private readonly ILogger<PaymentController> _logger;
 
-        public PaymentController(IPaymentService paymentService)
+        public PaymentController(IPaymentService paymentService, ILogger<PaymentController> logger)
         {
             _paymentService = paymentService;
+            _logger = logger;
         }
         private Guid? GetUserIdFromClaims()
         {
@@ -42,8 +44,18 @@ namespace PL.Controllers
              var userId = GetUserIdFromClaims();
             if (userId == null) return Unauthorized();
 
+            try
+            {
+                _logger?.LogInformation("CreateStripePaymentIntent called by user {UserId} for booking {BookingId} amount {Amount}", userId, model?.BookingId, model?.Amount);
+            }
+            catch {}
+
             var resp = await _paymentService.CreateStripePaymentIntentAsync(userId.Value, model);
-            if (!resp.Success) return BadRequest(new { error = resp.errorMessage });
+            if (!resp.Success)
+            {
+                try { _logger?.LogWarning("CreateStripePaymentIntent failed: {Reason}", resp.errorMessage); } catch {}
+                return BadRequest(new { error = resp.errorMessage });
+            }
             
             return Ok(resp.result);
         }
@@ -56,10 +68,13 @@ namespace PL.Controllers
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
             var signature = Request.Headers["Stripe-Signature"].ToString();
 
-            var resp = await _paymentService.HandleStripeWebhookAsync(json, signature);
-            if (!resp.Success) return BadRequest(new { error = resp.errorMessage });
+            // Process async WITHOUT blocking Stripe
+            _ = Task.Run(async () =>
+            {
+                await _paymentService.HandleStripeWebhookAsync(json, signature);
+            });
 
-            return Ok();
+            return Ok(); // Respond immediately
         }
         // Cancel a Stripe payment intent
         [HttpPost("stripe/cancel/{paymentIntentId}")]

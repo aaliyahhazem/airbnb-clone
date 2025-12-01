@@ -1,0 +1,95 @@
+<div class="container my-4">
+  <div class="card shadow-lg border-0 booking-card">
+    <div class="card-header bg-primary text-white py-3">
+      <h4 class="mb-0"><i class="bi bi-journal-check me-2"></i>Create Your Booking</h4>
+    </div>
+
+    <div class="card-body p-4">
+      <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+
+        <!-- Dates -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label for="checkInDate" class="form-label fw-semibold">Check-In Date</label>
+            <input
+              type="date"
+              id="checkInDate"
+              class="form-control"
+              formControlName="checkInDate"
+              [min]="today"
+              (change)="bookingForm.get('checkOutDate')?.updateValueAndValidity()">
+          </div>
+
+          <div class="col-md-6">
+            <label for="checkOutDate" class="form-label fw-semibold">Check-Out Date</label>
+            <input
+              type="date"
+              id="checkOutDate"
+              class="form-control"
+              formControlName="checkOutDate"
+              [min]="minCheckOutDate">
+          </div>
+        </div>
+
+        <!-- Guests -->
+        <div class="mb-3">
+          <label for="guests" class="form-label fw-semibold">Number of Guests</label>
+          <input 
+            type="number" 
+            id="guests" 
+            class="form-control" 
+            formControlName="guests" 
+            min="1" 
+            [attr.max]="listingMaxGuests ?? 10">
+        </div>
+
+        <!-- Price Breakdown -->
+        <div class="card bg-light border-0 shadow-sm mb-3">
+          <div class="card-body">
+            <h6 class="fw-bold text-secondary mb-3">Price Breakdown</h6>
+
+            <div class="d-flex justify-content-between mb-2">
+              <span>{{ listingPrice }} EGP × {{ getNumberOfNights() }} nights</span>
+              <span class="fw-semibold">{{ listingPrice * getNumberOfNights() }} EGP</span>
+            </div>
+
+            <hr>
+
+            <div class="d-flex justify-content-between">
+              <strong>Total Price:</strong>
+              <strong class="text-primary fs-5">{{ calculateTotalPrice() }} EGP</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="errorMessage" class="alert alert-danger">
+          {{ errorMessage }}
+        </div>
+
+        <!-- token debug removed -->
+
+        <!-- Buttons -->
+        <div class="d-grid gap-2 mt-4">
+          <button 
+            type="submit" 
+            class="btn btn-primary btn-lg"
+            [disabled]="!bookingForm.valid || isLoading">
+
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ isLoading ? 'Creating Booking...' : 'Continue To Pay Wth Stripe' }}
+          </button>
+
+          <button 
+            type="button"
+            class="btn btn-outline-secondary btn-lg"
+            (click)="onCancel()"
+            [disabled]="isLoading">
+            Cancel
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

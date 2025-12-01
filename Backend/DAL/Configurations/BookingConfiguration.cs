@@ -23,7 +23,7 @@
             builder.Property(b => b.BookingStatus)
                    .HasConversion<string>()
                    .HasMaxLength(20)
-                   .HasDefaultValue(BookingStatus.Active)
+                   .HasDefaultValue(BookingStatus.Pending)
                    .IsRequired();
 
             // Relationships

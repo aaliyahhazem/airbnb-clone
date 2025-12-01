@@ -9,6 +9,9 @@ import { MessageStoreService } from './core/services/message-store';
 import { AuthService } from './core/services/auth.service';
 import { LanguageService } from './core/services/language.service';
 import { TranslateService } from '@ngx-translate/core';
+import { FavoriteStoreService } from './core/services/favoriteService/favorite-store-service';
+import { BookingService } from './core/services/Booking/booking-service';
+import { BookingStoreService } from './core/services/Booking/booking-store-service';
 
 @Component({
   selector: 'app-root',
@@ -28,7 +31,10 @@ export class App implements OnInit {
     private messageHub: MessageHub,
     private messageStore: MessageStoreService,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private favoriteStore: FavoriteStoreService,
+    private bookingService: BookingService,
+    private bookingStore: BookingStoreService
   ) {
     // Initialize language service on app startup
     // Language detection happens automatically in LanguageService constructor
@@ -51,6 +57,8 @@ export class App implements OnInit {
         try { this.messageHub.startConnection(); } catch (err) { console.warn('Message hub start failed:', err); }
         this.store.loadInitial();
         this.messageStore.loadInitial();
+        this.favoriteStore.loadFavorites();
+        this.bookingService.getMyBookings();
       } else {
         console.log('User not authenticated, stopping hubs');
         try { this.hub.stopConnection(); } catch (err) { console.warn('Hub stop failed:', err); }

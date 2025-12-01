@@ -15,7 +15,12 @@ export class FavoriteButton {
 
   loading = false;
   private store = inject(FavoriteStoreService);
-
+  ngOnInit(): void {
+    // Subscribe to store updates for this specific listing
+    this.store.favorites$.subscribe(() => {
+      this.isFavorited = this.store.isFavorited(this.listingId);
+    });
+  }
   toggleFavorite(event: Event): void {
     event.stopPropagation();
     event.preventDefault();
@@ -23,17 +28,26 @@ export class FavoriteButton {
     if (this.loading) return;
 
     this.loading = true;
+    const newState = !this.isFavorited;
+    this.isFavorited = newState;
+    this.favoriteChanged.emit(newState);
+
     this.store.toggleFavorite(this.listingId).subscribe({
       next: (res) => {
+        this.loading = false;
         if (!res.isError && res.result !== undefined) {
+          if (res.result !== newState) {
           this.isFavorited = res.result;
-          this.favoriteChanged.emit(this.isFavorited);
+            this.favoriteChanged.emit(res.result);
+          }
         }
         this.loading = false;
       },
       error: (err) => {
         console.error('Failed to toggle favorite', err);
         this.loading = false;
+        this.isFavorited = !newState;
+        this.favoriteChanged.emit(!newState);
       }
     });
   }

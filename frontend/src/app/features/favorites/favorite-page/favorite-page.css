@@ -303,6 +303,32 @@
   padding: 2rem 0;
 }
 
+/* SweetAlert2 custom branding for this page */
+.swal-custom-popup {
+  border-radius: 16px !important;
+  border: 2px solid rgba(220,20,60,0.12) !important;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+}
+
+.swal-custom-popup .swal2-title {
+  font-family: 'Poppins', sans-serif;
+  color: var(--broker-black);
+  font-weight: 700;
+}
+
+.swal-custom-popup .swal2-html-container {
+  color: #6c757d;
+  font-size: 0.98rem;
+}
+
+/* Larger character image inside SweetAlert popup */
+.swal-custom-popup img[alt="hero"] {
+  width: 120px !important;
+  height: 120px !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
 .favorites-content-header {
   display: flex;
   justify-content: space-between;

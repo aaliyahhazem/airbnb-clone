@@ -1,0 +1,120 @@
+<div class="container mt-4">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4 host-header">
+    <h2 class="mb-0">
+      <i class="bi bi-speedometer2 text-primary me-2"></i>
+      Host Dashboard
+    </h2>
+
+    <button 
+      class="btn btn-outline-primary"
+      (click)="loadHostBookings()"
+      [disabled]="isLoading()">
+      <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div *ngIf="!isLoading() && bookings().length > 0" class="row mb-4">
+    
+    <div class="col-md-4 mb-3">
+      <div class="card stats-card text-white bg-primary">
+        <div class="card-body">
+          <h5>Total Bookings</h5>
+          <h2>{{ bookings().length }}</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+      <div class="card stats-card text-white bg-success">
+        <div class="card-body">
+          <h5>Confirmed</h5>
+          <h2>{{ getConfirmedBookingsCount() }}</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+      <div class="card stats-card text-white bg-info">
+        <div class="card-body">
+          <h5>Total Revenue</h5>
+          <h2>${{ getTotalRevenue() }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+    <p class="mt-3 text-muted">Loading host bookings...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMessage() && !isLoading()" class="alert alert-danger">
+    {{ errorMessage() }}
+  </div>
+
+  <!-- Empty State -->
+  <div 
+    *ngIf="!isLoading() && !errorMessage() && bookings().length === 0"
+    class="text-center py-5">
+
+    <i class="bi bi-house-door empty-icon"></i>
+    <h4 class="mt-3">No host bookings found</h4>
+    <p class="text-muted">You don’t have bookings for your listings yet.</p>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!isLoading() && bookings().length > 0" class="card mt-3">
+    <div class="card-header">
+      <h5 class="mb-0">All Bookings</h5>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Booking ID</th>
+              <th>Listing ID</th>
+              <th>Check-in</th>
+              <th>Check-out</th>
+              <th>Total Price</th>
+              <th>Status</th>
+              <th>Payment</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let booking of bookings()">
+              <td>#{{ booking.id }}</td>
+              <td>{{ booking.listingId }}</td>
+              <td>{{ booking.checkInDate | date:'shortDate' }}</td>
+              <td>{{ booking.checkOutDate | date:'shortDate' }}</td>
+              <td>${{ booking.totalPrice }}</td>
+
+              <td>
+                <span class="badge" [ngClass]="getStatusBadgeClass(booking.bookingStatus)">
+                  {{ booking.bookingStatus }}
+                </span>
+              </td>
+
+              <td>
+                <span class="badge bg-secondary">
+                  {{ booking.paymentStatus }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+    </div>
+
+  </div>
+</div>

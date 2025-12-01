@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 namespace BLL.Services.Impelementation
 {
     public class PaymentService : IPaymentService
@@ -5,14 +7,17 @@ namespace BLL.Services.Impelementation
         private readonly IUnitOfWork _uow;
         private readonly INotificationService _notificationService;
         private readonly IOptions<StripeSettings> _stripeSettings;
+        private readonly ILogger<PaymentService> _logger;
 
         public PaymentService(IUnitOfWork uow,
                               INotificationService notificationService,
-                              IOptions<StripeSettings> stripeSettings)
+                              IOptions<StripeSettings> stripeSettings,
+                              ILogger<PaymentService> logger)
         { 
             _uow = uow;
             _notificationService = notificationService;
             _stripeSettings = stripeSettings;
+            _logger = logger;
             // Configure Stripe API key
             StripeConfiguration.ApiKey = _stripeSettings.Value.SecretKey;
         }
@@ -36,11 +41,11 @@ namespace BLL.Services.Impelementation
                 await _uow.SaveChangesAsync();
 
                 // send notification to guest
-                await _notificationService.CreateAsync(new BLL.ModelVM.Notification.CreateNotificationVM 
-                { 
-                    UserId = booking.GuestId, 
-                    Title = "Payment Initiated", 
-                    Body = $"Payment of {amount:C} initiated for your booking.", 
+                await _notificationService.CreateAsync(new BLL.ModelVM.Notification.CreateNotificationVM
+                {
+                    UserId = booking.GuestId,
+                    Title = "Payment Initiated",
+                    Body = $"Payment of {amount:C} initiated for your booking.",
                     CreatedAt = DateTime.UtcNow,
                     ActionUrl = $"/payment/{booking.Id}",
                     ActionLabel = "View Payment"
@@ -68,26 +73,26 @@ namespace BLL.Services.Impelementation
                 _uow.Payments.Update(payment);
 
                 var booking = await _uow.Bookings.GetByIdAsync(bookingId);
-                booking.Update(booking.CheckInDate, booking.CheckOutDate, booking.TotalPrice, BookingPaymentStatus.Paid, BookingStatus.Active);
+                booking.Update(booking.CheckInDate, booking.CheckOutDate, booking.TotalPrice, BookingPaymentStatus.Paid, BookingStatus.Confirmed);
                 _uow.Bookings.Update(booking);
 
                 await _uow.SaveChangesAsync();
 
                 // notify guest & host
-                await _notificationService.CreateAsync(new CreateNotificationVM 
-                { 
-                    UserId = booking.GuestId, 
-                    Title = "Payment Confirmed", 
-                    Body = $"Your payment was successful! Enjoy your stay.", 
+                await _notificationService.CreateAsync(new CreateNotificationVM
+                {
+                    UserId = booking.GuestId,
+                    Title = "Payment Confirmed",
+                    Body = $"Your payment was successful! Enjoy your stay.",
                     CreatedAt = DateTime.UtcNow,
                     ActionUrl = $"/booking",
                     ActionLabel = "View Booking"
                 });
-                await _notificationService.CreateAsync(new CreateNotificationVM 
-                { 
-                    UserId = booking.Listing.UserId, 
-                    Title = "New Booking Confirmed", 
-                    Body = $"You have a new booking for {booking.Listing.Title}. Check-in: {booking.CheckInDate:MMM dd}", 
+                await _notificationService.CreateAsync(new CreateNotificationVM
+                {
+                    UserId = booking.Listing.UserId,
+                    Title = "New Booking Confirmed",
+                    Body = $"You have a new booking for {booking.Listing.Title}. Check-in: {booking.CheckInDate:MMM dd}",
                     CreatedAt = DateTime.UtcNow,
                     ActionUrl = $"/listings/{booking.Listing.Id}",
                     ActionLabel = "View Listing"
@@ -115,11 +120,11 @@ namespace BLL.Services.Impelementation
 
                 // notify user
                 var booking = await _uow.Bookings.GetByIdAsync(payment.BookingId);
-                await _notificationService.CreateAsync(new CreateNotificationVM 
-                { 
-                    UserId = booking.GuestId, 
-                    Title = "Payment Refunded", 
-                    Body = $"Your refund has been processed successfully.", 
+                await _notificationService.CreateAsync(new CreateNotificationVM
+                {
+                    UserId = booking.GuestId,
+                    Title = "Payment Refunded",
+                    Body = $"Your refund has been processed successfully.",
                     CreatedAt = DateTime.UtcNow,
                     ActionUrl = $"/booking",
                     ActionLabel = "View Bookings"
@@ -139,11 +144,19 @@ namespace BLL.Services.Impelementation
         {
             try
             {
+            try { _logger?.LogInformation("CreateStripePaymentIntentAsync requested by {UserId} for booking {BookingId}, amount {Amount}", userId, model.BookingId, model.Amount); } catch {}
                 var booking = await _uow.Bookings.GetByIdAsync(model.BookingId);
                 if (booking == null)
                     return Response<CreatePaymentIntentVm>.FailResponse("Booking not found");
                 if (booking.GuestId != userId)
                     return Response<CreatePaymentIntentVm>.FailResponse("Unauthorized");
+
+                // Validate amount to avoid creating 0-valued PaymentIntents
+                if (model.Amount <= 0)
+                {
+                    try { _logger?.LogWarning("CreateStripePaymentIntentAsync called with invalid amount {Amount} for booking {BookingId}", model.Amount, model.BookingId); } catch {}
+                    return Response<CreatePaymentIntentVm>.FailResponse("Invalid amount");
+                }
 
                 var options = new PaymentIntentCreateOptions
                 {
@@ -162,8 +175,14 @@ namespace BLL.Services.Impelementation
                 };
                 var service = new PaymentIntentService();
                 var paymentIntent = await service.CreateAsync(options);
-                var payment = Payment.Create(booking.Id, model.Amount, "Stripe", paymentIntent.Id, PaymentStatus.Pending, DateTime.UtcNow);
-                await _uow.Payments.AddAsync(payment);
+                var payment = Payment.Create(
+                    booking.Id,
+                    model.Amount,
+                    "Stripe",
+                    paymentIntent.Id,  // correct
+                    PaymentStatus.Pending,
+                    DateTime.UtcNow
+                ); await _uow.Payments.AddAsync(payment);
                 booking.Update(booking.CheckInDate, booking.CheckOutDate, booking.TotalPrice, BookingPaymentStatus.Pending, booking.BookingStatus);
                 _uow.Bookings.Update(booking);
                 await _uow.SaveChangesAsync();
@@ -186,10 +205,12 @@ namespace BLL.Services.Impelementation
             }
             catch (StripeException ex)
             {
+                try { _logger?.LogWarning("Stripe error creating intent: {Message}", ex.Message); } catch {}
                 return Response<CreatePaymentIntentVm>.FailResponse($"Stripe error: {ex.Message}");
             }
             catch (Exception ex)
             {
+                try { _logger?.LogError(ex, "CreateStripePaymentIntentAsync general error"); } catch {}
                 return Response<CreatePaymentIntentVm>.FailResponse(ex.Message);
             }
         }
@@ -198,7 +219,7 @@ namespace BLL.Services.Impelementation
         {
             try
             {
-                var stripeEvent = EventUtility.ConstructEvent(payload,signature,_stripeSettings.Value.WebhookSecret);
+                var stripeEvent = EventUtility.ConstructEvent(payload, signature, _stripeSettings.Value.WebhookSecret, throwOnApiVersionMismatch: false);
                 switch (stripeEvent.Type)
                 {
                     case "payment_intent.succeeded":
@@ -270,15 +291,24 @@ namespace BLL.Services.Impelementation
 
             // Update booking
             var booking = await _uow.Bookings.GetByIdAsync(bookingId);
-            if (booking != null)
+            if (booking == null) return;
+
+            // manually load related listing
+            var listing = await _uow.Listings.GetByIdAsync(booking.ListingId);
+            if (listing != null)
+            {
+                // assign manually so later code works
+                booking.GetType()
+                    .GetProperty("Listing")!
+                    .SetValue(booking, listing);
+            }
             {
                 booking.Update(
-                    booking.CheckInDate,
-                    booking.CheckOutDate,
-                    booking.TotalPrice,
-                    BookingPaymentStatus.Paid,
-                    BookingStatus.Active
-                );
+                booking.CheckInDate,
+                booking.CheckOutDate,
+                booking.TotalPrice,
+                BookingPaymentStatus.Paid,
+                BookingStatus.Confirmed);
                 _uow.Bookings.Update(booking);
 
                 // Notify guest and host
@@ -309,10 +339,10 @@ namespace BLL.Services.Impelementation
             if (paymentIntent == null) return;
 
             var bookingId = int.Parse(paymentIntent.Metadata["booking_id"]);
-            
+
             var payments = await _uow.Payments.GetPaymentsByBookingAsync(bookingId);
             var payment = payments.FirstOrDefault(p => p.TransactionId == paymentIntent.Id);
-            
+
             if (payment == null) return;
 
             payment.Update(
@@ -346,10 +376,10 @@ namespace BLL.Services.Impelementation
             if (paymentIntent == null) return;
 
             var bookingId = int.Parse(paymentIntent.Metadata["booking_id"]);
-            
+
             var payments = await _uow.Payments.GetPaymentsByBookingAsync(bookingId);
             var payment = payments.FirstOrDefault(p => p.TransactionId == paymentIntent.Id);
-            
+
             if (payment == null) return;
 
             payment.Update(

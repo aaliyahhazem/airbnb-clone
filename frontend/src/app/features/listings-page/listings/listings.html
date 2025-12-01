@@ -86,7 +86,11 @@
             </div>
 
             <div class="broker-cards-grid">
-              <app-listing-card *ngFor="let listing of filtered(); trackBy: trackById" [listing]="listing">
+              <app-listing-card
+                *ngFor="let listing of filtered(); trackBy: trackById"
+                [listing]="listing"
+                [isFavorited]="favoriteStore.isFavorited(listing.id)"
+                (favoriteChanged)="onListingFavoriteChanged($event)">
               </app-listing-card>
             </div>
 
