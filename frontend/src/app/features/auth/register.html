@@ -16,32 +16,117 @@
     <!-- Form Section -->
     <div class="broker-auth-card">
       <h3 class="auth-card-title">{{ 'navbar.signUp' | translate }}</h3>
-      <form (ngSubmit)="submit()" class="broker-auth-form">
-        <div class="input-group">
+
+      <!-- General Error Message -->
+      <div *ngIf="errorMessage" class="auth-error">
+        <i class="bi bi-exclamation-triangle"></i>
+        {{ errorMessage }}
+      </div>
+
+      <form (ngSubmit)="submit()" class="broker-auth-form" #registerForm="ngForm">
+        <!-- Full Name Field -->
+        <div class="input-group" [class.has-error]="fieldErrors['fullname']">
           <i class="bi bi-person"></i>
-          <input name="fullname" [(ngModel)]="fullname" placeholder="{{ 'auth.fullName' | translate }}" class="broker-input" />
+          <input
+            name="fullname"
+            [(ngModel)]="fullname"
+            (blur)="validateField('fullname', fullname)"
+            (input)="fieldErrors['fullname'] = ''"
+            placeholder="{{ 'auth.fullName' | translate }}"
+            class="broker-input"
+            [class.invalid]="fieldErrors['fullname']"
+            required />
         </div>
-        <div class="input-group">
+        <div *ngIf="fieldErrors['fullname']" class="field-error">
+          <i class="bi bi-exclamation-circle"></i>
+          {{ fieldErrors['fullname'] }}
+        </div>
+
+        <!-- Username Field -->
+        <div class="input-group" [class.has-error]="fieldErrors['userName']">
           <i class="bi bi-at"></i>
-          <input name="userName" [(ngModel)]="userName" placeholder="Username" class="broker-input" />
+          <input
+            name="userName"
+            [(ngModel)]="userName"
+            (blur)="validateField('userName', userName)"
+            (input)="fieldErrors['userName'] = ''"
+            placeholder="Username"
+            class="broker-input"
+            [class.invalid]="fieldErrors['userName']"
+            required />
         </div>
-        <div class="input-group">
+        <div *ngIf="fieldErrors['userName']" class="field-error">
+          <i class="bi bi-exclamation-circle"></i>
+          {{ fieldErrors['userName'] }}
+        </div>
+
+        <!-- Email Field -->
+        <div class="input-group" [class.has-error]="fieldErrors['email']">
           <i class="bi bi-envelope"></i>
-          <input name="email" [(ngModel)]="email" placeholder="{{ 'auth.email' | translate }}" class="broker-input" type="email" />
+          <input
+            name="email"
+            [(ngModel)]="email"
+            (blur)="validateField('email', email)"
+            (input)="fieldErrors['email'] = ''"
+            placeholder="{{ 'auth.email' | translate }}"
+            class="broker-input"
+            type="email"
+            [class.invalid]="fieldErrors['email']"
+            required />
         </div>
-        <div class="input-group">
+        <div *ngIf="fieldErrors['email']" class="field-error">
+          <i class="bi bi-exclamation-circle"></i>
+          {{ fieldErrors['email'] }}
+        </div>
+
+        <!-- Password Field -->
+        <div class="input-group password-group" [class.has-error]="fieldErrors['password']">
           <i class="bi bi-lock"></i>
-          <input name="password" [(ngModel)]="password" type="password" placeholder="{{ 'auth.password' | translate }}" class="broker-input" />
+          <input
+            name="password"
+            [(ngModel)]="password"
+            (blur)="validateField('password', password)"
+            (input)="fieldErrors['password'] = ''"
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="{{ 'auth.password' | translate }}"
+            class="broker-input"
+            [class.invalid]="fieldErrors['password']"
+            required />
+          <button type="button" class="password-toggle" (click)="togglePasswordVisibility()">
+            <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+          </button>
         </div>
-        <div class="input-group">
+        <div *ngIf="fieldErrors['password']" class="field-error">
+          <i class="bi bi-exclamation-circle"></i>
+          {{ fieldErrors['password'] }}
+        </div>
+
+        <!-- Confirm Password Field -->
+        <div class="input-group password-group" [class.has-error]="fieldErrors['confirmPassword']">
           <i class="bi bi-shield-check"></i>
-          <input name="confirmPassword" [(ngModel)]="confirmPassword" type="password" placeholder="{{ 'auth.confirmPassword' | translate }}" class="broker-input" />
+          <input
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
+            (blur)="validateField('confirmPassword', confirmPassword)"
+            (input)="fieldErrors['confirmPassword'] = ''"
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            placeholder="{{ 'auth.confirmPassword' | translate }}"
+            class="broker-input"
+            [class.invalid]="fieldErrors['confirmPassword']"
+            required />
+          <button type="button" class="password-toggle" (click)="toggleConfirmPasswordVisibility()">
+            <i [class]="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+          </button>
         </div>
-        <div *ngIf="errorMessage" class="auth-error">
-          <i class="bi bi-exclamation-triangle"></i>
-          {{ errorMessage }}
+        <div *ngIf="fieldErrors['confirmPassword']" class="field-error">
+          <i class="bi bi-exclamation-circle"></i>
+          {{ fieldErrors['confirmPassword'] }}
         </div>
-        <button type="submit" class="btn-broker">{{ 'navbar.signUp' | translate }}</button>
+
+        <button type="submit" class="btn-broker" [disabled]="isLoading">
+          <span *ngIf="isLoading" class="loading-spinner"></span>
+          {{ isLoading ? ('auth.creatingAccount' | translate) : ('navbar.signUp' | translate) }}
+        </button>
       </form>
       <div class="auth-links">
         {{ 'auth.alreadyHaveAccount' | translate }}

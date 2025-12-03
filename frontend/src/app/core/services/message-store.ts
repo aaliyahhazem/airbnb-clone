@@ -22,7 +22,7 @@ export class MessageStoreService {
       const msgs = Array.isArray(res.result) ? res.result : [];
       const list: MessageDto[] = msgs.map((m: any) => ({
         id: m.id ?? 0,
-        senderId: m.senderId ?? m.senderUserName ?? '',
+        senderId: m.otherUserName ?? m.otherUserId?.toString() ?? ``,
         receiverId: m.receiverId ?? '',
         content: m.content ?? '',
         sentAt: m.sentAt ?? '',

@@ -16,16 +16,61 @@
     <!-- Form Section -->
     <div class="broker-auth-card">
       <h3 class="auth-card-title">{{ 'navbar.logIn' | translate }}</h3>
-      <form (ngSubmit)="submit()" class="broker-auth-form">
-        <div class="input-group">
+
+      <!-- General Error Message -->
+      <div *ngIf="errorMessage" class="auth-error">
+        <i class="bi bi-exclamation-triangle"></i>
+        {{ errorMessage }}
+      </div>
+
+      <form (ngSubmit)="submit()" class="broker-auth-form" #loginForm="ngForm">
+        <!-- Email Field -->
+        <div class="input-group" [class.has-error]="fieldErrors['email']">
           <i class="bi bi-envelope"></i>
-          <input name="email" [(ngModel)]="email" placeholder="{{ 'auth.email' | translate }}" class="broker-input" type="email" />
+          <input
+            name="email"
+            [(ngModel)]="email"
+            (blur)="validateField('email', email)"
+            (input)="fieldErrors['email'] = ''"
+            placeholder="{{ 'auth.email' | translate }}"
+            class="broker-input"
+            type="email"
+            [class.invalid]="fieldErrors['email']"
+            #emailInput="ngModel"
+            required />
         </div>
-        <div class="input-group">
+        <div *ngIf="fieldErrors['email']" class="field-error">
+          <i class="bi bi-exclamation-circle"></i>
+          {{ fieldErrors['email'] }}
+        </div>
+
+        <!-- Password Field -->
+        <div class="input-group password-group" [class.has-error]="fieldErrors['password']">
           <i class="bi bi-lock"></i>
-          <input name="password" [(ngModel)]="password" type="password" placeholder="{{ 'auth.password' | translate }}" class="broker-input" />
+          <input
+            name="password"
+            [(ngModel)]="password"
+            (blur)="validateField('password', password)"
+            (input)="fieldErrors['password'] = ''"
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="{{ 'auth.password' | translate }}"
+            class="broker-input"
+            [class.invalid]="fieldErrors['password']"
+            #passwordInput="ngModel"
+            required />
+          <button type="button" class="password-toggle" (click)="togglePasswordVisibility()">
+            <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+          </button>
         </div>
-        <button type="submit" class="btn-broker">{{ 'navbar.logIn' | translate }}</button>
+        <div *ngIf="fieldErrors['password']" class="field-error">
+          <i class="bi bi-exclamation-circle"></i>
+          {{ fieldErrors['password'] }}
+        </div>
+
+        <button type="submit" class="btn-broker" [disabled]="isLoading">
+          <span *ngIf="isLoading" class="loading-spinner"></span>
+          {{ isLoading ? ('auth.loggingIn' | translate) : ('navbar.logIn' | translate) }}
+        </button>
       </form>
       <div class="auth-links">
         {{ 'auth.dontHaveAccount' | translate }}
