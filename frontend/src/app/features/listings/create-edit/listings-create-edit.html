@@ -18,7 +18,7 @@
   <!-- Main Content -->
   <div class="listing-form-container">
     <div class="form-header">
-        <h2>{{ editMode ? 'Edit Listing' : 'Create New Listing' }}</h2>
+        <h2>{{ editMode ? ('createEditListing.editListing' | translate) : ('createEditListing.createNewListing' | translate) }}</h2>
         <!-- <button class="btn-back" (click)="goBack()">← Back</button> -->
     </div>
 
@@ -29,39 +29,39 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-content">
         <!-- Basic Information -->
         <div class="section">
-            <h3>Basic Information</h3>
+            <h3>{{ 'createEditListing.basicInformation' | translate }}</h3>
 
             <div class="form-group">
-                <label for="title">Title *</label>
+                <label for="title">{{ 'createEditListing.title' | translate }} *</label>
                 <input
                     id="title"
                     type="text"
                     formControlName="title"
-                    placeholder="e.g., Cozy Apartment in Downtown"
+                    [placeholder]="'createEditListing.titlePlaceholder' | translate"
                     [class.is-invalid]="isInvalid('title')"
                 />
                 <small *ngIf="isInvalid('title')" class="error-text">
-                    Title is required and must be at least 5 characters
+                    {{ 'createEditListing.titleError' | translate }}
                 </small>
             </div>
 
             <div class="form-group">
-                <label for="description">Description *</label>
+                <label for="description">{{ 'createEditListing.description' | translate }} *</label>
                 <textarea
                     id="description"
                     formControlName="description"
-                    placeholder="Describe your listing in detail..."
+                    [placeholder]="'createEditListing.descriptionPlaceholder' | translate"
                     rows="5"
                     [class.is-invalid]="isInvalid('description')"
                 ></textarea>
                 <small *ngIf="isInvalid('description')" class="error-text">
-                    Description is required and must be at least 20 characters
+                    {{ 'createEditListing.descriptionError' | translate }}
                 </small>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="pricePerNight">Price Per Night (EGP) *</label>
+                    <label for="pricePerNight">{{ 'createEditListing.pricePerNight' | translate }} *</label>
                     <input
                         id="pricePerNight"
                         type="number"
@@ -70,12 +70,12 @@
                         [class.is-invalid]="isInvalid('pricePerNight')"
                     />
                     <small *ngIf="isInvalid('pricePerNight')" class="error-text">
-                        Price is required and must be greater than 0
+                        {{ 'createEditListing.priceError' | translate }}
                     </small>
                 </div>
 
                 <div class="form-group">
-                    <label for="maxGuests">Max Guests *</label>
+                    <label for="maxGuests">{{ 'createEditListing.maxGuests' | translate }} *</label>
                     <input
                         id="maxGuests"
                         type="number"
@@ -84,7 +84,7 @@
                         [class.is-invalid]="isInvalid('maxGuests')"
                     />
                     <small *ngIf="isInvalid('maxGuests')" class="error-text">
-                        Max guests is required
+                        {{ 'createEditListing.maxGuestsError' | translate }}
                     </small>
                 </div>
             </div>
@@ -92,60 +92,60 @@
 
         <!-- Location Information -->
         <div class="section">
-            <h3>Location Information</h3>
+            <h3>{{ 'createEditListing.locationInformation' | translate }}</h3>
 
             <div class="form-group">
-                <label for="location">Location *</label>
+                <label for="location">{{ 'createEditListing.location' | translate }} *</label>
                 <input
                     id="location"
                     type="text"
                     formControlName="location"
-                    placeholder="e.g., Cairo, Egypt"
+                    [placeholder]="'createEditListing.locationPlaceholder' | translate"
                     [class.is-invalid]="isInvalid('location')"
                 />
                 <small *ngIf="isInvalid('location')" class="error-text">
-                    Location is required
+                    {{ 'createEditListing.locationError' | translate }}
                 </small>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="destination">Destination *</label>
+                    <label for="destination">{{ 'createEditListing.destination' | translate }} *</label>
                     <input
                         id="destination"
                         type="text"
                         formControlName="destination"
-                        placeholder="e.g., Downtown Cairo"
+                        [placeholder]="'createEditListing.destinationPlaceholder' | translate"
                         [class.is-invalid]="isInvalid('destination')"
                     />
                     <small *ngIf="isInvalid('destination')" class="error-text">
-                        Destination is required
+                        {{ 'createEditListing.destinationError' | translate }}
                     </small>
                 </div>
 
                 <div class="form-group">
-                    <label for="type">Property Type *</label>
+                    <label for="type">{{ 'createEditListing.propertyType' | translate }} *</label>
                     <select
                         id="type"
                         formControlName="type"
                         [class.is-invalid]="isInvalid('type')"
                     >
-                        <option value="">Select a type</option>
-                        <option value="Apartment">Apartment</option>
-                        <option value="House">House</option>
-                        <option value="Villa">Villa</option>
-                        <option value="Studio">Studio</option>
-                        <option value="Penthouse">Penthouse</option>
+                        <option value="">{{ 'createEditListing.selectType' | translate }}</option>
+                        <option value="Apartment">{{ 'createEditListing.apartment' | translate }}</option>
+                        <option value="House">{{ 'createEditListing.house' | translate }}</option>
+                        <option value="Villa">{{ 'createEditListing.villa' | translate }}</option>
+                        <option value="Studio">{{ 'createEditListing.studio' | translate }}</option>
+                        <option value="Penthouse">{{ 'createEditListing.penthouse' | translate }}</option>
                     </select>
                     <small *ngIf="isInvalid('type')" class="error-text">
-                        Property type is required
+                        {{ 'createEditListing.propertyTypeError' | translate }}
                     </small>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="latitude">Latitude *</label>
+                    <label for="latitude">{{ 'createEditListing.latitude' | translate }} *</label>
                     <input
                         id="latitude"
                         type="number"
@@ -155,12 +155,12 @@
                         [class.is-invalid]="isInvalid('latitude')"
                     />
                     <small *ngIf="isInvalid('latitude')" class="error-text">
-                        Latitude is required
+                        {{ 'createEditListing.latitudeError' | translate }}
                     </small>
                 </div>
 
                 <div class="form-group">
-                    <label for="longitude">Longitude *</label>
+                    <label for="longitude">{{ 'createEditListing.longitude' | translate }} *</label>
                     <input
                         id="longitude"
                         type="number"
@@ -170,14 +170,14 @@
                         [class.is-invalid]="isInvalid('longitude')"
                     />
                     <small *ngIf="isInvalid('longitude')" class="error-text">
-                        Longitude is required
+                        {{ 'createEditListing.longitudeError' | translate }}
                     </small>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="bedrooms">Bedrooms *</label>
+                    <label for="bedrooms">{{ 'createEditListing.bedrooms' | translate }} *</label>
                     <input
                         id="bedrooms"
                         type="number"
@@ -187,12 +187,12 @@
                         [class.is-invalid]="isInvalid('bedrooms')"
                     />
                     <small *ngIf="isInvalid('bedrooms')" class="error-text">
-                        Bedrooms is required
+                        {{ 'createEditListing.bedroomsError' | translate }}
                     </small>
                 </div>
 
                 <div class="form-group">
-                    <label for="bathrooms">Bathrooms *</label>
+                    <label for="bathrooms">{{ 'createEditListing.bathrooms' | translate }} *</label>
                     <input
                         id="bathrooms"
                         type="number"
@@ -202,29 +202,29 @@
                         [class.is-invalid]="isInvalid('bathrooms')"
                     />
                     <small *ngIf="isInvalid('bathrooms')" class="error-text">
-                        Bathrooms is required
+                        {{ 'createEditListing.bathroomsError' | translate }}
                     </small>
                 </div>
             </div>
 
             <div class="form-group">
                 <button type="button" class="btn btn-outline-primary" (click)="toggleMapPicker()">
-                    {{ showMapPicker ? 'Close map' : 'Pick location on map' }}
+                    {{ showMapPicker ? ('createEditListing.closeMap' | translate) : ('createEditListing.pickLocationOnMap' | translate) }}
                 </button>
             </div>
 
             <div *ngIf="showMapPicker" class="map-picker">
                 <div id="picker-map" style="height: 320px; width: 100%; border: 1px solid #ddd; margin-bottom:8px;"></div>
                 <div class="picker-actions">
-                    <button type="button" class="btn btn-primary" (click)="confirmPickedLocation()">Confirm location</button>
-                    <button type="button" class="btn btn-secondary" (click)="toggleMapPicker()">Cancel</button>
+                    <button type="button" class="btn btn-primary" (click)="confirmPickedLocation()">{{ 'createEditListing.confirmLocation' | translate }}</button>
+                    <button type="button" class="btn btn-secondary" (click)="toggleMapPicker()">{{ 'createEditListing.cancel' | translate }}</button>
                 </div>
             </div>
         </div>
 
         <!-- Amenities -->
         <div class="section">
-            <h3>Amenities</h3>
+            <h3>{{ 'createEditListing.amenities' | translate }}</h3>
             <div class="amenities-grid">
                 <button
                     *ngFor="let amenity of amenitiesList"
@@ -240,11 +240,11 @@
 
         <!-- Images -->
         <div class="section">
-            <h3>Images</h3>
+            <h3>{{ 'createEditListing.images' | translate }}</h3>
 
             <!-- Existing Images (Edit Mode) -->
             <div *ngIf="editMode && existingImages.length > 0" class="image-section">
-                <h4>Current Images</h4>
+                <h4>{{ 'createEditListing.currentImages' | translate }}</h4>
                 <div class="images-grid">
                     <div *ngFor="let img of existingImages" class="image-item">
                         <img [src]="img.url" [alt]="'Listing image'" />
@@ -261,7 +261,7 @@
 
             <!-- New Images -->
             <div class="image-section">
-                <label for="images">{{ editMode ? 'Add New Images' : 'Upload Images' }}</label>
+                <label for="images">{{ editMode ? ('createEditListing.addNewImages' | translate) : ('createEditListing.uploadImages' | translate) }}</label>
                 <input
                     id="images"
                     type="file"
@@ -297,7 +297,7 @@
                 class="btn btn-primary"
                 [disabled]="loading || form.invalid"
             >
-                {{ loading ? 'Saving...' : (editMode ? 'Update' : 'Create') }}
+                {{ loading ? ('createEditListing.saving' | translate) : (editMode ? ('createEditListing.update' | translate) : ('createEditListing.create' | translate)) }}
             </button>
 
             <button
@@ -307,7 +307,7 @@
                 (click)="onDelete()"
 
             >
-                Delete
+                {{ 'createEditListing.delete' | translate }}
             </button>
 
             <button
@@ -315,7 +315,7 @@
                 class="btn btn-secondary"
                 (click)="goBack()"
             >
-                Cancel
+                {{ 'createEditListing.cancel' | translate }}
             </button>
         </div>
     </form>

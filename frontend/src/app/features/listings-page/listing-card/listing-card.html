@@ -32,19 +32,19 @@
     <!-- Property Details Section -->
     <div class="broker-card-content">
       <!-- Property Title -->
-      <h5 class="broker-property-title">{{ listing?.title || 'Untitled Property' }}</h5>
+      <h5 class="broker-property-title">{{ listing?.title || ('listings.untitledProperty' | translate) }}</h5>
 
       <!-- Location -->
       <div class="broker-location-info">
         <i class="bi bi-geo-alt"></i>
-        <span>{{ listing?.destination || 'Location not specified' }}</span>
+        <span>{{ listing?.destination || ('listings.locationNotSpecified' | translate) }}</span>
       </div>
 
       <!-- Property Features -->
       <div class="broker-features-row">
         <div class="broker-feature-item">
           <i class="bi bi-house-door"></i>
-          <span>{{ listing?.type || 'Property' }}</span>
+          <span>{{ listing?.type || ('listings.property' | translate) }}</span>
         </div>
         <div class="broker-feature-item">
           <i class="bi bi-bed"></i>

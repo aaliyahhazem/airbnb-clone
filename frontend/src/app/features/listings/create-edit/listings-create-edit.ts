@@ -3,6 +3,7 @@ import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {  FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { ListingService } from '../../../core/services/listings/listing.service';
 import { ListingCreateVM, ListingUpdateVM, ListingDetailVM } from '../../../core/models/listing.model';
 import { isPlatformBrowser } from '@angular/common';
@@ -11,7 +12,7 @@ import { MapService } from '../../../core/services/map/map';
 @Component({
   selector: 'app-listings-create-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule],
   templateUrl: './listings-create-edit.html',
   styleUrls: ['./listings-create-edit.css']
 })
