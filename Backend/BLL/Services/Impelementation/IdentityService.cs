@@ -35,6 +35,10 @@ namespace BLL.Services.Impelementation
             var existing = await _userManager.FindByEmailAsync(email);
             if (existing != null) return Response<LoginResponseVM>.FailResponse("Email already registered");
 
+            //check for username uniqueness
+            var existingUserName = await _userManager.FindByNameAsync(userName);
+            if (existingUserName != null) return Response<LoginResponseVM>.FailResponse("Username already taken");
+
             // sanitize provided username: keep only letters and digits
             string sanitized = null;
             if (!string.IsNullOrWhiteSpace(userName))
@@ -47,6 +51,9 @@ namespace BLL.Services.Impelementation
             {
                 sanitized = Guid.NewGuid().ToString("N");
             }
+
+            
+            
 
             // ensure uniqueness of username
             string candidate = sanitized;
@@ -91,17 +98,17 @@ namespace BLL.Services.Impelementation
                     user.Id, 
                     $@"Welcome {fullName}! 🎉
 
-We're thrilled to have you join our community. Here's what you can do:
+                    We're thrilled to have you join our community. Here's what you can do:
 
-✨ Browse unique stays worldwide
-📅 Book your perfect vacation
-💬 Chat with hosts
-🏠 List your own property
+                    ✨ Browse unique stays worldwide
+                    📅 Book your perfect vacation
+                    💬 Chat with hosts
+                    🏠 List your own property
 
-Need help? Just reply to this message!
+                    Need help? Just reply to this message!
 
-Happy exploring!
-- The Airbnb Clone Team",
+                    Happy exploring!
+                    - The Airbnb Clone Team",
                     DateTime.UtcNow,
                     false);
                 await _unitOfWork.SaveChangesAsync();
