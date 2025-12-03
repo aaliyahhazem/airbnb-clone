@@ -36,7 +36,7 @@ export class Login {
 
   validateField(fieldName: string, value: string) {
     this.fieldErrors[fieldName] = '';
-    
+
     switch (fieldName) {
       case 'email':
         if (!value) {
@@ -64,10 +64,10 @@ export class Login {
   private handleAuthError(error: any) {
     this.errorMessage = '';
     this.fieldErrors = {};
-    
+
     console.log('Full error object:', error);
     console.log('Error.error:', error.error);
-    
+
     if (error.status === 400) {
       // Bad request - validation errors
       if (error.error?.errors) {
@@ -99,7 +99,7 @@ export class Login {
       // Generic error
       this.errorMessage = error.error?.errorMessage || error.error?.message || this.translate.instant('auth.loginError');
     }
-    
+
     this.cdr.detectChanges();
   }
 
@@ -107,19 +107,19 @@ export class Login {
     // Reset previous errors
     this.errorMessage = '';
     this.fieldErrors = {};
-    
+
     // Validate form
     this.validateField('email', this.email);
     this.validateField('password', this.password);
-    
+
     // Check if there are validation errors
     if (Object.keys(this.fieldErrors).some(key => this.fieldErrors[key])) {
       return;
     }
-    
+
     this.isLoading = true;
     console.log('Submitting login with:', { email: this.email, password: this.password });
-    
+
     this.auth.login({ email: this.email, password: this.password }).subscribe({
       next: (response) => {
         console.log('Login response:', response);

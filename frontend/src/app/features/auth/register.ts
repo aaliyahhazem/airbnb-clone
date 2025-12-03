@@ -94,10 +94,10 @@ export class Register {
   private handleAuthError(error: any) {
     this.errorMessage = '';
     this.fieldErrors = {};
-    
+
     console.log('Full error object:', error);
     console.log('Error.error:', error.error);
-    
+
     if (error.status === 400) {
       // Bad request - validation errors
       if (error.error?.errors) {
@@ -139,7 +139,7 @@ export class Register {
       // Generic error
       this.errorMessage = error.error?.errorMessage || error.error?.message || this.translate.instant('auth.registerError');
     }
-    
+
     this.cdr.detectChanges();
   }  submit(form?: NgForm) {
     // Reset previous errors
