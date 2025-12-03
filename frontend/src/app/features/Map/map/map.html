@@ -1,7 +1,109 @@
-<div id="map" class="map-container"></div>
+<div class="broker-map-page">
+  <!-- Map Header -->
+  <div class="map-header">
+    <div class="header-content">
+      <div class="map-title">
+        <h1><i class="bi bi-map"></i> Explore Properties</h1>
+        <p>Discover amazing places to stay around the world</p>
+      </div>
+      
+      <!-- Map Controls -->
+      <div class="map-controls">
+        <button class="control-btn" title="Zoom In" (click)="zoomIn()">
+          <i class="bi bi-zoom-in"></i>
+        </button>
+        <button class="control-btn" title="Zoom Out" (click)="zoomOut()">
+          <i class="bi bi-zoom-out"></i>
+        </button>
+        <button class="control-btn" title="Reset View" (click)="resetView()">
+          <i class="bi bi-house"></i>
+        </button>
+      </div>
+    </div>
+  </div>
 
-<div class="property-card" *ngIf="selectedProperty">
-    <img [src]="selectedProperty.mainImageUrl" alt="" />
-    <h3>{{ selectedProperty.title }}</h3>
-    <p>{{ selectedProperty.pricePerNight }} EGP/night</p>
+  <!-- Loading Indicator -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <i class="bi bi-geo-alt"></i>
+      <span>Loading properties...</span>
+    </div>
+  </div>
+
+  <!-- Map Container -->
+  <div class="map-wrapper">
+    <div id="map" class="map-container"></div>
+    
+    <!-- Property Stats -->
+    <div class="property-stats" *ngIf="properties.length > 0">
+      <i class="bi bi-buildings"></i>
+      <span>{{ properties.length }} properties found</span>
+    </div>
+  </div>
+
+  <!-- Property Card -->
+  <div class="property-card-container" *ngIf="selectedProperty">
+    <div class="property-card">
+      <button class="close-btn" (click)="closePropertyCard()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      
+      <div class="property-image">
+        <img [src]="selectedProperty.mainImageUrl || '/assets/images/default-listing.svg'" [alt]="selectedProperty.title" />
+        <div class="property-badge">{{ selectedProperty.type }}</div>
+      </div>
+      
+      <div class="property-content">
+        <h3 class="property-title">{{ selectedProperty.title }}</h3>
+        
+        <div class="property-details">
+          <div class="detail-item">
+            <i class="bi bi-bed"></i>
+            <span>{{ selectedProperty.bedrooms }} beds</span>
+          </div>
+          <div class="detail-item">
+            <i class="bi bi-droplet"></i>
+            <span>{{ selectedProperty.bathrooms }} baths</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedProperty.averageRating">
+            <i class="bi bi-star-fill"></i>
+            <span>{{ selectedProperty.averageRating | number:'1.1-1' }} ({{ selectedProperty.reviewCount }} reviews)</span>
+          </div>
+        </div>
+        
+        <div class="property-price">
+          <span class="price">${{ selectedProperty.pricePerNight }}</span>
+          <span class="period">per night</span>
+        </div>
+        
+        <div class="property-actions">
+          <button class="btn-view-details" (click)="viewPropertyDetails(selectedProperty.id)">
+            <i class="bi bi-eye"></i>
+            View Details
+          </button>
+          <button class="btn-favorite" (click)="toggleFavorite(selectedProperty.id)">
+            <i class="bi bi-heart"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map Legend -->
+  <div class="map-legend">
+    <div class="legend-title">
+      <i class="bi bi-info-circle"></i>
+      <span>Map Legend</span>
+    </div>
+    <div class="legend-items">
+      <div class="legend-item">
+        <div class="marker-sample available"></div>
+        <span>Available Property</span>
+      </div>
+      <div class="legend-item">
+        <div class="marker-sample premium"></div>
+        <span>Premium Property</span>
+      </div>
+    </div>
+  </div>
 </div>

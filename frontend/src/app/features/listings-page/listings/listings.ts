@@ -251,6 +251,10 @@ export class Listings implements OnInit {
     this.loadListings();
   }
 
+  viewOnMap() {
+    this.router.navigate(['/map']);
+  }
+
   onDelete(id: number) {
     if (!confirm('Delete this listing?')) return;
 

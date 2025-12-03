@@ -2,6 +2,10 @@
 
 
 
+// UNUSED: This entire file is not used and has been replaced by DomainProfile.cs
+// The mapping functionality has been moved to DomainProfile.cs which handles all entity-to-viewmodel mappings
+// This file can be safely deleted or kept for reference
+
 //namespace BLL.AutoMapper
 //{
 //    public class ListingProfile : Profile

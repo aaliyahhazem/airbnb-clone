@@ -29,6 +29,7 @@
         public int? MainImageId { get; private set; }
         public ListingImage? MainImage { get; private set; }
 
+        // UNUSED: Tags system replaced by Amenities
         //public List<string> Tags { get; private set; } = new List<string>();
 
         // Approval Workflow
@@ -79,6 +80,7 @@
      string type,
         int numberOfRooms,
         int numberOfBathrooms,
+     // UNUSED: Promotion is admin-only, not set during creation
      //bool isPromoted = false,
      //DateTime? promotionEndDate = null,
 
@@ -98,6 +100,7 @@
                 Type = type,
                 NumberOfRooms = numberOfRooms,
                 NumberOfBathrooms = numberOfBathrooms,
+                // UNUSED: Promotion is admin-only, not set during creation
                 //IsPromoted = isPromoted,
                 //PromotionEndDate = promotionEndDate,
 
@@ -162,6 +165,7 @@
  string type,
     int numberOfRooms,
     int numberOfBathrooms,
+    // UNUSED: Promotion managed separately by admin methods
     //bool isPromoted,
     //DateTime? promotionEndDate,
     IEnumerable<string>? keywordNames = null,
@@ -181,6 +185,7 @@
             Type = type;
             NumberOfRooms = numberOfRooms;
             NumberOfBathrooms = numberOfBathrooms;
+            // UNUSED: Promotion managed separately by admin methods
             //IsPromoted = isPromoted;
             //PromotionEndDate = promotionEndDate;
 

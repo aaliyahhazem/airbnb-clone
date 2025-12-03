@@ -7,9 +7,11 @@
         public string Description { get; set; }
         public decimal PricePerNight { get; set; }
         
+        // UNUSED: Location removed in favor of Destination property
         //public string Location { get; set; } = null!;
         public string? MainImageUrl { get; set; }
 
+        // UNUSED: Promotion status managed separately in admin interface
         //public bool IsPromoted { get; set; }
         public bool IsApproved { get; set; }
 

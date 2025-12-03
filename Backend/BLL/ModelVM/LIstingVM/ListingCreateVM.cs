@@ -37,6 +37,8 @@
 
         // images to upload on create (first image -> main image)
         public List<IFormFile>? Images { get; set; }
+        
+        // UNUSED: Promotion is admin-only functionality, not set during creation
         //public bool IsPromoted { get; set; }
         //public DateTime? PromotionEndDate { get; set; }
        

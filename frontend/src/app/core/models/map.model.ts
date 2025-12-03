@@ -17,8 +17,11 @@ export interface PropertyMap {
   latitude: number;
   longitude: number;
   mainImageUrl?: string;
+  type: string;
+  bedrooms: number;
+  bathrooms: number;
   averageRating?: number;
-  reviewCount: number;
+  reviewCount: number;
 }
 
 // GeocodeResponse

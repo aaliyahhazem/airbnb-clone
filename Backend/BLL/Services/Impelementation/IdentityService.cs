@@ -214,6 +214,7 @@ namespace BLL.Services.Impelementation
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null) return Response<bool>.FailResponse("User not found");
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            // INCOMPLETE: Email sending not implemented yet
             // TODO: send email with token
             return Response<bool>.SuccessResponse(true);
         }

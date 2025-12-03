@@ -1,25 +1,558 @@
-.map-container {
-  height: 80vh;
-  width: 80%;
-  margin-top: 100px;
-  margin-left: auto;
+/* ================================
+   BROKER MAP PAGE STYLES
+   ================================ */
+
+.broker-map-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ea6666 0%, #a24b5b 100%);
+  position: relative;
+  overflow: hidden;
 }
 
-.property-card {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  background: #fff;
-  padding: 14px;
-  width: 260px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px #0003;
+/* Map Header */
+.map-header {
+  background: #DC143C;
+  border-bottom: 2px solid #DC143C;
+  padding: 20px 0;
+  position: relative;
   z-index: 1000;
 }
 
-.property-card img {
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+}
+
+.map-title h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.map-title h1 i {
+  color: #fff;
+  font-size: 1.8rem;
+}
+
+.map-title p {
+  color: #fff;
+  margin: 5px 0 0 0;
+  font-size: 1.1rem;
+}
+
+/* Map Controls */
+.map-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.control-btn {
+  width: 45px;
+  height: 45px;
+  border: none;
+  border-radius: 12px;
+  background: #fff;
+  color: #DC143C;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.control-btn:hover {
+  background: #B22222;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(220, 20, 60, 0.4);
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 140px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.loading-spinner {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.loading-spinner i {
+  font-size: 3rem;
+  color: #DC143C;
+  animation: bounce 2s infinite;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.loading-spinner span {
+  font-size: 1.2rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-20px); }
+  60% { transform: translateY(-10px); }
+}
+
+/* Map Wrapper */
+.map-wrapper {
+  position: relative;
+  height: calc(100vh - 120px);
+  margin: 0;
+}
+
+.map-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+}
+
+/* Property Stats */
+.property-stats {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 12px 18px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.property-stats i {
+  color: #DC143C;
+  font-size: 1.1rem;
+}
+
+/* Property Card Container */
+.property-card-container {
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  z-index: 1500;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Property Card */
+.property-card {
+  background: #222;
+  color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(220, 20, 60, 0.15);
+  overflow: hidden;
+  width: 350px;
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.property-card:hover {
+  transform: translateY(-8px);
+}
+
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+}
+
+/* Property Image */
+.property-image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.property-image img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.property-card:hover .property-image img {
+  transform: scale(1.05);
+}
+
+.property-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #DC143C;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Property Content */
+.property-content {
+  padding: 20px;
+}
+
+.property-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 15px 0;
+  line-height: 1.4;
+}
+
+/* Property Details */
+.property-details {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.detail-item i {
+  color: #f3edee;
+  font-size: 0.85rem;
+}
+
+/* Property Price */
+.property-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.property-price .price {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #e0e0e0;
+}
+
+.property-price .period {
+  color: #ccc;
+  font-size: 1rem;
+}
+
+/* Property Actions */
+.property-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-view-details {
+  flex: 1;
+  background: #DC143C;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-view-details:hover {
+  background: #B22222;
+  transform: translateY(-2px);
+}
+
+.btn-favorite {
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: #DC143C;
+  color: white;
   border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 8px rgba(220, 20, 60, 0.3);
+}
+
+.btn-favorite:hover {
+  background: #B22222;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 20, 60, 0.4);
+}
+
+/* Map Legend */
+.map-legend {
+  position: fixed;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 200px;
+}
+
+.legend-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+.legend-title i {
+  color: #DC143C;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.marker-sample {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.marker-sample.available {
+  background: #DC143C;
+}
+
+.marker-sample.premium {
+  background: #f39c12;
+}
+
+/* Custom Leaflet Icon Styles */
+.custom-leaflet-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+  
+  .map-controls {
+    justify-content: center;
+  }
+  
+  .property-card-container {
+    left: 15px;
+    right: 15px;
+    bottom: 20px;
+  }
+  
+  .property-card {
+    width: 100%;
+  }
+  
+  .property-details {
+    justify-content: space-between;
+  }
+  
+  .map-legend {
+    position: fixed;
+    bottom: 20px;
+    right: 15px;
+    top: auto;
+    transform: none;
+    min-width: auto;
+    width: calc(100% - 30px);
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .map-title h1 {
+    font-size: 1.6rem;
+  }
+  
+  .property-actions {
+    flex-direction: column;
+  }
+  
+  .btn-favorite {
+    width: 100%;
+    height: 48px;
+  }
+  
+  .property-stats {
+    top: 10px;
+    right: 10px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .map-header {
+    padding: 15px 0;
+  }
+  
+  .property-card {
+    margin: 0;
+  }
+  
+  .property-image {
+    height: 160px;
+  }
+  
+  .property-content {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 360px) {
+  .control-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .map-title h1 {
+    font-size: 1.4rem;
+  }
+  
+  .map-title p {
+    font-size: 1rem;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .marker-sample {
+    border-width: 2px;
+  }
+}
+
+/* Dark mode support (if implemented) */
+@media (prefers-color-scheme: dark) {
+  .broker-map-page {
+    background: linear-gradient(135deg, #cd1313 0%, #c31515 100%);
+  }
+  
+  .map-header {
+    background: rgba(233, 9, 9, 0.95);
+  }
+  
+  .map-title h1,
+  .map-title p {
+    color: #ecf0f1;
+  }
+  
+  .property-card {
+    background: #ba1212;
+    color: #ecf0f1;
+  }
+  
+  .property-title {
+    color: #ecf0f1;
+  }
+}
+
+/* Animation for better UX */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.property-stats {
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* Focus styles for accessibility */
+.control-btn:focus,
+.btn-view-details:focus,
+.btn-favorite:focus,
+.close-btn:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
 }
