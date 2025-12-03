@@ -105,7 +105,7 @@ export interface ListingOverviewVM {
   reviewCount: number;
   isApproved: boolean;
   description?: string;
-  destination: string;  
+  destination: string;
   type: string;
   bedrooms: number;
   bathrooms: number;
@@ -115,7 +115,7 @@ export interface ListingOverviewVM {
   viewCount: number;
   favoriteCount: number;
   bookingCount: number;
-  // amenities: string[];
+  amenities?: string[];
 }
 
 export interface ListingsResponse<T> {

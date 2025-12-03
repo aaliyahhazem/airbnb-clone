@@ -7,7 +7,7 @@ import { ListingOverviewVM } from '../../../core/models/listing.model';
 import { ListingService } from '../../../core/services/listings/listing.service';
 import { ListingCard } from '../listing-card/listing-card';
 import { FavoriteStoreService } from '../../../core/services/favoriteService/favorite-store-service';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-listings',
@@ -32,21 +32,14 @@ export class Listings implements OnInit {
   type = signal<string>('');
   maxPrice = signal<number | null>(null);
   minRating = signal<number | null>(null);
-
-  // amenities (form)
-  form: FormGroup;
+  amenities = signal<string[]>([]);
 
   constructor(
     private listingService: ListingService,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
     public favoriteStore: FavoriteStoreService
-  ) {
-    this.form = this.fb.group({
-      amenities: [[]]
-    });
-  }
+  ) {}
 
   onListingFavoriteChanged(payload: { listingId: number; isFavorited: boolean }) {
     try {
@@ -66,22 +59,23 @@ export class Listings implements OnInit {
   ];
 
   toggleAmenity(amenity: string): void {
-    const currentValue = this.form.get('amenities')?.value || [];
-    const amenities = Array.isArray(currentValue) ? [...currentValue] : [];
-    const index = amenities.indexOf(amenity);
+    const currentAmenities = [...this.amenities()];
+    const index = currentAmenities.indexOf(amenity);
 
-    if (index > -1) amenities.splice(index, 1);
-    else amenities.push(amenity);
+    if (index > -1) {
+      currentAmenities.splice(index, 1);
+    } else {
+      currentAmenities.push(amenity);
+    }
 
-    this.form.patchValue({ amenities });
+    this.amenities.set(currentAmenities);
 
     // Reset to first page when filters change
     this.currentPage.set(1);
   }
 
   isAmenitySelected(amenity: string): boolean {
-    const amenities: string[] = this.form.get('amenities')?.value || [];
-    return amenities.includes(amenity);
+    return this.amenities().includes(amenity);
   }
 
   // arabic/english normalization
@@ -106,7 +100,11 @@ export class Listings implements OnInit {
   destinations = computed(() => {
     const data = this.allListings();
     const set = new Set<string>();
-    data.forEach(l => set.add(l.destination));
+    data.forEach(l => {
+      if (l.destination && l.destination.trim()) {
+        set.add(l.destination);
+      }
+    });
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   });
 
@@ -114,7 +112,11 @@ export class Listings implements OnInit {
   types = computed(() => {
     const data = this.allListings();
     const set = new Set<string>();
-    data.forEach(l => set.add(l.type));
+    data.forEach(l => {
+      if (l.type && l.type.trim()) {
+        set.add(l.type);
+      }
+    });
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   });
 
@@ -128,7 +130,7 @@ export class Listings implements OnInit {
     const rawType = this.type().trim();
     const maxP = this.maxPrice();
     const minR = this.minRating();
-    const selectedAmenities = this.form.get('amenities')?.value || [];
+    const selectedAmenities = this.amenities();
 
     const q = this.normalize(rawQuery);
     const destNormalized = this.normalize(rawDest);
@@ -158,12 +160,12 @@ export class Listings implements OnInit {
         minR === null || (l.averageRating ?? 0) >= minR;
 
       // Amenities filter
-      // const amenitiesOk = selectedAmenities.length === 0 ||
-      //   selectedAmenities.every((amenity: string) =>
-      //     l.amenities && l.amenities.includes(amenity)
-      //   );
+      const amenitiesOk = selectedAmenities.length === 0 ||
+        selectedAmenities.every((amenity: string) =>
+          l.amenities && l.amenities.includes(amenity)
+        );
 
-      return matchesSearch && matchesDestination && matchesType && priceOk && ratingOk; // && amenitiesOk;
+      return matchesSearch && matchesDestination && matchesType && priceOk && ratingOk && amenitiesOk;
     });
   });
 
@@ -302,7 +304,7 @@ export class Listings implements OnInit {
     this.type.set('');
     this.maxPrice.set(null);
     this.minRating.set(null);
-    this.form.patchValue({ amenities: [] });
+    this.amenities.set([]);
     this.currentPage.set(1);
     // No need to reload data, filters are applied client-side
   }
