@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { BookingService } from '../../../core/services/Booking/booking-service';
 import { BookingStoreService } from '../../../core/services/Booking/booking-store-service';
 import { GetBookingVM } from '../../../core/models/booking';
@@ -17,7 +17,21 @@ export class MyBookings implements OnInit {
   bookings = signal<GetBookingVM[]>([]);
   isLoading = signal(false);
   errorMessage = signal('');
+  filter = signal<'all' | 'upcoming' | 'past' | 'cancelled'>('all');
 
+  ilteredBookings = computed(() => {
+    const f = this.filter();
+    const all = this.bookings();
+
+    const now = new Date();
+
+    if (f === 'all') return all;
+    if (f === 'cancelled') return all.filter(b => b.bookingStatus === 'cancelled');
+    if (f === 'upcoming') return all.filter(b => new Date(b.checkInDate) >= now);
+    if (f === 'past') return all.filter(b => new Date(b.checkOutDate) < now);
+
+    return all;
+  });
   ngOnInit(): void {
     this.loadMyBookings();
   }

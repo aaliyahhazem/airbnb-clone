@@ -12,7 +12,7 @@ import { of } from 'rxjs';
 export class BookingService extends BaseService {
   private readonly url = `${this.apiBase}/booking`;
 
-  
+
   constructor(http: HttpClient) {
     super(http);
   }
@@ -40,7 +40,7 @@ export class BookingService extends BaseService {
   getById(id: number): Observable<BookingResponse> {
     return this.http.get<any>(`${this.url}/${id}`).pipe(
       map(response => {
-        
+
         return {
           success: response?.success ?? true,
           result: response?.result || response?.data || response,
@@ -62,7 +62,9 @@ export class BookingService extends BaseService {
     return this.http.get<any>(`${this.url}/me`).pipe(
       map(response => ({
         success: response?.success ?? true,
-        result: response?.result || response?.data || [],
+        result: Array.isArray(response)
+          ? response
+          : response?.result || response?.data || [],
         errorMessage: response?.errorMessage || null
       } as BookingsResponse)),
       catchError(error => of({
@@ -77,7 +79,9 @@ export class BookingService extends BaseService {
     return this.http.get<any>(`${this.url}/host/me`).pipe(
       map(response => ({
         success: response?.success ?? true,
-        result: response?.result || response?.data || [],
+        result: Array.isArray(response)
+          ? response
+          : response?.result || response?.data || [],
         errorMessage: response?.errorMessage || null
       } as BookingsResponse)),
       catchError(error => of({

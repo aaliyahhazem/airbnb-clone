@@ -242,7 +242,7 @@ namespace BLL.Services.Impelementation
             }
         }
 
-        public async Task<Response<GetBookingVM>> GetByIdAsync(Guid requesterId, int bookingId)
+            public async Task<Response<GetBookingVM>> GetByIdAsync(Guid requesterId, int bookingId)
         {
             try
             {

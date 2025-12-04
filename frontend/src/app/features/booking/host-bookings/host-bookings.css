@@ -1,84 +1,76 @@
-/* Page Header */
+/* Header */
 .host-header h2 {
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: #222;
 }
 
 .host-header .btn {
-  border-radius: 8px;
+  border-radius: 10px;
+  padding: 8px 14px;
   font-weight: 500;
+  color: #c62828;
+  border-color: #c62828;
+  transition: 0.2s ease;
+}
+
+.host-header .btn:hover {
+  background: #c62828;
+  color: white;
 }
 
 /* Stats Cards */
 .stats-card {
-  border: none;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  transition: 0.25s ease;
 }
 
 .stats-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-}
-
-.stats-card .card-body {
-  padding: 1.5rem;
-}
-
-.stats-card h5 {
-  font-size: 0.95rem;
-  opacity: 0.9;
-}
-
-.stats-card h2 {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
-}
-
-/* General Cards */
-.card {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
 }
 
 /* Table */
 .table-responsive {
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
 }
 
-.table th {
-  background-color: #f8f9fa;
-  color: #495057;
-  font-weight: 600;
-  border-bottom: 1px solid #e5e5e5;
+.table thead {
+  background: #fafafa;
 }
 
-.table td {
-  vertical-align: middle;
+.table tbody tr:hover {
+  background-color: #fff5f5;
 }
 
 /* Badges */
 .badge {
+  border-radius: 8px;
   font-size: 0.75rem;
-  padding: 0.45em 0.7em;
-  border-radius: 6px;
+  padding: 0.45em .75em;
+  font-weight: 600;
+}
+
+/* Status Colors */
+.status-confirmed {
+  background: #2e7d32 !important;
+  color: white !important;
+}
+
+.status-pending {
+  background: #f9a825 !important;
+  color: white !important;
+}
+
+.status-cancelled {
+  background: #c62828 !important;
+  color: white !important;
 }
 
 /* Empty State */
 .empty-icon {
   font-size: 4rem;
-  opacity: 0.3;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .host-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
-  }
+  opacity: .25;
 }
