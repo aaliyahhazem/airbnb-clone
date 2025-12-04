@@ -39,10 +39,6 @@
       <span *ngIf="!(isLoading | async)">Pay ${{ amount | number:'1.2-2' }}</span>
       <span *ngIf="isLoading | async">Processing...</span>
     </button>
-
-    <p class="payment-info">
-      🔒 Your payment is secured by Stripe. Test card: 4242 4242 4242 4242
-    </p>
   </div>
 
   <!-- Login CTA -->

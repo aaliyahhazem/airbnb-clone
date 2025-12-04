@@ -5,12 +5,10 @@ namespace PL.Controllers
     public class PaymentController : BaseController
     {
         private readonly IPaymentService _paymentService;
-        private readonly ILogger<PaymentController> _logger;
 
         public PaymentController(IPaymentService paymentService, ILogger<PaymentController> logger)
         {
             _paymentService = paymentService;
-            _logger = logger;
         }
         private Guid? GetUserIdFromClaims()
         {
@@ -41,22 +39,13 @@ namespace PL.Controllers
         [Authorize]
         public async Task<IActionResult> CreateStripePaymentIntent([FromBody] CreateStripePaymentVM model)
         {
-             var userId = GetUserIdFromClaims();
+            var userId = GetUserIdFromClaims();
             if (userId == null) return Unauthorized();
-
-            try
-            {
-                _logger?.LogInformation("CreateStripePaymentIntent called by user {UserId} for booking {BookingId} amount {Amount}", userId, model?.BookingId, model?.Amount);
-            }
-            catch {}
-
             var resp = await _paymentService.CreateStripePaymentIntentAsync(userId.Value, model);
             if (!resp.Success)
             {
-                try { _logger?.LogWarning("CreateStripePaymentIntent failed: {Reason}", resp.errorMessage); } catch {}
                 return BadRequest(new { error = resp.errorMessage });
             }
-            
             return Ok(resp.result);
         }
 
@@ -71,23 +60,19 @@ namespace PL.Controllers
 
                 try
                 {
-                    _logger?.LogInformation("Stripe webhook received.");
                     var result = await _paymentService.HandleStripeWebhookAsync(json, signature);
                     if (result == null || !result.Success)
                     {
-                        _logger?.LogWarning("Stripe webhook handler failed: {Message}", result?.errorMessage);
                         return BadRequest(new { error = result?.errorMessage ?? "Webhook processing failed" });
                     }
                     return Ok();
                 }
                 catch (StripeException ex)
                 {
-                    _logger?.LogError(ex, "Stripe signature error.");
                     return BadRequest(new { error = "Invalid stripe signature" });
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogError(ex, "Internal webhook handling error.");
                     return StatusCode(500, new { error = "Internal webhook error" });
                 }
             }

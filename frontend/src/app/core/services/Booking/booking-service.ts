@@ -20,7 +20,6 @@ export class BookingService extends BaseService {
   createBooking(model: CreateBookingVM): Observable<BookingResponse> {
     return this.http.post<any>(this.url, model).pipe(
       map(response => {
-        // ✅ Normalize response structure
         return {
           success: response?.success ?? false,
           result: response?.result || response?.data || null,
@@ -28,7 +27,7 @@ export class BookingService extends BaseService {
         } as BookingResponse;
       }),
       catchError(error => {
-        console.error('❌ Booking creation error:', error);
+        console.error('Booking creation error:', error);
         return of({
           success: false,
           result: null,
@@ -41,9 +40,7 @@ export class BookingService extends BaseService {
   getById(id: number): Observable<BookingResponse> {
     return this.http.get<any>(`${this.url}/${id}`).pipe(
       map(response => {
-        console.log('✅ GetById raw response:', response);
         
-        // ✅ Normalize response structure
         return {
           success: response?.success ?? true,
           result: response?.result || response?.data || response,

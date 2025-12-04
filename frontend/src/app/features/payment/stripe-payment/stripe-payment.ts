@@ -46,23 +46,21 @@ export class StripePayment implements OnInit, OnDestroy {
   private stripePublishableKey = 'pk_test_51QcFrYAIOvv3gPwPsSer0XmyVWEEuWMzHUX6faseM6I99rQOVdqGpklBAtfUdACpZUXYBv4z1sOb1GQSgqv8Ck1200RQCnRXYc';
 
   ngOnInit(): void {
-    console.log('🔵 StripePayment component initialized');
 
     this.bookingId = Number(
       this.route.snapshot.paramMap.get('bookingId') ?? 
       this.route.snapshot.paramMap.get('id')
     );
-    console.log('📋 Booking ID from route:', this.bookingId);
 
     if (!this.bookingId || isNaN(this.bookingId)) {
       this.errorMessage = 'Invalid booking ID in route.';
-      console.error('❌ Invalid bookingId:', this.bookingId);
+      console.error('Invalid bookingId:', this.bookingId);
       return;
     }
 
     this.loadBookingData();
     this.loadStripeScript(() => {
-      // ✅ Initialize Stripe after DOM is ready
+      // Initialize Stripe after DOM is ready
       setTimeout(() => {
         this.initializeStripe();
       }, 500);
@@ -91,10 +89,9 @@ export class StripePayment implements OnInit, OnDestroy {
       return;
     }
 
-    // ✅ Check if Stripe is already loaded
+    // Check if Stripe is already loaded
     if (typeof Stripe !== 'undefined') {
       this.stripeScriptLoaded = true;
-      console.log('✅ Stripe already available');
       callback();
       return;
     }
@@ -104,11 +101,10 @@ export class StripePayment implements OnInit, OnDestroy {
     script.async = true;
     script.onload = () => {
       this.stripeScriptLoaded = true;
-      console.log('✅ Stripe script loaded');
       callback();
     };
     script.onerror = () => {
-      console.error('❌ Failed to load Stripe script');
+      console.error('Failed to load Stripe script');
       this.errorMessage = 'Failed to load payment system. Please refresh.';
     };
     document.head.appendChild(script);
@@ -116,19 +112,19 @@ export class StripePayment implements OnInit, OnDestroy {
 
   private initializeStripe(): void {
     try {
-      // ✅ Check if Stripe is available
+      // Check if Stripe is available
       if (typeof Stripe === 'undefined') {
-        console.error('❌ Stripe not loaded');
+        console.error('Stripe not loaded');
         this.errorMessage = 'Payment system not loaded. Please refresh.';
         return;
       }
 
-      // ✅ Check if card element exists in DOM
+      // Check if card element exists in DOM
       const cardElement = document.getElementById('card-element');
       if (!cardElement) {
-        console.error('❌ Card element not found in DOM');
+        console.error('Card element not found in DOM');
         this.errorMessage = 'Payment form not ready. Please wait...';
-        // ✅ Retry after a delay
+        // Retry after a delay
         setTimeout(() => {
           this.initializeStripe();
         }, 500);
@@ -138,7 +134,7 @@ export class StripePayment implements OnInit, OnDestroy {
       this.stripe = Stripe(this.stripePublishableKey);
       this.elements = this.stripe.elements();
       
-      // ✅ Create card element with styling
+      // Create card element with styling
       this.card = this.elements.create('card', {
         style: {
           base: {
@@ -156,17 +152,14 @@ export class StripePayment implements OnInit, OnDestroy {
         }
       });
 
-      // ✅ Mount card element
+      // card element
       this.card.mount('#card-element');
 
-      // ✅ Clear error message on successful mount
+      // clear error message on successful 
       this.ngZone.run(() => {
         this.errorMessage = '';
       });
-
-      console.log('✅ Stripe initialized and card mounted');
-
-      // ✅ Listen for card errors
+      // Listen for card errors
       this.card.on('change', (event: any) => {
         this.ngZone.run(() => {
           if (event.error) {
@@ -178,31 +171,24 @@ export class StripePayment implements OnInit, OnDestroy {
       });
 
     } catch (err) {
-      console.error('❌ Error initializing Stripe:', err);
       this.errorMessage = 'Failed to initialize payment system. ' + (err instanceof Error ? err.message : '');
     }
   }
 
   private loadBookingData(): void {
-    console.log('📥 Loading booking data for ID:', this.bookingId);
-
     const storedBooking = this.bookingStore.currentBookingSignal?.() ?? null;
 
     if (storedBooking && storedBooking.id === this.bookingId) {
       this.amount = storedBooking.totalPrice ?? 0;
       this.bookingLoaded = true;
-      console.log('✅ Using stored booking, amount:', this.amount);
 
       this.existingClientSecret = this.bookingStore.getPaymentIntentClientSecret();
       this.existingPaymentIntentId = this.bookingStore.getPaymentIntentId();
     } else {
-      console.log('🌐 Fetching booking from API...');
       this.isLoading.next(true);
 
       this.bookingService.getById(this.bookingId).subscribe({
         next: (resp) => {
-          console.log('✅ API response:', resp);
-
           if (resp && resp.success && resp.result) {
             this.bookingStore.setCurrentBooking(resp.result);
             this.amount = resp.result.totalPrice ?? 0;
@@ -223,7 +209,6 @@ export class StripePayment implements OnInit, OnDestroy {
           this.isLoading.next(false);
         },
         error: (err) => {
-          console.error('❌ Error loading booking:', err);
           this.errorMessage = 'Could not load booking details. ' + (err.message ?? '');
           this.isLoading.next(false);
         }
@@ -232,7 +217,6 @@ export class StripePayment implements OnInit, OnDestroy {
   }
 
   pay(): void {
-    console.log('💳 Pay button clicked');
 
     if (!this.bookingLoaded) {
       this.errorMessage = 'Booking data not loaded. Please wait...';
@@ -244,7 +228,7 @@ export class StripePayment implements OnInit, OnDestroy {
       return;
     }
 
-    // ✅ Check if card is ready
+    //  Check if card is ready
     if (!this.card) {
       this.errorMessage = 'Payment form not ready. Please wait or refresh the page.';
       return;
@@ -254,8 +238,6 @@ export class StripePayment implements OnInit, OnDestroy {
     this.errorMessage = '';
 
     const doConfirm = async (clientSecret: string) => {
-      console.log('🔐 Confirming payment with clientSecret');
-
       try {
         const { paymentIntent, error } = await this.stripe.confirmCardPayment(clientSecret, {
           payment_method: { card: this.card }
@@ -264,15 +246,12 @@ export class StripePayment implements OnInit, OnDestroy {
         if (error) {
           this.ngZone.run(() => {
             this.errorMessage = error.message || 'Payment failed.';
-            console.error('❌ Payment confirmation error:', error);
             this.isLoading.next(false);
           });
           return;
         }
 
-        if (paymentIntent?.status === 'succeeded') {
-          console.log('✅ Payment succeeded:', paymentIntent.id);
-          
+        if (paymentIntent?.status === 'succeeded') {          
           this.ngZone.run(() => {
             this.successMessage = 'Payment successful! Redirecting...';
             this.bookingStore.updateBookingStatus(this.bookingId, 'confirmed');
@@ -288,7 +267,6 @@ export class StripePayment implements OnInit, OnDestroy {
 
         this.isLoading.next(false);
       } catch (err) {
-        console.error('❌ Payment confirmation exception:', err);
         this.ngZone.run(() => {
           this.errorMessage = 'Payment processing failed. Please try again.';
           this.isLoading.next(false);
@@ -297,12 +275,10 @@ export class StripePayment implements OnInit, OnDestroy {
     };
 
     if (this.existingClientSecret) {
-      console.log('♻️ Using existing clientSecret');
       doConfirm(this.existingClientSecret);
       return;
     }
 
-    console.log('🆕 Creating new PaymentIntent');
     const payload: CreateStripePaymentVM = {
       bookingId: this.bookingId,
       amount: this.amount,
@@ -326,7 +302,6 @@ export class StripePayment implements OnInit, OnDestroy {
         doConfirm(resp.result.clientSecret);
       },
       error: (err) => {
-        console.error('❌ Error creating PaymentIntent:', err);
         this.errorMessage = 'Unable to process payment. Please try again.';
         this.isLoading.next(false);
       }
@@ -334,7 +309,6 @@ export class StripePayment implements OnInit, OnDestroy {
   }
 
   retryCreateIntent(): void {
-    console.log('🔄 Retrying PaymentIntent creation');
     this.errorMessage = '';
     this.intentCreationFailed = false;
     this.intentCreationInProgress = true;
@@ -371,10 +345,8 @@ export class StripePayment implements OnInit, OnDestroy {
         this.existingPaymentIntentId = resp.result.paymentIntentId;
         this.intentCreationFailed = false;
 
-        console.log('✅ PaymentIntent created successfully');
       },
       error: (err) => {
-        console.error('❌ Retry failed:', err);
         this.errorMessage = 'Failed to create payment intent. Try again.';
         this.intentCreationFailed = true;
         this.intentCreationInProgress = false;

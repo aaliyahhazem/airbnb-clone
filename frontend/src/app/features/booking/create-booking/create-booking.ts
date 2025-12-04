@@ -50,7 +50,7 @@ export class CreateBooking implements OnInit {
               this.listingPrice = res.data.pricePerNight ?? this.listingPrice;
               this.listingMaxGuests = res.data.maxGuests ?? this.listingMaxGuests;
 
-              // Update validators after loading listing data
+              // Update validators after loading listing
               this.bookingForm.get('guests')?.setValidators([
                 Validators.required,
                 Validators.min(1),
@@ -58,12 +58,11 @@ export class CreateBooking implements OnInit {
               ]);
               this.bookingForm.get('guests')?.updateValueAndValidity();
 
-              // ✅ Trigger change detection manually
               this.cdr.detectChanges();
             }
           },
           error: (err) => {
-            console.warn('Failed to load listing details for booking', err);
+            console.error('Error loading listing details:', err);
           }
         });
       }
@@ -80,7 +79,7 @@ export class CreateBooking implements OnInit {
       paymentMethod: ['stripe', [Validators.required]]
     });
 
-    // cross-field validation: checkOut must be after checkIn
+    // validation
     this.bookingForm.setValidators(() => {
       const checkIn = new Date(this.bookingForm.get('checkInDate')?.value);
       const checkOut = new Date(this.bookingForm.get('checkOutDate')?.value);
@@ -112,11 +111,9 @@ onSubmit(): void {
     paymentMethod: this.bookingForm.get('paymentMethod')?.value || 'stripe'
   };
 
-  console.log('📤 Submitting booking:', bookingData);
 
   this.bookingService.createBooking(bookingData).subscribe({
     next: (res) => {
-      console.log('✅ Booking response:', res);
 
       this.isLoading = false;
 
@@ -127,7 +124,6 @@ onSubmit(): void {
       }
 
       const booking = res.result;
-      console.log('✅ Booking created:', booking);
 
       // Store booking in state
       this.bookingStore.setCurrentBooking(booking);
@@ -135,28 +131,23 @@ onSubmit(): void {
 
       // Store PaymentIntent if present
       if (booking.clientSecret && booking.paymentIntentId) {
-        console.log('💳 Storing payment intent:', booking.paymentIntentId);
         this.bookingStore.setPaymentIntent(
           booking.clientSecret,
           booking.paymentIntentId
         );
       }
 
-      // ✅ Navigate using NgZone to ensure it happens within Angular context
+      //  Navigate using NgZone
       this.ngZone.run(() => {
-        console.log('🔀 Navigating to payment for booking:', booking.id);
         this.router.navigate(['/booking/payment', booking.id]).then(
           (success) => {
             if (success) {
-              console.log('✅ Navigation successful');
             } else {
-              console.error('❌ Navigation returned false');
               this.errorMessage = 'Navigation failed. Please check your bookings.';
               this.cdr.detectChanges();
             }
           },
           (err) => {
-            console.error('❌ Navigation failed:', err);
             this.errorMessage = 'Navigation failed. Please check your bookings.';
             this.cdr.detectChanges();
           }
@@ -164,7 +155,6 @@ onSubmit(): void {
       });
     },
     error: (err) => {
-      console.error('❌ Booking creation error:', err);
       this.isLoading = false;
 
       this.errorMessage = err?.errorMessage || 
