@@ -49,6 +49,8 @@ namespace BLL.AutoMapper
                                 s.Amenities.Select(k => k.Word).ToList()))
                             .ForMember(d => d.  Bedrooms, opt => opt.MapFrom(s => s.NumberOfRooms))
                             .ForMember(d => d.Bathrooms, opt => opt.MapFrom(s => s.NumberOfBathrooms))
+                            .ForMember(d => d.HostId, opt => opt.MapFrom(s => s.UserId))
+                            .ForMember(d => d.HostName, opt => opt.MapFrom(s => s.User.FullName ?? s.UserId.ToString()))
                             .ForMember(d => d.Priority, opt => opt.MapFrom(s => s.Priority))
                             .ForMember(d => d.ViewCount, opt => opt.MapFrom(s => s.ViewCount))
                             .ForMember(d => d.FavoriteCount, opt => opt.MapFrom(s => s.FavoriteCount))

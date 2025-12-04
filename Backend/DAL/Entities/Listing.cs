@@ -338,18 +338,7 @@
             UpdatedOn = DateTime.UtcNow;
         }
     
-        // Checks if the promotion has expired and automatically unpromotes if needed.
-        // Should be called when retrieving listings for public display
-        public bool CheckAndExpirePromotion()
-        {
-            if (IsPromoted && PromotionEndDate.HasValue && PromotionEndDate.Value <= DateTime.UtcNow)
-            {
-                IsPromoted = false;
-                PromotionEndDate = null;
-                return true;
-            }
-            return false;
-        }
+        
 
         // Extends the current promotion to a new end date.
         // Validates that listing is currently promoted and new date is valid.
@@ -374,16 +363,7 @@
         }
     
 
-// Set main image for seedings
-public void SetMainImage(int imageId, string performedBy) 
-        { if (IsDeleted)
-                throw new InvalidOperationException("Cannot change main image..."); 
-            if (!Images.Any(img => img.Id == imageId && !img.IsDeleted)) 
-                throw new InvalidOperationException("Image not found in listing"); 
-            MainImageId = imageId;
-            UpdatedBy = performedBy;
-            UpdatedOn = DateTime.UtcNow;
-        }
+
 
 
      

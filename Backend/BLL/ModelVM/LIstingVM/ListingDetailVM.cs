@@ -22,6 +22,10 @@
     public int Bedrooms { get; set; }        
     public int Bathrooms { get; set; }
 
+    // Host Information
+    public Guid HostId { get; set; }
+    public string HostName { get; set; } = string.Empty;
+
     // Dynamic Priority & Engagement System
     public int Priority { get; set; }
     public int ViewCount { get; set; }

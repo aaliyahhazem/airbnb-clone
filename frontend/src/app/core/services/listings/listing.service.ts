@@ -57,6 +57,14 @@ export class ListingService {
             res.data.mainImageUrl = this.normalizeImageUrl(res.data.mainImageUrl);
           }
 
+          // Map host information
+          if (res.data.hostId) {
+            res.data.hostId = res.data.hostId;
+          }
+          if (res.data.hostName) {
+            res.data.hostName = res.data.hostName;
+          }
+
           if (Array.isArray(res.data.images)) {
             res.data.images = res.data.images.map((img: any) => ({
               ...img,
