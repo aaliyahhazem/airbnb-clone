@@ -204,3 +204,33 @@
     </div>
   </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteModal()" class="modal-overlay" (click)="closeDeleteModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ 'common.confirm' | translate }}</h3>
+      <button class="modal-close" (click)="closeDeleteModal()">
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="warning-icon">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <p>{{ 'hostListings.confirmDeleteMessage' | translate }}</p>
+      <p class="listing-title"><strong>"{{ listingToDeleteTitle() }}"</strong></p>
+      <p class="warning-text">{{ 'hostListings.deleteWarning' | translate }}</p>
+    </div>
+    
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="closeDeleteModal()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button class="btn-delete" (click)="confirmDelete()">
+        {{ 'common.delete' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

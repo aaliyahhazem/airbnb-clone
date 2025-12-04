@@ -18,8 +18,8 @@
     <!-- Main Content -->
     <div class="listing-form-container">
         <div class="form-header">
-            <h2>{{ editMode ? 'Edit Listing' : 'Create New Listing' }}</h2>
-            <!-- <button class="btn-back" (click)="goBack()">← Back</button> -->
+            <h2>{{ editMode ? ('hostListings.editListing' | translate) : ('hostListings.createNewListing' | translate) }}</h2>
+            <!-- <button class="btn-back" (click)="goBack()">← {{ 'common.back' | translate }}</button> -->
         </div>
 
         <!-- Messages -->
@@ -29,83 +29,83 @@
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-content">
             <!-- Basic Information -->
             <div class="section">
-                <h3>Basic Information</h3>
+                <h3>{{ 'hostListings.basicInformation' | translate }}</h3>
 
                 <div class="form-group">
-                    <label for="title">Title</label>
-                    <input id="title" type="text" formControlName="title" placeholder="e.g., Cozy Apartment in Downtown"
+                    <label for="title">{{ 'hostListings.title' | translate }}</label>
+                    <input id="title" type="text" formControlName="title" [placeholder]="'hostListings.titlePlaceholder' | translate"
                         [class.is-invalid]="isInvalid('title')" />
                     <small *ngIf="isInvalid('title')" class="error-text">
-                        Title is required and must be at least 5 characters
+                        {{ 'hostListings.titleError' | translate }}
                     </small>
                 </div>
 
                 <div class="form-group">
-                    <label for="description">Description</label>
+                    <label for="description">{{ 'hostListings.description' | translate }}</label>
                     <textarea id="description" formControlName="description"
-                        placeholder="Describe your listing in detail..." rows="5"
+                        [placeholder]="'hostListings.descriptionPlaceholder' | translate" rows="5"
                         [class.is-invalid]="isInvalid('description')"></textarea>
                     <small *ngIf="isInvalid('description')" class="error-text">
-                        Description is required and must be at least 10 characters
+                        {{ 'hostListings.descriptionError' | translate }}
                     </small>
                 </div>
 
                 <div class="form-group">
-                    <label for="type">Property Type</label>
+                    <label for="type">{{ 'hostListings.propertyType' | translate }}</label>
                     <select id="type" formControlName="type" [class.is-invalid]="isInvalid('type')">
-                        <option value="">Select a type</option>
-                        <option value="Apartment">Apartment</option>
-                        <option value="House">House</option>
-                        <option value="Villa">Villa</option>
-                        <option value="Studio">Studio</option>
-                        <option value="Penthouse">Penthouse</option>
-                        <option value="Cottage">Cottage</option>
-                        <option value="Chalet">Chalet</option>
-                        <option value="Loft">Loft</option>
-                        <option value="Cabin">Cabin</option>
-                        <option value="Farmhouse">Farmhouse</option>
+                        <option value="">{{ 'hostListings.selectType' | translate }}</option>
+                        <option value="Apartment">{{ 'hostListings.apartment' | translate }}</option>
+                        <option value="House">{{ 'hostListings.house' | translate }}</option>
+                        <option value="Villa">{{ 'hostListings.villa' | translate }}</option>
+                        <option value="Studio">{{ 'hostListings.studio' | translate }}</option>
+                        <option value="Penthouse">{{ 'hostListings.penthouse' | translate }}</option>
+                        <option value="Cottage">{{ 'hostListings.cottage' | translate }}</option>
+                        <option value="Chalet">{{ 'hostListings.chalet' | translate }}</option>
+                        <option value="Loft">{{ 'hostListings.loft' | translate }}</option>
+                        <option value="Cabin">{{ 'hostListings.cabin' | translate }}</option>
+                        <option value="Farmhouse">{{ 'hostListings.farmhouse' | translate }}</option>
                     </select>
                     <small *ngIf="isInvalid('type')" class="error-text">
-                        {{ 'createEditListing.propertyTypeError' | translate }}
+                        {{ 'hostListings.propertyTypeError' | translate }}
                     </small>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="pricePerNight">Price Per Night (EGP)</label>
+                        <label for="pricePerNight">{{ 'hostListings.pricePerNight' | translate }}</label>
                         <input id="pricePerNight" type="number" formControlName="pricePerNight" placeholder="0"
                             [class.is-invalid]="isInvalid('pricePerNight')" />
                         <small *ngIf="isInvalid('pricePerNight')" class="error-text">
-                            Price is required and must be greater than 0
+                            {{ 'hostListings.priceError' | translate }}
                         </small>
                     </div>
 
                     <div class="form-group">
-                        <label for="maxGuests">Max Guests</label>
+                        <label for="maxGuests">{{ 'hostListings.maxGuests' | translate }}</label>
                         <input id="maxGuests" type="number" formControlName="maxGuests" placeholder="1"
                             [class.is-invalid]="isInvalid('maxGuests')" />
                         <small *ngIf="isInvalid('maxGuests')" class="error-text">
-                            Max guests is required
+                            {{ 'hostListings.maxGuestsError' | translate }}
                         </small>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="bedrooms">Bedrooms</label>
+                        <label for="bedrooms">{{ 'hostListings.bedrooms' | translate }}</label>
                         <input id="bedrooms" type="number" formControlName="bedrooms" min="1"
                             [class.is-invalid]="isInvalid('bedrooms')" />
                         <small *ngIf="isInvalid('bedrooms')" class="error-text">
-                            Bedrooms is required
+                            {{ 'hostListings.bedroomsError' | translate }}
                         </small>
                     </div>
 
                     <div class="form-group">
-                        <label for="bathrooms">Bathrooms</label>
+                        <label for="bathrooms">{{ 'hostListings.bathrooms' | translate }}</label>
                         <input id="bathrooms" type="number" formControlName="bathrooms" min="1"
                             [class.is-invalid]="isInvalid('bathrooms')" />
                         <small *ngIf="isInvalid('bathrooms')" class="error-text">
-                            Bathrooms is required
+                            {{ 'hostListings.bathroomsError' | translate }}
                         </small>
                     </div>
                 </div>
@@ -114,29 +114,29 @@
 
             <!-- Location Information -->
             <div class="section">
-                <h3>Location Information</h3>
+                <h3>{{ 'hostListings.locationInformation' | translate }}</h3>
 
                 <div class="form-group">
-                    <label for="destination">Destination</label>
-                    <input id="destination" type="text" formControlName="destination" placeholder="e.g., Cairo"
+                    <label for="destination">{{ 'hostListings.destination' | translate }}</label>
+                    <input id="destination" type="text" formControlName="destination" [placeholder]="'hostListings.destinationPlaceholder' | translate"
                         [class.is-invalid]="isInvalid('destination')" />
                     <small *ngIf="isInvalid('destination')" class="error-text">
-                        Destination is required
+                        {{ 'hostListings.destinationError' | translate }}
                     </small>
                 </div>
 
                 <div class="form-group">
-                    <label for="location">Location</label>
+                    <label for="location">{{ 'hostListings.location' | translate }}</label>
                     <input id="location" type="text" formControlName="location"
-                        placeholder="e.g., Downtown Cairo, Egypt" [class.is-invalid]="isInvalid('location')" />
+                        [placeholder]="'hostListings.locationPlaceholder' | translate" [class.is-invalid]="isInvalid('location')" />
                     <small *ngIf="isInvalid('location')" class="error-text">
-                        Location is required
+                        {{ 'hostListings.locationError' | translate }}
                     </small>
                 </div>
 
                 <div class="form-group">
                     <button type="button" class="btn btn-outline map-btn" (click)="toggleMapPicker()">
-                        {{ showMapPicker ? 'Close map' : 'Pick location on map' }}
+                        {{ showMapPicker ? ('hostListings.closeMap' | translate) : ('hostListings.pickLocationOnMap' | translate) }}
                     </button>
                 </div>
 
@@ -144,16 +144,15 @@
                     <div id="picker-map" style="height: 320px; width: 100%; border: 1px solid #ddd; margin-bottom:8px;">
                     </div>
                     <div class="picker-actions mt-3">
-                        <button type="button" class="btn btn-primary me-3" (click)="confirmPickedLocation()">Confirm
-                            location</button>
-                        <button type="button" class="btn btn-secondary" (click)="toggleMapPicker()">Cancel</button>
+                        <button type="button" class="btn btn-primary me-3" (click)="confirmPickedLocation()">{{ 'hostListings.confirmLocation' | translate }}</button>
+                        <button type="button" class="btn btn-secondary" (click)="toggleMapPicker()">{{ 'common.cancel' | translate }}</button>
                     </div>
                 </div>
             </div>
 
             <!-- Amenities -->
             <div class="section">
-                <h3>Amenities</h3>
+                <h3>{{ 'hostListings.amenities' | translate }}</h3>
                 <div class="amenities-grid">
                     <button *ngFor="let amenity of amenitiesList" type="button" class="amenity-btn"
                         [class.selected]="isAmenitySelected(amenity)" (click)="toggleAmenity(amenity)">
@@ -164,7 +163,7 @@
 
             <!-- Images -->
             <div class="section">
-                <h3>Images</h3>
+                <h3>{{ 'hostListings.images' | translate }}</h3>
 
                 <!-- Existing Images (Edit Mode) -->
                 <div *ngIf="editMode && existingImages.length > 0" class="image-section">
@@ -180,7 +179,7 @@
 
                 <!-- New Images -->
                 <div class="image-section">
-                    <label for="images">{{ editMode ? 'Add New Images' : 'Upload Images' }}</label>
+                    <label for="images">{{ editMode ? ('hostListings.addNewImages' | translate) : ('hostListings.uploadImages' | translate) }}</label>
                     <input id="images" type="file" multiple accept="image/*" (change)="onFileChange($event)" />
                     <!-- <small class="help-text">You can upload multiple images. The first will be set as main.</small> -->
                 </div>
@@ -201,15 +200,15 @@
             <!-- Form Actions -->
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary" [disabled]="loading || form.invalid">
-                    {{ loading ? 'Saving...' : (editMode ? 'Update' : 'Create') }}
+                    {{ loading ? ('hostListings.saving' | translate) : (editMode ? ('common.update' | translate) : ('common.create' | translate)) }}
                 </button>
 
                 <button *ngIf="editMode" type="button" class="btn btn-danger" (click)="onDelete()">
-                    Delete
+                    {{ 'common.delete' | translate }}
                 </button>
 
                 <button type="button" class="btn btn-secondary" (click)="goBack()">
-                    Cancel
+                    {{ 'common.cancel' | translate }}
                 </button>
             </div>
         </form>
