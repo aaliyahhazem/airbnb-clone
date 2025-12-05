@@ -43,26 +43,7 @@
   </div>
 <div class="favorites-container">
   <!-- Header -->
-  <div class="header">
-    <div class="header-title">
-      <div class="favorite-count-badge">
-        <span class="count">{{ favoriteCount }}</span>
-        <span class="label">Saved Listings</span>
-      </div>
-    </div>
-    <div class="header-actions">
-      <button class="btn btn-outline" (click)="goToListings()">
-        <i class="bi bi-search"></i> Browse Listings
-      </button>
-      <button
-        *ngIf="favoriteCount > 0"
-        class="btn btn-danger-outline"
-        (click)="clearAll()"
-      >
-        <i class="bi bi-trash"></i> Clear All
-      </button>
-    </div>
-  </div>
+  
 
   <!-- Loading State -->
   <div *ngIf="loading" class="broker-loading-section">
@@ -101,108 +82,26 @@
     </div>
   </div>
 
-  <!-- Favorites Grid -->
-  <div *ngIf="!loading && !error && listings.length > 0" class="broker-favorites-content">
-    <div class="container-fluid">
 
-      <!-- Favorites Header -->
-      <div class="favorites-content-header">
-        <h3>{{ 'favorites.yourSavedProperties' | translate }}</h3>
-        <div class="view-options">
-          <button class="view-btn grid-view active" title="{{ 'favorites.gridView' | translate }}">
-            <i class="bi bi-grid"></i>
-          </button>
-          <button class="view-btn list-view" title="{{ 'favorites.listView' | translate }}">
-            <i class="bi bi-list"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Properties Grid -->
-      <div class="broker-properties-grid">
-        <div
-          *ngFor="let listing of listings"
-          class="broker-favorite-card"
-          (click)="viewListing(listing.id)">
-
-          <!-- Property Image -->
-          <div class="favorite-image-container">
-            <img
-              [src]="normalizeImageUrl(listing.mainImageUrl)"
-              [alt]="listing.title"
-              class="favorite-property-image"
-            />
-
-            <!-- Image Overlay -->
-            <div class="favorite-image-overlay"></div>
-
-            <!-- Property Badge -->
-            <div class="property-badge">
-              <i class="bi bi-house"></i>
-              <span>{{ 'listings.property' | translate }}</span>
-            </div>
-
-            <!-- Favorite Count -->
-            <div class="favorite-count-badge">
-              <i class="bi bi-heart-fill"></i>
-              <span>{{ listing.favoriteCount }}</span>
-            </div>
-          </div>
-
-          <!-- Property Details -->
-          <div class="favorite-content">
-            <div class="property-header">
-              <h4 class="property-title">{{ listing.title }}</h4>
-              <!-- Rating removed as averageRating doesn't exist in model -->
-            </div>
-
-            <div class="property-location">
-              <i class="bi bi-geo-alt"></i>
-              <span>{{ listing.location }}</span>
-            </div>
-
-            <p class="property-description">{{ listing.description | slice:0:100 }}</p>
-
-            <!-- Property Features -->
-            <div class="property-features">
-              <div class="feature-item">
-                <i class="bi bi-people"></i>
-              </div>
-              <!-- Removed bedrooms and bathrooms as they don't exist in FavoriteListingVM -->
-            </div>
-
-            <!-- Property Footer -->
-            <div class="property-footer">
-              <div class="price-info">
-                <span class="price-amount">{{ listing.pricePerNight }}</span>
-                <span class="price-currency">{{ 'listings.egp' | translate }}</span>
-                <span class="price-period">/ {{ 'listings.night' | translate }}</span>
-              </div>
-
-              <button class="view-property-btn" (click)="viewListing(listing.id); $event.stopPropagation()">
-                <i class="bi bi-eye"></i>
-                {{ 'favorites.viewProperty' | translate }}
-              </button>
-            </div>
-
-            <!-- Added Date -->
-            <div class="added-date">
-              <i class="bi bi-clock"></i>
-              <span>{{ 'favorites.addedToFavorites' | translate }}</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
 
   <!-- Favorites Grid using Listing Cards -->
   <div *ngIf="!loading && !error && listings.length > 0" class="favorites-grid">
     <div *ngFor="let listing of listings; trackBy: trackByListingId" class="listing-card-wrapper">
-      <app-listing-card
-        [listing]="listing"
-        [isFavorited]="true"
-        (favoriteChanged)="onFavoriteChanged($event.listingId, $event.isFavorited)">
-      </app-listing-card>
+        <app-listing-card
+          [listing]="listing"
+          [isFavorited]="true"
+          (favoriteChanged)="onFavoriteChanged($event.listingId ?? listing.id, $event.isFavorited ?? true)">
+        </app-listing-card>
+        
+        <!-- Remove Button Overlay -->
+        <button 
+          class="remove-favorite-btn" 
+          (click)="removeFavorite(listing.id, $event)"
+          [title]="'favorites.removeFromFavorites' | translate"
+          aria-label="Remove from favorites">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
     </div>
   </div>
 

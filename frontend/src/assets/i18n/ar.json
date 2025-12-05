@@ -534,7 +534,9 @@
     "gridView": "عرض الشبكة",
     "listView": "عرض اللائحة",
     "viewProperty": "عرض العقار",
-    "addedToFavorites": "تمت الإضافة للمفضلة"
+    "addedToFavorites": "تمت الإضافة للمفضلة",
+    "remove": "إزالة",
+    "removeFromFavorites": "إزالة من المفضلة"
   },
   "chat": {
     "messages": "الرسائل",

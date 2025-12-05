@@ -416,7 +416,9 @@
     "gridView": "Grid View",
     "listView": "List View",
     "viewProperty": "View Property",
-    "addedToFavorites": "Added to favorites"
+    "addedToFavorites": "Added to favorites",
+    "remove": "Remove",
+    "removeFromFavorites": "Remove from Favorites"
   },
   "profile": {
     "title": "Profile",

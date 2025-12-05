@@ -1,3 +1,7 @@
+using Hangfire;
+using Hangfire.SqlServer;
+using PL.Background_Jobs;
+
 namespace PL
 {
     public class Program
@@ -45,6 +49,29 @@ namespace PL
                 });
             });
 
+            //--------------------------------------------------------------------
+            //Background Jobs
+            //---------------------------------------------------------------------
+            // Hangfire storage
+            builder.Services.AddHangfire(config =>
+            {
+                config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                      .UseSimpleAssemblyNameTypeSerializer()
+                      .UseRecommendedSerializerSettings()
+                      .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"),
+                          new SqlServerStorageOptions
+                          {
+                              CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                              SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                              QueuePollInterval = TimeSpan.FromSeconds(15),
+                              UseRecommendedIsolationLevel = true,
+                              DisableGlobalLocks = true
+                          });
+            });
+            builder.Services.AddHangfireServer();
+            // Register jobs
+            builder.Services.AddTransient<MessageCleanupJob>();
+            builder.Services.AddTransient<NotificationCleanupJob>();
             // --------------------------------------------------------------------
             // DbContext
             // --------------------------------------------------------------------
@@ -217,6 +244,24 @@ namespace PL
             app.UseAuthentication();
             app.UseAuthorization();
 
+            // Hangfire Dashboard
+            app.UseHangfireDashboard("/hangfire");
+
+            // register recurring jobs reading cron from config
+            var messageCron = builder.Configuration.GetValue<string>("BackgroundJobs:MessageCleanupCron", Cron.Daily());
+            var notifCron = builder.Configuration.GetValue<string>("BackgroundJobs:NotificationCleanupCron", Cron.Daily());
+
+            RecurringJob.AddOrUpdate<MessageCleanupJob>(
+                "cleanup-messages",
+                job => job.ExecuteAsync(),
+                messageCron
+            );
+
+            RecurringJob.AddOrUpdate<NotificationCleanupJob>(
+                "cleanup-notifications",
+                job => job.ExecuteAsync(),
+                notifCron
+            );
             app.MapControllers();
 
             app.MapHub<NotificationHub>("/notificationsHub");

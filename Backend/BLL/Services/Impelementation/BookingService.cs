@@ -27,40 +27,70 @@ namespace BLL.Services.Impelementation
         {
             try
             {
-                // Log key inputs for diagnostics (dev-only, non-sensitive)
-                try
-                {
-                    _logger?.LogInformation("CreateBookingAsync called by guest={GuestId} listing={ListingId} checkIn={CheckIn} checkOut={CheckOut} guests={Guests} method={PaymentMethod}",
-                        guestId, model.ListingId, model.CheckInDate.ToString("o"), model.CheckOutDate.ToString("o"), model.Guests, model.PaymentMethod);
-                }
-                catch { }
-                // basic validations
+                _logger?.LogInformation(
+                    "CreateBookingAsync called by guest={GuestId} listing={ListingId} " +
+                    "checkIn={CheckIn} checkOut={CheckOut} guests={Guests} method={Method}",
+                    guestId, model.ListingId, model.CheckInDate, model.CheckOutDate,
+                    model.Guests, model.PaymentMethod);
+
+                // 1. Validate listing exists
                 var listing = await _uow.Listings.GetByIdAsync(model.ListingId);
-                if (listing == null) return Response<GetBookingVM>.FailResponse("Listing not found");
-                if (model.CheckOutDate <= model.CheckInDate) return Response<GetBookingVM>.FailResponse("Invalid dates");
+                if (listing == null)
+                    return Response<GetBookingVM>.FailResponse("Listing not found");
 
-                // ensure guest exists
-                var guest = await _uow.Users.GetByIdAsync(guestId);
-                if (guest == null) return Response<GetBookingVM>.FailResponse("Guest not found");
+                // 2. Validate dates
+                if (model.CheckInDate >= model.CheckOutDate)
+                    return Response<GetBookingVM>.FailResponse("Check-out must be after check-in");
 
-                // check availability: any overlapping active booking?
-                var existing = (await _uow.Bookings.GetBookingsByListingAsync(model.ListingId))
-                .Where(b => b.BookingStatus == BookingStatus.Pending && !(model.CheckOutDate <= b.CheckInDate || model.CheckInDate >= b.CheckOutDate));
-                if (existing.Any()) return Response<GetBookingVM>.FailResponse("Listing is not available for the selected dates");
+                if (model.CheckInDate < DateTime.UtcNow.Date)
+                    return Response<GetBookingVM>.FailResponse("Check-in date cannot be in the past");
 
-                // calculate total price (simple nights * price)
-                var nights = (decimal)(model.CheckOutDate - model.CheckInDate).TotalDays;
-                if (nights <= 0) return Response<GetBookingVM>.FailResponse("Invalid date range");
-                var total = nights * listing.PricePerNight;
+                // 3. Validate guest capacity
+                if (model.Guests > listing.MaxGuests)
+                    return Response<GetBookingVM>.FailResponse(
+                        $"Listing can accommodate maximum {listing.MaxGuests} guests");
+
+                //  Check availability ONLY for CONFIRMED/PAID bookings
+                var conflictingBookings = await _uow.Bookings.GetBookingsByListingAsync(model.ListingId);
+
+                var hasConflict = conflictingBookings.Any(b =>
+                    // ⚠️ CRITICAL: Only block if booking is confirmed/paid AND dates overlap
+                    (b.BookingStatus == BookingStatus.Confirmed ||
+                     b.PaymentStatus == BookingPaymentStatus.Paid) &&
+                    b.CheckInDate < model.CheckOutDate &&
+                    b.CheckOutDate > model.CheckInDate
+                );
+
+                if (hasConflict)
+                {
+                    _logger?.LogWarning(
+                        "Listing {ListingId} has conflicting bookings for {CheckIn} to {CheckOut}",
+                        model.ListingId, model.CheckInDate, model.CheckOutDate);
+
+                    return Response<GetBookingVM>.FailResponse(
+                        "Listing is not available for the selected dates");
+                }
+
+                // Calculate total price
+                var nights = (model.CheckOutDate - model.CheckInDate).Days;
+                var total = listing.PricePerNight * nights;
 
                 Booking created = null!;
                 CreatePaymentIntentVm? intentResult = null;
+
                 await _uow.ExecuteInTransactionAsync(async () =>
                 {
-                    var bookingEntity = await _uow.Bookings.CreateAsync(model.ListingId, guestId, model.CheckInDate, model.CheckOutDate, total);
+                    // Create booking
+                    var bookingEntity = await _uow.Bookings.CreateAsync(
+                        model.ListingId, guestId, model.CheckInDate,
+                        model.CheckOutDate, total);
+
                     await _uow.SaveChangesAsync();
 
-                    // ✅ CREATE STRIPE INTENT FOR STRIPE PAYMENTS
+                    _logger?.LogInformation("Booking {BookingId} created for listing {ListingId}",
+                        bookingEntity.Id, model.ListingId);
+
+                    // Create Stripe Payment Intent
                     if (model.PaymentMethod.ToLower() == "stripe")
                     {
                         var stripePayload = new CreateStripePaymentVM
@@ -68,30 +98,36 @@ namespace BLL.Services.Impelementation
                             BookingId = bookingEntity.Id,
                             Amount = total,
                             Currency = "usd",
-                            Description = $"Booking #{bookingEntity.Id}"
+                            Description = $"Booking #{bookingEntity.Id} - {listing.Title}"
                         };
 
-                        var paymentResp = await _paymentService.CreateStripePaymentIntentAsync(guestId, stripePayload);
+                        var paymentResp = await _paymentService
+                            .CreateStripePaymentIntentAsync(guestId, stripePayload);
+
                         if (!paymentResp.Success)
-                            throw new Exception(paymentResp.errorMessage ?? "Stripe payment intent creation failed");
+                        {
+                            _logger?.LogError(
+                                "Payment intent creation failed for booking {BookingId}: {Error}",
+                                bookingEntity.Id, paymentResp.errorMessage);
+
+                            throw new Exception(paymentResp.errorMessage
+                                ?? "Failed to create payment intent");
+                        }
 
                         intentResult = paymentResp.result;
-                    }
-                    else
-                    {
-                        // Non-Stripe payment methods (if you have any)
-                        var paymentResp = await _paymentService.InitiatePaymentAsync(guestId, bookingEntity.Id, total, model.PaymentMethod);
-                        if (!paymentResp.Success)
-                            throw new Exception(paymentResp.errorMessage ?? "Payment initiation failed");
+
+                        _logger?.LogInformation(
+                            "Payment intent {PaymentIntentId} created for booking {BookingId}",
+                            intentResult.PaymentIntentId, bookingEntity.Id);
                     }
 
-                    // Increment booking priority for engagement tracking
                     await _uow.Listings.IncrementBookingPriorityAsync(model.ListingId);
                     await _uow.SaveChangesAsync();
 
-                    // load created booking for return
                     created = bookingEntity;
                 });
+
+                // ✅ Build complete response
                 var vm = new GetBookingVM
                 {
                     Id = created.Id,
@@ -104,14 +140,23 @@ namespace BLL.Services.Impelementation
                     ClientSecret = intentResult?.ClientSecret,
                     PaymentIntentId = intentResult?.PaymentIntentId
                 };
+
+                _logger?.LogInformation(
+                    "Booking {BookingId} created successfully with PaymentIntent={PaymentIntentId}, " +
+                    "ClientSecret={HasSecret}",
+                    vm.Id, vm.PaymentIntentId, !string.IsNullOrEmpty(vm.ClientSecret));
+
                 return Response<GetBookingVM>.SuccessResponse(vm);
             }
             catch (Exception ex)
             {
+                _logger?.LogError(ex,
+                    "CreateBookingAsync failed for guest {GuestId}, listing {ListingId}",
+                    guestId, model.ListingId);
+
                 return Response<GetBookingVM>.FailResponse(ex.Message);
             }
         }
-
         public async Task<Response<bool>> CancelBookingAsync(Guid guestId, int bookingId)
         {
             try
@@ -197,19 +242,53 @@ namespace BLL.Services.Impelementation
             }
         }
 
-        public async Task<Response<GetBookingVM>> GetByIdAsync(Guid requesterId, int bookingId)
+            public async Task<Response<GetBookingVM>> GetByIdAsync(Guid requesterId, int bookingId)
         {
             try
             {
                 var booking = await _uow.Bookings.GetByIdAsync(bookingId);
-                if (booking == null) return Response<GetBookingVM>.FailResponse("Booking not found");
+                if (booking == null)
+                    return Response<GetBookingVM>.FailResponse("Booking not found");
 
-                // allow guests and hosts to fetch
+                // Allow guests and hosts to fetch
                 if (booking.GuestId != requesterId)
                 {
                     var listing = await _uow.Listings.GetByIdAsync(booking.ListingId);
-                    if (listing == null) return Response<GetBookingVM>.FailResponse("Booking/listing not found");
-                    if (listing.UserId != requesterId) return Response<GetBookingVM>.FailResponse("Not authorized");
+                    if (listing == null)
+                        return Response<GetBookingVM>.FailResponse("Booking/listing not found");
+                    if (listing.UserId != requesterId)
+                        return Response<GetBookingVM>.FailResponse("Not authorized");
+                }
+
+                // ✅ Get payment details to include clientSecret if available
+                var payments = await _uow.Payments.GetPaymentsByBookingAsync(bookingId);
+                var latestPayment = payments
+                    .OrderByDescending(p => p.PaidAt)
+                    .FirstOrDefault();
+
+                // ✅ If payment exists and has a Stripe PaymentIntentId, try to get clientSecret
+                string? clientSecret = null;
+                string? paymentIntentId = booking.PaymentIntentId;
+
+                if (!string.IsNullOrEmpty(paymentIntentId) && latestPayment?.Status == PaymentStatus.Pending)
+                {
+                    try
+                    {
+                        // Retrieve PaymentIntent from Stripe to get clientSecret
+                        var service = new Stripe.PaymentIntentService();
+                        var intent = await service.GetAsync(paymentIntentId);
+                        clientSecret = intent?.ClientSecret;
+
+                        _logger?.LogInformation(
+                            "Retrieved clientSecret for booking {BookingId}, PaymentIntent {PaymentIntentId}",
+                            bookingId, paymentIntentId);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogWarning(ex,
+                            "Could not retrieve PaymentIntent {PaymentIntentId} for booking {BookingId}",
+                            paymentIntentId, bookingId);
+                    }
                 }
 
                 var vm = new GetBookingVM
@@ -220,13 +299,16 @@ namespace BLL.Services.Impelementation
                     CheckOutDate = booking.CheckOutDate,
                     TotalPrice = booking.TotalPrice,
                     BookingStatus = booking.BookingStatus.ToString(),
-                    PaymentStatus = booking.PaymentStatus.ToString()
+                    PaymentStatus = booking.PaymentStatus.ToString(),
+                    ClientSecret = clientSecret,
+                    PaymentIntentId = paymentIntentId
                 };
 
                 return Response<GetBookingVM>.SuccessResponse(vm);
             }
             catch (Exception ex)
             {
+                _logger?.LogError(ex, "Error in GetByIdAsync for booking {BookingId}", bookingId);
                 return Response<GetBookingVM>.FailResponse(ex.Message);
             }
         }

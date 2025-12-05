@@ -5,12 +5,10 @@ namespace PL.Controllers
     public class PaymentController : BaseController
     {
         private readonly IPaymentService _paymentService;
-        private readonly ILogger<PaymentController> _logger;
 
         public PaymentController(IPaymentService paymentService, ILogger<PaymentController> logger)
         {
             _paymentService = paymentService;
-            _logger = logger;
         }
         private Guid? GetUserIdFromClaims()
         {
@@ -41,41 +39,43 @@ namespace PL.Controllers
         [Authorize]
         public async Task<IActionResult> CreateStripePaymentIntent([FromBody] CreateStripePaymentVM model)
         {
-             var userId = GetUserIdFromClaims();
+            var userId = GetUserIdFromClaims();
             if (userId == null) return Unauthorized();
-
-            try
-            {
-                _logger?.LogInformation("CreateStripePaymentIntent called by user {UserId} for booking {BookingId} amount {Amount}", userId, model?.BookingId, model?.Amount);
-            }
-            catch {}
-
             var resp = await _paymentService.CreateStripePaymentIntentAsync(userId.Value, model);
             if (!resp.Success)
             {
-                try { _logger?.LogWarning("CreateStripePaymentIntent failed: {Reason}", resp.errorMessage); } catch {}
                 return BadRequest(new { error = resp.errorMessage });
             }
-            
             return Ok(resp.result);
         }
 
         // Stripe webhook endpoint - handles payment events from Stripe
         [HttpPost("stripe/webhook")]
         [AllowAnonymous]
-        public async Task<IActionResult> StripeWebhook()
-        {
-            var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-            var signature = Request.Headers["Stripe-Signature"].ToString();
-
-            // Process async WITHOUT blocking Stripe
-            _ = Task.Run(async () =>
+        [IgnoreAntiforgeryToken]
+            public async Task<IActionResult> StripeWebhook()
             {
-                await _paymentService.HandleStripeWebhookAsync(json, signature);
-            });
+                var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+                var signature = Request.Headers["Stripe-Signature"].ToString();
 
-            return Ok(); // Respond immediately
-        }
+                try
+                {
+                    var result = await _paymentService.HandleStripeWebhookAsync(json, signature);
+                    if (result == null || !result.Success)
+                    {
+                        return BadRequest(new { error = result?.errorMessage ?? "Webhook processing failed" });
+                    }
+                    return Ok();
+                }
+                catch (StripeException ex)
+                {
+                    return BadRequest(new { error = "Invalid stripe signature" });
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new { error = "Internal webhook error" });
+                }
+            }
         // Cancel a Stripe payment intent
         [HttpPost("stripe/cancel/{paymentIntentId}")]
         [Authorize]

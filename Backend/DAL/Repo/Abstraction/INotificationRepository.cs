@@ -19,5 +19,6 @@
         Task<Notification?> MarkAsReadAsync(int notificationId);
         Task<bool> MarkAllAsReadAsync(Guid userId);
         Task<bool> MarkAsSentAsync(int notificationId);
+        Task<int> DeleteReadOlderThanDaysAsync(int days); // delete read notifications older than specified days
     }
 }
