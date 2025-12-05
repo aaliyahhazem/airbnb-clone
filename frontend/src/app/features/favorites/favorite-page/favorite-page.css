@@ -745,20 +745,22 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: linear-gradient(135deg, var(--broker-red), #8B0000);
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.95), rgba(139, 0, 0, 0.95));
   color: white;
   border: none;
-  border-radius: 12px;
-  padding: 0.65rem 1.2rem;
-  font-weight: 600;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);
-  z-index: 20;
-  opacity: 0;
+  z-index: 100;
+  opacity: 0; /* Hidden by default */
+  transform: scale(0.9);
+  padding: 0;
 }
 
 .remove-favorite-btn:hover {
@@ -771,7 +773,7 @@
   transform: translateY(0);
 }
 
-.listing-card-container:hover .remove-favorite-btn {
+.listing-card-wrapper:hover .remove-favorite-btn {
   opacity: 1;
 }
 
@@ -783,30 +785,6 @@
   font-size: 1rem;
 }
 
-/* Favorite Count Badge Overlay */
-.favorite-count-overlay {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  background: linear-gradient(135deg, rgba(220, 20, 60, 0.95), rgba(139, 0, 0, 0.95));
-  color: white;
-  border-radius: 20px;
-  padding: 0.5rem 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 15;
-  animation: badgeSlideIn 0.4s ease-out;
-}
-
-.favorite-count-overlay i {
-  font-size: 1.1rem;
-  animation: heartBeat 1.2s ease-in-out infinite;
-}
 
 @keyframes badgeSlideIn {
   from {
@@ -868,5 +846,41 @@
 
   .listing-card-container:hover .remove-favorite-btn {
     opacity: 1;
+  }
+}
+/* ===== Favorites Grid Layout ===== */
+.favorites-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  padding: 1rem 2rem;
+}
+
+/* Each card wrapper */
+.listing-card-wrapper {
+  flex: 1 1 calc(25% - 1.5rem); 
+  max-width: calc(25% - 1.5rem);
+  display: flex;
+}
+
+/* Prevent card stretching vertically */
+.listing-card-container {
+  width: 100%;
+  position: relative;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1200px) {
+  .listing-card-wrapper {
+    flex: 1 1 calc(50% - 1.5rem); 
+    max-width: calc(50% - 1.5rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .listing-card-wrapper {
+    flex: 1 1 100%;                 /* 1 in a row */
+    max-width: 100%;
   }
 }

@@ -66,11 +66,11 @@ export class HostBookings implements OnInit {
   }
   getTotalRevenue(): number {
     return this.bookings()
-      .filter(booking => booking.bookingStatus === 'confirmed')
+      .filter(booking => booking.bookingStatus.toLocaleLowerCase() === 'confirmed')
       .reduce((sum, booking) => sum + booking.totalPrice, 0);
   }
 
   getConfirmedBookingsCount(): number {
-    return this.bookings().filter(booking => booking.bookingStatus === 'confirmed').length;
+    return this.bookings().filter(booking => booking.bookingStatus.toLocaleLowerCase() === 'confirmed').length;
   }
 }

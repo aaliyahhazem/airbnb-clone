@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { ListingCard } from '../../listings-page/listing-card/listing-card';
@@ -12,7 +12,7 @@ import { ListingOverviewVM } from '../../../core/models/listing.model';
 @Component({
   selector: 'app-favorite-page',
   standalone: true,
-  imports: [CommonModule,TranslateModule, ListingCard],
+  imports: [CommonModule, TranslateModule, ListingCard],
   templateUrl: './favorite-page.html',
   styleUrl: './favorite-page.css',
 })
@@ -20,6 +20,7 @@ export class FavoritePage implements OnInit {
   private store = inject(FavoriteStoreService);
   private router = inject(Router);
   private api = inject(FavoriteService);
+  private favoriteStore = inject(FavoriteStoreService);
 
   favorites: FavoriteVM[] = [];
   listings: ListingOverviewVM[] = [];
@@ -29,8 +30,7 @@ export class FavoritePage implements OnInit {
   listingFavoriteCounts: Map<number, number> = new Map();
 
   ngOnInit(): void {
-    this.loadFavorites();
-
+    this.favoriteStore.loadFavorites();
     // Subscribe to store updates
     this.store.favorites$.subscribe({
       next: (favorites) => {
@@ -39,7 +39,7 @@ export class FavoritePage implements OnInit {
         this.listings = favorites
           .filter(fav => fav.listing)
           .map(fav => this.convertToListingOverview(fav.listing!));
-        
+
         // Fetch favorite count for each listing
         this.listings.forEach(listing => {
           this.api.getListingFavoritesCount(listing.id).subscribe({
@@ -53,7 +53,7 @@ export class FavoritePage implements OnInit {
             error: (err) => console.warn('Failed to get favorite count for listing', listing.id, err)
           });
         });
-        
+
         this.loading = false;
       },
       error: (err) => {
@@ -80,8 +80,12 @@ export class FavoritePage implements OnInit {
       title: favListing.title,
       pricePerNight: favListing.pricePerNight ?? 0,
       location: favListing.location ?? '',
-      mainImageUrl: this.normalizeImageUrl(favListing.mainImageUrl),
-      averageRating: favListing.averageRating ?? 0,
+      mainImageUrl: this.normalizeImageUrl(
+        favListing.mainImageUrl ||
+        (favListing as any).MainImageUrl ||
+        (favListing as any).imageUrl ||
+        (favListing as any).ImageUrl
+      ), averageRating: favListing.averageRating ?? 0,
       reviewCount: favListing.reviewCount ?? 0,
       isApproved: favListing.isApproved ?? false,
       description: favListing.description ?? '',

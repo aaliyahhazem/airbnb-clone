@@ -61,6 +61,11 @@
               <!-- Property Title & Status -->
               <div class="property-title-section">
                 <h1 class="property-title">{{ listing.title }}</h1>
+                <!-- Favorite Button Integration -->
+                <app-favorite-button [listingId]="listing.id" [isFavorited]="isFavorited"
+                  (favoriteChanged)="onFavoriteChanged($event)">
+                </app-favorite-button>
+
                 <div class="property-status" [class.approved]="listing.isApproved"
                   [class.pending]="!listing.isApproved">
                   <i class="bi" [class.bi-check-circle-fill]="listing.isApproved"

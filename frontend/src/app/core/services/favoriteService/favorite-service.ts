@@ -78,4 +78,5 @@ addFavorite(listingId: number): Observable<FavoriteResponse<FavoriteVM>> {
   getFavoriteStats(): Observable<FavoriteResponse<FavoriteStatsVM>> {
     return this.http.get<FavoriteResponse<FavoriteStatsVM>>(`${this.url}/stats`);
   }
+  
 }

@@ -87,7 +87,6 @@
   <!-- Favorites Grid using Listing Cards -->
   <div *ngIf="!loading && !error && listings.length > 0" class="favorites-grid">
     <div *ngFor="let listing of listings; trackBy: trackByListingId" class="listing-card-wrapper">
-      <div class="listing-card-container">
         <app-listing-card
           [listing]="listing"
           [isFavorited]="true"
@@ -101,14 +100,7 @@
           [title]="'favorites.removeFromFavorites' | translate"
           aria-label="Remove from favorites">
           <i class="bi bi-trash"></i>
-          <span class="btn-text">{{ 'favorites.remove' | translate }}</span>
         </button>
-
-        <!-- Favorite Count Badge on Card -->
-        <div class="favorite-count-overlay">
-          <i class="bi bi-heart-fill"></i>
-          <span>{{ listing.favoriteCount }}</span>
-        </div>
       </div>
     </div>
   </div>
