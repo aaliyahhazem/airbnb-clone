@@ -1,10 +1,48 @@
+.payment-container {
+  max-width: 500px;
+  margin: 30px auto;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #e6e6e6;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+h2 {
+  color: #c62828;
+  font-weight: 700;
+}
+
 .card-element {
-  padding: 12px;
+  padding: 14px;
   border: 1px solid #dcdcdc;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #fafafa;
 }
 
-button {
-  font-size: 1.2rem;
+.btn-pay {
+  background: #c62828 !important;
+  color: white;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 1.1rem;
+}
+
+.btn-pay:hover {
+  background: #a91f1f !important;
+}
+
+.error-message {
+  background: #ffe5e5;
+  color: #a11;
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.success-message {
+  background: #e8ffe8;
+  color: #0a8a0a;
+  padding: 14px;
+  border-radius: 10px;
 }

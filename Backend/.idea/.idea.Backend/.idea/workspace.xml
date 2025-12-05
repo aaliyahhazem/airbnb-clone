@@ -11,19 +11,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7f7c1e2a-48e7-4c75-85a2-f48f381af1ed" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/BLL/BLL.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/BLL/BLL.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BLL/Common/ModularBLL.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BLL/Common/ModularBLL.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BLL/Global/Global.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BLL/Global/Global.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BLL/Helper/Upload.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BLL/Helper/Upload.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BLL/Services/Abstractions/IPaymentService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BLL/Services/Abstractions/IPaymentService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BLL/Services/Impelementation/PaymentService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BLL/Services/Impelementation/PaymentService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BLL/Services/Impelementation/ReviewService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/BLL/Services/Impelementation/ReviewService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DAL/Migrations/20251116134607_1.Designer.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DAL/Migrations/20251116134607_1.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/PL/Controllers/PaymentController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PL/Controllers/PaymentController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PL/Global/Global.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PL/Global/Global.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PL/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PL/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PL/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/PL/appsettings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Backend/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Backend/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DAL/Entities/Booking.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DAL/Entities/Booking.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,10 +22,10 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 7
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 7
+}</component>
   <component name="ProjectId" id="35vogPusuekyHCO7v8PH92yEwof" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -46,6 +35,7 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "master",
     "junie.onboarding.icon.badge.shown": "true",
@@ -132,7 +122,10 @@
       <method v="2" />
     </configuration>
     <configuration default="true" type="docker-deploy" factoryName="dockerfile" temporary="true">
-      <deployment type="dockerfile" />
+      <deployment type="dockerfile">
+        <settings />
+      </deployment>
+      <EXTENSION ID="com.jetbrains.rider.docker.debug" isFastModeEnabled="true" isSslEnabled="false" />
       <method v="2" />
     </configuration>
   </component>
@@ -144,6 +137,7 @@
       <option name="presentableId" value="Default" />
       <updated>1764000038910</updated>
       <workItem from="1764000096158" duration="451000" />
+      <workItem from="1764791280313" duration="113000" />
     </task>
     <servers />
   </component>

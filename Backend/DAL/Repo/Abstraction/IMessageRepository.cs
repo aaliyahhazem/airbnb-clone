@@ -11,5 +11,6 @@
         Task<Message?> MarkAsReadAsync(int messageId);
         Task<int> MarkAllAsReadAsync(Guid receiverId);                                     // returns count updated
         Task<bool> DeleteAsync(int messageId);
+        Task<int> DeleteSeenOlderThanDaysAsync(int days);                               //Delete messages that are read and older than specified days
     }
 }

@@ -1,8 +1,9 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { BookingService } from '../../../core/services/Booking/booking-service';
 import { BookingStoreService } from '../../../core/services/Booking/booking-store-service';
 import { GetBookingVM } from '../../../core/models/booking';
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-my-bookings',
@@ -17,7 +18,21 @@ export class MyBookings implements OnInit {
   bookings = signal<GetBookingVM[]>([]);
   isLoading = signal(false);
   errorMessage = signal('');
+  filter = signal<'all' | 'upcoming' | 'past' | 'cancelled'>('all');
 
+  ilteredBookings = computed(() => {
+    const f = this.filter();
+    const all = this.bookings();
+
+    const now = new Date();
+
+    if (f === 'all') return all;
+    if (f === 'cancelled') return all.filter(b => b.bookingStatus === 'cancelled');
+    if (f === 'upcoming') return all.filter(b => new Date(b.checkInDate) >= now);
+    if (f === 'past') return all.filter(b => new Date(b.checkOutDate) < now);
+
+    return all;
+  });
   ngOnInit(): void {
     this.loadMyBookings();
   }
@@ -33,31 +48,79 @@ export class MyBookings implements OnInit {
           this.bookingStore.setMyBookings(response.result);
         } else {
           this.errorMessage.set(response.errorMessage || 'Failed to load bookings');
+            Swal.fire({
+            icon: 'error',
+            title: 'Loading Failed',
+            text: response.errorMessage || 'Failed to load bookings',
+            confirmButtonColor: '#d00'
+          });
         }
       },
       error: (error) => {
         this.isLoading.set(false);
         this.errorMessage.set('An error occurred while loading bookings');
         console.error('Bookings loading error:', error);
+         Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An error occurred while loading bookings',
+          confirmButtonColor: '#d00'
+        });
       }
     });
   }
-  cancelBooking(bookingId: number): void {
-    if (confirm('Are you sure you want to cancel this booking?')) {
-      this.bookingService.cancelBooking(bookingId).subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.loadMyBookings(); // Reload bookings
-          } else {
-            alert(response.errorMessage || 'Failed to cancel booking');
+  cancelBooking(bookingId: number): void { Swal.fire({
+      title: 'Cancel Booking?',
+      text: 'Are you sure you want to cancel this booking?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d00',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, cancel it',
+      cancelButtonText: 'No, keep it'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Show loading
+        Swal.fire({
+          title: 'Cancelling...',
+          text: 'Please wait',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
           }
-        },
-        error: (error) => {
-          alert('An error occurred while cancelling booking');
-          console.error('Booking cancellation error:', error);
-        }
-      });
-    }
+        });
+
+        this.bookingService.cancelBooking(bookingId).subscribe({
+          next: (response) => {
+            if (response.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Cancelled!',
+                text: 'Your booking has been cancelled successfully.',
+                confirmButtonColor: '#28a745'
+              });
+              this.loadMyBookings(); // Reload bookings
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Cancellation Failed',
+                text: response.errorMessage || 'Failed to cancel booking',
+                confirmButtonColor: '#d00'
+              });
+            }
+          },
+          error: (error) => {
+            console.error('Booking cancellation error:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'An error occurred while cancelling booking',
+              confirmButtonColor: '#d00'
+            });
+          }
+        });
+      }
+    });
   }
   getStatusBadgeClass(status: string): string {
     switch (status.toLowerCase()) {

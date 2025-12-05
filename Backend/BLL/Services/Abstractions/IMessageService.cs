@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace BLL.Services.Abstractions
 {
  public interface IMessageService
@@ -11,5 +13,6 @@ namespace BLL.Services.Abstractions
  Task<Response<GetMessageVM>> MarkAsReadAsync(int messageId, Guid userId);
  Task<Response<int>> MarkAllAsReadAsync(Guid receiverId);
  Task<Response<bool>> DeleteMessageAsync(int messageId, Guid userId);
- }
+ Task<Response<int>> DeleteOldSeenMessagesAsync(int days);
+}
 }

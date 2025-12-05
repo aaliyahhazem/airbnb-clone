@@ -9,11 +9,13 @@ import { Subscription } from 'rxjs';
 import { CreateBooking } from "../../booking/create-booking/create-booking";
 import { CreateReviewVM, ReviewVM } from '../../../core/models/review.model';
 import { ReviewService } from '../../../core/services/review/review.service';
+import { FavoriteStoreService } from '../../../core/services/favoriteService/favorite-store-service';
+import { FavoriteButton } from '../../favorites/favorite-button/favorite-button';
 
 @Component({
   selector: 'app-listings-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslateModule],
+    imports: [CommonModule, FormsModule, RouterLink, TranslateModule, FavoriteButton],
   templateUrl: './listings-detail.html',
   styleUrls: ['./listings-detail.css'],
 })
@@ -25,12 +27,15 @@ export class ListingsDetail implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private platformId = inject(PLATFORM_ID);
   private sub: Subscription | null = null;
+  private favoriteStore = inject(FavoriteStoreService);
 
   listing?: ListingDetailVM;
   loading = true;
   error = '';
   currentImageIndex = 0;
-  canEdit = false;
+  canEdit = false; // Add edit permission property
+  isFavorited = false;
+
 
   //Bookings Props 
   showBookingForm = false;
@@ -274,5 +279,10 @@ next: (res: any) => {
   selectBooking(bookingId: number) {
     this.newReview.bookingId = bookingId;
   }
+  onFavoriteChanged(isFavorited: boolean): void {
+    this.isFavorited = isFavorited;
+  }
+
+}
 
 }

@@ -20,7 +20,7 @@ export interface GetBookingVM {
 
 export interface BookingResponse {
   success: boolean;
-  result?: GetBookingVM;
+  result?: GetBookingVM | null;
   errorMessage?: string;
 }
 

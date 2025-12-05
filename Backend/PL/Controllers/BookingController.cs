@@ -28,22 +28,58 @@ namespace PL.Controllers
         public async Task<IActionResult> Create([FromBody] CreateBookingVM model)
         {
             var userId = GetUserIdFromClaims();
+
             if (userId == null) return Unauthorized();
 
             // Log incoming request
             try
             {
+                _logger?.LogInformation(
+                    "Booking Create request received. userId={UserId}, listingId={ListingId}",
+                    userId?.ToString() ?? "<null>", model?.ListingId);
                 _logger?.LogInformation("Booking Create request received. userId={UserId}, listingId={ListingId}, checkIn={CheckIn}, checkOut={CheckOut}, guests={Guests}, paymentMethod={PaymentMethod}",
                     userId?.ToString() ?? "<null>", model?.ListingId, model?.CheckInDate.ToString("o"), model?.CheckOutDate.ToString("o"), model?.Guests, model?.PaymentMethod);
             }
             catch { }
 
+                if (userId == null)
+                    return Unauthorized(new { success = false, errorMessage = "Unauthorized" });
+
+                var resp = await _bookingService.CreateBookingAsync(userId.Value, model);
+
+                if (!resp.Success)
+                {
+                    _logger?.LogWarning("Booking create failed: {Reason}", resp.errorMessage);
+                    return BadRequest(new
+                    {
+                        success = false,
+                        errorMessage = resp.errorMessage
+                    });
+                }
+
+                // ? Return consistent wrapped response
+                return Ok(new
+                {
+                    success = true,
+                    result = resp.result,
+                    errorMessage = (string?)null
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "CreateBooking exception");
+                return StatusCode(500, new
+                {
+                    success = false,
+                    errorMessage = ex.Message
+                });
             var resp = await _bookingService.CreateBookingAsync(userId.Value, model);
             if (!resp.Success)
             {
                 try { _logger?.LogWarning("Booking create failed for user {UserId}: {Reason}", userId?.ToString() ?? "<null>", resp.errorMessage); } catch { }
                 return BadRequest(resp.errorMessage);
             }
+        }
 
             var bookingVM = resp.result;
 
@@ -106,6 +142,8 @@ namespace PL.Controllers
                 _logger.LogError(ex, "Failed sending payout notification for bookingId={BookingId}", fullBooking.Id);
             }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
 
             return Ok(bookingVM);
         }
@@ -114,8 +152,27 @@ namespace PL.Controllers
         public async Task<IActionResult> Cancel(int id)
         {
             var userId = GetUserIdFromClaims();
-            if (userId == null) return Unauthorized();
+            if (userId == null)
+                return Unauthorized(new { success = false, errorMessage = "Unauthorized" });
 
+            var resp = await _bookingService.GetByIdAsync(userId.Value, id);
+
+            if (!resp.Success)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    errorMessage = resp.errorMessage
+                });
+            }
+
+            // ? Return consistent wrapped response
+            return Ok(new
+            {
+                success = true,
+                result = resp.result,
+                errorMessage = (string?)null
+            });
             var resp = await _bookingService.CancelBookingAsync(userId.Value, id);
             if (!resp.Success) return BadRequest(resp.errorMessage);
 
@@ -136,13 +193,13 @@ namespace PL.Controllers
             return Ok(resp.result);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        [HttpPost("{id}/cancel")]
+        public async Task<IActionResult> Cancel(int id)
         {
             var userId = GetUserIdFromClaims();
             if (userId == null) return Unauthorized();
 
-            var resp = await _bookingService.GetByIdAsync(userId.Value, id);
+            var resp = await _bookingService.CancelBookingAsync(userId.Value, id);
             if (!resp.Success) return BadRequest(resp.errorMessage);
             return Ok(resp.result);
         }

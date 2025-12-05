@@ -138,6 +138,14 @@ export class Navbar implements OnInit, OnDestroy {
       Promise.resolve().then(() => { this.unreadMsgCount = cnt; this.cdr.detectChanges(); });
     }));
 
+    // Subscribe to favorite count
+    this.sub.add(this.favoriteStore.favoriteCount$.subscribe(cnt => {
+      Promise.resolve().then(() => {
+        this.favoriteCount = cnt;
+        this.cdr.detectChanges();
+      });
+    }));
+
     // close dropdowns when clicking outside the navbar component
     this.docClickUnlisten = this.renderer.listen('document', 'click', (evt: Event) => {
       const target = evt.target as Node;

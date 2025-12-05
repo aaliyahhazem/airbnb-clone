@@ -99,5 +99,19 @@
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<int> DeleteSeenOlderThanDaysAsync(int days)
+        {
+            var cutoffDate = DateTime.UtcNow.AddDays(-days);
+
+            var oldMsgs = await _context.Messages
+                .Where(m => m.IsRead && m.SentAt < cutoffDate)
+                .ToListAsync();
+
+            if (!oldMsgs.Any()) return 0;
+
+            _context.Messages.RemoveRange(oldMsgs);
+            await _context.SaveChangesAsync();
+            return oldMsgs.Count;
+        }
     }
 }

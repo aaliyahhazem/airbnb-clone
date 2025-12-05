@@ -32,6 +32,11 @@ export class ListingsList implements OnInit {
   minRating = signal<number | null>(null);
   isApproved = signal<string>(''); // '', approved, not-approved
 
+  // delete confirmation modal
+  showDeleteModal = signal<boolean>(false);
+  listingToDelete = signal<number | null>(null);
+  listingToDeleteTitle = signal<string>('');
+
   // computed
   totalPages = computed(() => {
     const filteredCount = this.filtered().length;
@@ -176,7 +181,17 @@ export class ListingsList implements OnInit {
   }
 
   onDelete(id: number) {
-    if (!confirm('Delete this listing?')) return;
+    const listing = this.listings().find(l => l.id === id);
+    if (listing) {
+      this.listingToDelete.set(id);
+      this.listingToDeleteTitle.set(listing.title || 'this listing');
+      this.showDeleteModal.set(true);
+    }
+  }
+
+  confirmDelete() {
+    const id = this.listingToDelete();
+    if (!id) return;
 
     this.listingService.delete(id).subscribe({
       next: (response) => {
@@ -185,11 +200,19 @@ export class ListingsList implements OnInit {
         } else {
           this.error.set(response.message || 'Failed to delete listing');
         }
+        this.closeDeleteModal();
       },
       error: (err) => {
         this.error.set('Error deleting listing: ' + (err.message || 'Unknown error'));
+        this.closeDeleteModal();
       }
     });
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal.set(false);
+    this.listingToDelete.set(null);
+    this.listingToDeleteTitle.set('');
   }
 
   resetFilters() {

@@ -10,6 +10,8 @@
         public decimal TotalPrice { get; private set; }
         public BookingPaymentStatus PaymentStatus { get; private set; }
         public BookingStatus BookingStatus { get; private set; }
+        public string? PaymentIntentId { get; private set; }
+
         public DateTime CreatedAt { get; private set; }
 
         // Relationships
@@ -40,7 +42,10 @@
                 GuestId = guestId,
                 CheckInDate = checkInDate,
                 CheckOutDate = checkOutDate,
-                TotalPrice = totalPrice
+                TotalPrice = totalPrice,
+                PaymentStatus = BookingPaymentStatus.Pending,
+                BookingStatus = BookingStatus.Pending,
+                CreatedAt = DateTime.UtcNow
             };
         }
 
@@ -63,6 +68,11 @@
             TotalPrice = totalPrice;
             PaymentStatus = paymentStatus;
             BookingStatus = bookingStatus;
+        }
+        // Set PaymentIntentId  
+        public void SetPaymentIntentId(string paymentIntentId)
+        {
+            PaymentIntentId = paymentIntentId;
         }
     }
 }

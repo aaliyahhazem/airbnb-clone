@@ -93,6 +93,9 @@ export interface ListingDetailVM {
   type: string;
   bedrooms: number;
   bathrooms: number;
+  // Host Information
+  hostId: string;
+  hostName: string;
 }
 
 export interface ListingOverviewVM {
