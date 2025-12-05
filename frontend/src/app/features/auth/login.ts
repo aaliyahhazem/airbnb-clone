@@ -98,6 +98,29 @@ export class Login {
     this.cdr.detectChanges();
   }
 
+  loginWithGoogle() {
+    this.isLoading = true;
+    this.auth.googleLogin().subscribe({
+      next: res => {
+        this.isLoading = false;
+        console.log('Google login response:', res);
+
+        // Navigate after login
+        if (this.auth.isAdmin()) {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/']);
+        }
+      },
+      error: err => {
+        this.isLoading = false;
+        console.error('Google login failed', err);
+        this.errorMessage = this.translate.instant('auth.loginError');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   // ============================================================
   // SUBMIT - MAIN ENTRY
   // ============================================================

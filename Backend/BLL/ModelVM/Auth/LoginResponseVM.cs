@@ -16,10 +16,18 @@ namespace BLL.ModelVM.Auth
     /// </summary>
     public class UserInfoVM
     {
+
         public Guid Id { get; set; }
         public string Email { get; set; } = null!;
         public string UserName { get; set; } = null!;
         public string FullName { get; set; } = null!;
         public string Role { get; set; } = null!;
+        public string? FirebaseUid { get; set; }
+
+    }
+
+    public class GoogleLoginDto
+    {
+        public string IdToken { get; set; } = string.Empty;
     }
 }

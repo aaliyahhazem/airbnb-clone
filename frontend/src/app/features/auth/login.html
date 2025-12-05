@@ -17,104 +17,57 @@
     <div class="broker-auth-card">
       <h3 class="auth-card-title">{{ 'navbar.logIn' | translate }}</h3>
 
-      <!-- Login Mode Tabs -->
-      <div class="login-mode-tabs">
-        <button 
-          type="button"
-          class="tab-btn"
-          [class.active]="isLoginMode === 'email'"
-          (click)="switchToEmailLogin()"
-          [disabled]="isLoading">
-          📧 {{'faceCapture.Email' | translate }}
-        </button>
-        <button 
-          type="button"
-          class="tab-btn"
-          [class.active]="isLoginMode === 'face'"
-          (click)="switchToFaceLogin()"
-          [disabled]="isLoading">
-          📸 {{ 'faceCapture.FaceID' | translate }}
-        </button>
+      <!-- General Error Message -->
+      <div *ngIf="errorMessage" class="auth-error">
+        <i class="bi bi-exclamation-triangle"></i>
+        {{ errorMessage }}
       </div>
 
-      <!-- Email Login Form -->
-      <form *ngIf="isLoginMode === 'email'" (ngSubmit)="submit()" class="broker-auth-form">
-        <div class="input-group">
+      <form (ngSubmit)="submit()" class="broker-auth-form" #loginForm="ngForm">
+        <!-- Email Field -->
+        <div class="input-group" [class.has-error]="fieldErrors['email']">
           <i class="bi bi-envelope"></i>
-          <input 
-            name="email" 
-            [(ngModel)]="email" 
-            placeholder="{{ 'auth.email' | translate }}" 
-            class="broker-input" 
-            type="email"
-            [disabled]="isLoading" />
+          <input name="email" [(ngModel)]="email" (blur)="validateField('email', email)"
+            (input)="fieldErrors['email'] = ''" placeholder="{{ 'auth.email' | translate }}" class="broker-input"
+            type="email" [class.invalid]="fieldErrors['email']" #emailInput="ngModel" required />
         </div>
-        <div class="input-group">
+        <div *ngIf="fieldErrors['email']" class="field-error">
+          <i class="bi bi-exclamation-circle"></i>
+          {{ fieldErrors['email'] }}
+        </div>
+
+        <!-- Password Field -->
+        <div class="input-group password-group" [class.has-error]="fieldErrors['password']">
           <i class="bi bi-lock"></i>
-          <input 
-            name="password" 
-            [(ngModel)]="password" 
-            type="password" 
-            placeholder="{{ 'auth.password' | translate }}" 
-            class="broker-input"
-            [disabled]="isLoading" />
+          <input name="password" [(ngModel)]="password" (blur)="validateField('password', password)"
+            (input)="fieldErrors['password'] = ''" [type]="showPassword ? 'text' : 'password'"
+            placeholder="{{ 'auth.password' | translate }}" class="broker-input"
+            [class.invalid]="fieldErrors['password']" #passwordInput="ngModel" required />
+          <button type="button" class="password-toggle" (click)="togglePasswordVisibility()">
+            <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+          </button>
         </div>
-
-        <div *ngIf="errorMessage" class="auth-error">
-          <i class="bi bi-exclamation-triangle"></i>
-          {{ errorMessage }}
-        </div>
-
-        <div *ngIf="successMessage" class="auth-success">
-          <i class="bi bi-check-circle"></i>
-          {{ successMessage }}
+        <div *ngIf="fieldErrors['password']" class="field-error">
+          <i class="bi bi-exclamation-circle"></i>
+          {{ fieldErrors['password'] }}
         </div>
 
         <button type="submit" class="btn-broker" [disabled]="isLoading">
-          <span *ngIf="!isLoading">{{ 'navbar.logIn' | translate }}</span>
-          <span *ngIf="isLoading" class="button-loading">
-            <span class="spinner"></span>
-            {{ 'common.loading' | translate }}
-          </span>
+          <span *ngIf="isLoading" class="loading-spinner"></span>
+          {{ isLoading ? ('auth.loggingIn' | translate) : ('navbar.logIn' | translate) }}
         </button>
       </form>
 
-      <!-- Face Login Notice -->
-      <div *ngIf="isLoginMode === 'face'" class="face-login-container">
-        <div class="face-login-notice">
-          <div class="face-login-icon">📸</div>
-          <h4>{{ 'auth.faceLoginReady' | translate }}</h4>
-          <p>{{ 'auth.faceLoginHint' | translate }}</p>
-          
-          <div *ngIf="errorMessage" class="auth-error">
-            <i class="bi bi-exclamation-triangle"></i>
-            {{ errorMessage }}
-          </div>
-
-          <div *ngIf="successMessage" class="auth-success">
-            <i class="bi bi-check-circle"></i>
-            {{ successMessage }}
-          </div>
-
-          <div class="loading-state" *ngIf="isLoading">
-            <div class="spinner"></div>
-            <p>{{ 'auth.processingFace' | translate }}</p>
-          </div>
-
-          <p class="face-login-hint">{{ 'auth.switchTabHint' | translate }}</p>
-        </div>
-      </div>
+      <button type="button" class="btn-google" (click)="loginWithGoogle()" [disabled]="isLoading">
+        <i class="bi bi-google"></i>
+        Login with Google
+      </button>
 
       <div class="auth-links">
         {{ 'auth.dontHaveAccount' | translate }}
         <a routerLink="/auth/register" class="broker-link">{{ 'navbar.signUp' | translate }}</a>
       </div>
+
     </div>
   </div>
-
-  <!-- Face Capture Modal -->
-  <app-face-capture
-    (frameCapture)="onFaceCaptured($event)"
-    (cancel)="onFaceCaptureCancelled()">
-  </app-face-capture>
 </div>

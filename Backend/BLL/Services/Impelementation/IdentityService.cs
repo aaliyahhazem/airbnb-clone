@@ -1,3 +1,5 @@
+using Google.Apis.Auth;
+using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 
 namespace BLL.Services.Impelementation
@@ -32,109 +34,93 @@ namespace BLL.Services.Impelementation
 
         public async Task<Response<LoginResponseVM>> RegisterAsync(string email, string password, string fullName, string userName, string? firebaseUid = null, string role = "Guest")
         {
-            var existing = await _userManager.FindByEmailAsync(email);
-            if (existing != null) return Response<LoginResponseVM>.FailResponse("Email already registered");
-
-            //check for username uniqueness
-            var existingUserName = await _userManager.FindByNameAsync(userName);
-            if (existingUserName != null) return Response<LoginResponseVM>.FailResponse("Username already taken");
-
-            // sanitize provided username: keep only letters and digits
-            string sanitized = null;
-            if (!string.IsNullOrWhiteSpace(userName))
+            try
             {
-                sanitized = Regex.Replace(userName.Trim(), "[^a-zA-Z0-9]", string.Empty);
-            }
+                Console.WriteLine($"RegisterAsync called: email={email}, firebaseUid={firebaseUid}");
 
-            // if sanitized is empty, use new guid string
-            if (string.IsNullOrWhiteSpace(sanitized))
-            {
-                sanitized = Guid.NewGuid().ToString("N");
-            }
-
-            
-            
-
-            // ensure uniqueness of username
-            string candidate = sanitized;
-            var rnd = new Random();
-            for (int i =0; i <10; i++)
-            {
-                var found = await _userManager.FindByNameAsync(candidate);
-                if (found == null) break;
-                candidate = sanitized + rnd.Next(1000,9999).ToString();
-            }
-
-            var user = User.Create(fullName, Enum.Parse<DAL.Enum.UserRole>(role));
-            user.Email = email;
-            user.UserName = candidate; // set before creation to satisfy Identity validators
-
-            var result = await _userManager.CreateAsync(user, password);
-            if (!result.Succeeded) return Response<LoginResponseVM>.FailResponse(string.Join(";", result.Errors.Select(e => e.Description)));
-
-            if (!await _roleManager.RoleExistsAsync(role))
-                await _roleManager.CreateAsync(new IdentityRole<Guid>(role));
-
-            await _userManager.AddToRoleAsync(user, role);
-
-            // Send welcome notification with onboarding button
-            await _notificationService.CreateAsync(new BLL.ModelVM.Notification.CreateNotificationVM
-            {
-                UserId = user.Id,
-                Title = "Welcome to Airbnb Clone!",
-                Body = $"Hi {fullName}! We're excited to have you here. Take a quick tour to discover all the amazing features.",
-                CreatedAt = DateTime.UtcNow,
-                ActionUrl = "/onboarding",
-                ActionLabel = "Start Tour",
-                Type = DAL.Enum.NotificationType.System
-            });
-            
-            // Send welcome message from system user
-            var systemUser = await _userManager.FindByEmailAsync("system@airbnb.com");
-            if (systemUser != null)
-            {
-                await _unitOfWork.Messages.CreateAsync(
-                    systemUser.Id, 
-                    user.Id, 
-                    $@"Welcome {fullName}! 🎉
-
-                    We're thrilled to have you join our community. Here's what you can do:
-
-                    ✨ Browse unique stays worldwide
-                    📅 Book your perfect vacation
-                    💬 Chat with hosts
-                    🏠 List your own property
-
-                    Need help? Just reply to this message!
-
-                    Happy exploring!
-                    - The Airbnb Clone Team",
-                    DateTime.UtcNow,
-                    false);
-                await _unitOfWork.SaveChangesAsync();
-            }
-
-            // generate token for the new user
-            var token = _tokenService.GenerateToken(user.Id, role, user.FullName);
-            
-            // New users always get onboarding (IsFirstLogin defaults to true)
-            var loginResponse = new LoginResponseVM
-            {
-                Token = token,
-                IsFirstLogin = user.IsFirstLogin,
-                User = new UserInfoVM
+                var existing = await _userManager.FindByEmailAsync(email);
+                if (existing != null)
                 {
-                    Id = user.Id,
-                    Email = user.Email!,
-                    UserName = user.UserName!,
-                    FullName = user.FullName,
-                    Role = role
+                    return Response<LoginResponseVM>.FailResponse("Email already registered");
                 }
-            };
-            
-            return Response<LoginResponseVM>.SuccessResponse(loginResponse);
-        }
 
+                // Check for username uniqueness
+                var existingUserName = await _userManager.FindByNameAsync(userName);
+                if (existingUserName != null)
+                {
+                    return Response<LoginResponseVM>.FailResponse("Username already taken");
+                }
+
+                // Sanitize username
+                string sanitized = null;
+                if (!string.IsNullOrWhiteSpace(userName))
+                {
+                    sanitized = Regex.Replace(userName.Trim(), "[^a-zA-Z0-9]", string.Empty);
+                }
+
+                if (string.IsNullOrWhiteSpace(sanitized))
+                {
+                    sanitized = Guid.NewGuid().ToString("N");
+                }
+
+                // Ensure uniqueness of username
+                string candidate = sanitized;
+                var rnd = new Random();
+                for (int i = 0; i < 10; i++)
+                {
+                    var found = await _userManager.FindByNameAsync(candidate);
+                    if (found == null) break;
+                    candidate = sanitized + rnd.Next(1000, 9999).ToString();
+                }
+
+                // CREATE USER WITH FirebaseUid IN THE CONSTRUCTOR/METHOD
+                var user = User.Create(fullName, Enum.Parse<DAL.Enum.UserRole>(role), null, firebaseUid);
+
+                // Set other properties
+                user.Email = email;
+                user.UserName = candidate;
+
+                var result = await _userManager.CreateAsync(user, password);
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(";", result.Errors.Select(e => e.Description));
+                    return Response<LoginResponseVM>.FailResponse($"User creation failed: {errors}");
+                }
+
+                // Create role if it doesn't exist
+                if (!await _roleManager.RoleExistsAsync(role))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole<Guid>(role));
+                }
+
+                await _userManager.AddToRoleAsync(user, role);
+
+                // Generate token for the new user
+                var token = _tokenService.GenerateToken(user.Id, role, user.FullName);
+
+                var loginResponse = new LoginResponseVM
+                {
+                    Token = token,
+                    IsFirstLogin = user.IsFirstLogin,
+                    User = new UserInfoVM
+                    {
+                        Id = user.Id,
+                        Email = user.Email!,
+                        UserName = user.UserName!,
+                        FullName = user.FullName,
+                        Role = role,
+                        FirebaseUid = user.FirebaseUid // This will be set correctly
+                    }
+                };
+
+                return Response<LoginResponseVM>.SuccessResponse(loginResponse);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception in RegisterAsync: {ex}");
+                return Response<LoginResponseVM>.FailResponse($"Registration failed: {ex.Message}");
+            }
+        }
         // toggle between host and guest roles
         public async Task<Response<string>> ToggleUserRoleAsync(Guid userId)
         {
@@ -227,43 +213,82 @@ namespace BLL.Services.Impelementation
             if (!result.Succeeded) return Response<bool>.FailResponse(string.Join(";", result.Errors.Select(e => e.Description)));
             return Response<bool>.SuccessResponse(true);
         }
-
-        public async Task<Response<string>> OAuthLoginAsync(string provider, string externalToken)
+        public async Task<Response<LoginResponseVM>> OAuthLoginAsync(string provider, string externalToken)
         {
-            // Very simplified: in real app validate token with provider
-            // Assume externalToken contains email
-            var email = externalToken;
-            var user = await _userManager.FindByEmailAsync(email);
+            if (provider.ToLower() != "google")
+                return Response<LoginResponseVM>.FailResponse("Unsupported provider");
+
+            GoogleJsonWebSignature.Payload payload;
+
+            try
+            {
+                // Validate Google ID token
+                payload = await GoogleJsonWebSignature.ValidateAsync(externalToken);
+            }
+            catch
+            {
+                return Response<LoginResponseVM>.FailResponse("Invalid Google token");
+            }
+
+            string email = payload.Email;
+            string fullName = payload.Name ?? "User";
+            string firebaseUid = payload.Subject; // Google UID
+            string picture = payload.Picture;
+
+            // Check if this user exists (by Firebase UID or email)
+            var user = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.FirebaseUid == firebaseUid || u.Email == email);
+
             if (user == null)
             {
-                // derive sanitized username from email local part
-                var baseName = email.Split('@')[0];
-                var sanitized = Regex.Replace(baseName, "[^a-zA-Z0-9]", string.Empty);
+                // Create username from email
+                string baseName = email.Split('@')[0];
+                string sanitized = Regex.Replace(baseName, "[^a-zA-Z0-9]", string.Empty);
                 if (string.IsNullOrWhiteSpace(sanitized)) sanitized = Guid.NewGuid().ToString("N");
 
+                // Ensure username is unique
                 string candidate = sanitized;
-                var rnd = new Random();
-                for (int i =0; i <10; i++)
+                for (int i = 0; i < 10; i++)
                 {
-                    var found = await _userManager.FindByNameAsync(candidate);
-                    if (found == null) break;
-                    candidate = sanitized + rnd.Next(1000,9999).ToString();
+                    var exists = await _userManager.FindByNameAsync(candidate);
+                    if (exists == null) break;
+                    candidate = sanitized + new Random().Next(1000, 9999);
                 }
 
-                user = User.Create(baseName);
+                // Create user with no password
+                user = User.Create(fullName, DAL.Enum.UserRole.Guest, picture, firebaseUid);
                 user.Email = email;
                 user.UserName = candidate;
 
                 var createRes = await _userManager.CreateAsync(user);
-                if (!createRes.Succeeded) return Response<string>.FailResponse(string.Join(";", createRes.Errors.Select(e => e.Description)));
+                if (!createRes.Succeeded)
+                    return Response<LoginResponseVM>.FailResponse(string.Join(";", createRes.Errors.Select(e => e.Description)));
+
                 await _userManager.AddToRoleAsync(user, "Guest");
             }
 
+            // Get role
             var roles = await _userManager.GetRolesAsync(user);
             var role = roles.FirstOrDefault() ?? "Guest";
+
+            // Generate your JWT
             var token = _tokenService.GenerateToken(user.Id, role, user.FullName);
-            return Response<string>.SuccessResponse(token);
+
+            return Response<LoginResponseVM>.SuccessResponse(new LoginResponseVM
+            {
+                Token = token,
+                IsFirstLogin = user.IsFirstLogin,
+                User = new UserInfoVM
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    UserName = user.UserName!,
+                    FullName = user.FullName,
+                    Role = role
+                }
+            });
         }
+
 
         public async Task<Response<bool>> VerifyFaceIdAsync(Guid userId, string faceData)
         {
@@ -292,6 +317,32 @@ namespace BLL.Services.Impelementation
                 return Response<bool>.FailResponse("Failed to update onboarding status");
             
             return Response<bool>.SuccessResponse(true);
+        }
+
+        public async Task<User?> FindByEmailAsync(string email)
+        {
+            Console.WriteLine($"FindByEmailAsync called for: {email}");
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                Console.WriteLine($"User found: {user != null}");
+                if (user != null)
+                {
+                    Console.WriteLine($"User ID: {user.Id}, FirebaseUid: {user.FirebaseUid}");
+                }
+                return user;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception in FindByEmailAsync: {ex}");
+                return null;
+            }
+        }
+        public async Task<IList<string>> GetRolesAsync(Guid userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null) return new List<string>();
+            return await _userManager.GetRolesAsync(user);
         }
 
         public string GenerateToken(Guid userId, string role, string fullName, Guid? orderId = null, Guid? listingId = null)

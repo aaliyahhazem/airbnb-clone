@@ -1,7 +1,4 @@
-
-using Microsoft.AspNetCore.Identity;
-
-namespace PL.Controllers
+﻿namespace PL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -172,5 +169,86 @@ namespace PL.Controllers
             var token = _identityService.GenerateToken(userId, role, fullName, orderId, listingId);
             return Ok(new { token });
         }
+
+        // Google auth using Firebase token
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDto request)
+        {
+            if (string.IsNullOrWhiteSpace(request.IdToken))
+                return BadRequest(new { errorMessage = "IdToken is required" });
+
+            FirebaseToken decodedToken;
+
+            try
+            {
+                decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(request.IdToken);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = "Invalid Firebase token", details = ex.Message });
+            }
+
+            var email = decodedToken.Claims.TryGetValue("email", out var emailObj)
+                ? emailObj?.ToString()
+                : null;
+
+            if (email == null)
+                return BadRequest(new { errorMessage = "Email not provided by Google" });
+
+            var fullName = decodedToken.Claims.TryGetValue("name", out var nObj)
+                ? nObj?.ToString()
+                : "User";
+
+            var firebaseUid = decodedToken.Uid;
+
+            var user = await _identityService.FindByEmailAsync(email);
+
+            Response<LoginResponseVM> loginResponse;
+
+            if (user == null)
+            {
+                var randomPassword = "Aa1!" + Guid.NewGuid().ToString("N")[..12];
+                var username = email.Split('@')[0].ToLower();
+
+                var registerResponse = await _identityService.RegisterAsync(
+                    email: email,
+                    password: randomPassword,
+                    fullName: fullName,
+                    userName: username,
+                    firebaseUid: firebaseUid,
+                    role: "Guest"
+                );
+
+                if (!registerResponse.Success)
+                    return BadRequest(registerResponse);
+
+                loginResponse = registerResponse;
+            }
+            else
+            {
+                var roles = await _identityService.GetRolesAsync(user.Id);
+                var role = roles.FirstOrDefault() ?? "Guest";
+
+                var token = _identityService.GenerateToken(user.Id, role, user.FullName);
+
+                loginResponse = Response<LoginResponseVM>.SuccessResponse(new LoginResponseVM
+                {
+                    Token = token,
+                    IsFirstLogin = user.IsFirstLogin,
+                    User = new UserInfoVM
+                    {
+                        Id = user.Id,
+                        Email = user.Email!,
+                        UserName = user.UserName!,
+                        FullName = user.FullName,
+                        Role = role,
+                        FirebaseUid = firebaseUid
+                    }
+                });
+            }
+
+            return Ok(loginResponse);
+        }
+
     }
 }

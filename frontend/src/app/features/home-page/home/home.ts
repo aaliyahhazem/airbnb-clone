@@ -1,7 +1,6 @@
 import { Component, HostListener, ElementRef, AfterViewInit, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HomeListingCard } from "../home-listing-card/home-listing-card";
-import { StackedCards } from "../stacked-cards/stacked-cards";
 import { ListingOverviewVM } from '../../../core/models/listing.model';
 import { ListingService } from '../../../core/services/listings/listing.service';
 import { Router, RouterModule } from '@angular/router';
@@ -14,7 +13,7 @@ import { UserPreferencesService } from '../../../core/services/user-preferences/
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, HomeListingCard, StackedCards, TranslateModule, RouterModule],
+  imports: [CommonModule, HomeListingCard, TranslateModule, RouterModule],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -37,7 +36,7 @@ export class Home implements OnInit {
     private cdr: ChangeDetectorRef,
     private chatService: RagChatService,
     private userPreferences: UserPreferencesService
-  ) {}
+  ) { }
 
   viewOnMap() {
     this.router.navigate(['/map']);
@@ -91,6 +90,30 @@ export class Home implements OnInit {
 
   get villaPages(): number {
     return Math.ceil(this.villaTotal / this.itemsPerPage);
+  }
+
+  // Clicking on service cards
+  scrollToVillas() {
+    this.scrollToElement('villas-section');
+  }
+
+  scrollToFeatured() {
+    this.scrollToElement('featured-section');
+  }
+
+  scrollToCairo() {
+    this.scrollToElement('cairo-section');
+  }
+
+  private scrollToElement(elementId: string) {
+
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
   }
 
   // Pagination methods for top priority

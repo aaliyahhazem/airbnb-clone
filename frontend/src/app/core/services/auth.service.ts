@@ -6,6 +6,9 @@ import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { AuthService as NewAuthService } from './auth-service';
 
+import { firebaseAuth } from '../../firebase.config';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly cookieName = 'airbnb_token';
@@ -35,6 +38,32 @@ export class AuthService {
     } else {
       console.log('AuthService initialized: Running on server (SSR), skipping token check');
     }
+  }
+
+  // Google login using Firebase
+  googleLogin(): Observable<any> {
+    const provider = new GoogleAuthProvider();
+
+    return new Observable(observer => {
+      signInWithPopup(firebaseAuth, provider)
+        .then(async (result) => {
+          const idToken = await result.user.getIdToken();
+          console.log('Firebase Google ID token:', idToken);
+
+          // Send token to your backend to get your own JWT
+          this.http.post<any>(`${this.apiBase}/google-login`, { idToken })
+            .subscribe({
+              next: (res) => {
+                const token = res?.result?.token;
+                if (token) this.setToken(token);
+                observer.next(res);
+                observer.complete();
+              },
+              error: (err) => observer.error(err)
+            });
+        })
+        .catch(err => observer.error(err));
+    });
   }
 
   // Silent token retrieval without logging (for initialization)

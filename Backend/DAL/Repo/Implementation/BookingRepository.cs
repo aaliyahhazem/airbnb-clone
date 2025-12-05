@@ -32,5 +32,38 @@
             // Do not call SaveChanges here so caller can control transaction
             return entity;
         }
+
+        // Get booking by id including related Listing, Guest, and Payment for Email notifications
+        public async Task<Booking?> GetByIdAsync(int id)
+        {
+            return await _context.Bookings.FindAsync(id);
+        }
+
+        public async Task<Booking?> GetByIdWithListingAndHostAsync(int id)
+        {
+            return await _context.Bookings
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.User) // Host
+                .Include(b => b.Guest)
+                .Include(b => b.Payment)
+                .FirstOrDefaultAsync(b => b.Id == id);
+        }
+        public async Task<IEnumerable<Booking>> GetBookingsForCheckInReminderAsync(DateTime checkInDate)
+        {
+            return await _context.Bookings
+                .Include(b => b.Guest)
+                .Include(b => b.Listing)
+                .Where(b => b.CheckInDate.Date == checkInDate)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Booking>> GetBookingsForCheckOutReminderAsync(DateTime checkOutDate)
+        {
+            return await _context.Bookings
+                .Include(b => b.Guest)
+                .Include(b => b.Listing)
+                .Where(b => b.CheckOutDate.Date == checkOutDate)
+                .ToListAsync();
+        }
     }
 }

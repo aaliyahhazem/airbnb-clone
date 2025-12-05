@@ -1,3 +1,4 @@
+import { FormsModule } from '@angular/forms';
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -6,13 +7,15 @@ import { ListingService } from '../../../core/services/listings/listing.service'
 import { ListingDetailVM } from '../../../core/models/listing.model';
 import { Subscription } from 'rxjs';
 import { CreateBooking } from "../../booking/create-booking/create-booking";
+import { CreateReviewVM, ReviewVM } from '../../../core/models/review.model';
+import { ReviewService } from '../../../core/services/review/review.service';
 import { FavoriteStoreService } from '../../../core/services/favoriteService/favorite-store-service';
 import { FavoriteButton } from '../../favorites/favorite-button/favorite-button';
 
 @Component({
   selector: 'app-listings-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslateModule,FavoriteButton],
+    imports: [CommonModule, FormsModule, RouterLink, TranslateModule, FavoriteButton],
   templateUrl: './listings-detail.html',
   styleUrls: ['./listings-detail.css'],
 })
@@ -20,6 +23,7 @@ export class ListingsDetail implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private listingService = inject(ListingService);
+  private reviewService = inject(ReviewService);
   private cdr = inject(ChangeDetectorRef);
   private platformId = inject(PLATFORM_ID);
   private sub: Subscription | null = null;
@@ -40,9 +44,9 @@ export class ListingsDetail implements OnInit, OnDestroy {
 
   private leaflet: any;
   private detailMap: any | null = null;
+Math: any;
 
   ngOnInit(): void {
-    // Subscribe to route params so component reloads when navigated via routerLink
     this.sub = this.route.paramMap.subscribe((params) => {
       this.loading = true;
       this.error = '';
@@ -60,10 +64,9 @@ export class ListingsDetail implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
     if (this.detailMap) {
-      try { this.detailMap.remove(); } catch { /* ignore */ }
+      try { this.detailMap.remove(); } catch { }
       this.detailMap = null;
     }
-    // Clear Leaflet to free memory
     this.leaflet = null;
   }
 
@@ -73,20 +76,19 @@ export class ListingsDetail implements OnInit, OnDestroy {
         if (!response.isError && response.data) {
           this.listing = response.data;
           this.loading = false;
-          // Detect changes first to render content
-          try { this.cdr.detectChanges(); } catch { /* ignore */ }
-          // Then initialize map asynchronously without blocking UI
+          try { this.cdr.detectChanges(); } catch { }
           void this.initDetailMap();
+          this.loadReviews(); // LOAD REVIEWS HERE
         } else {
           this.error = response.message || 'Failed to load listing';
           this.loading = false;
-          try { this.cdr.detectChanges(); } catch { /* ignore */ }
+          try { this.cdr.detectChanges(); } catch { }
         }
       },
       (err) => {
         this.error = 'Error loading listing details';
         this.loading = false;
-        try { this.cdr.detectChanges(); } catch { /* ignore */ }
+        try { this.cdr.detectChanges(); } catch { }
       }
     );
   }
@@ -96,18 +98,15 @@ export class ListingsDetail implements OnInit, OnDestroy {
       if (!isPlatformBrowser(this.platformId)) return;
       if (!this.listing) return;
 
-      // Delay map initialization to avoid blocking main thread
       await new Promise(resolve => setTimeout(resolve, 300));
 
-      // Only import if map element exists
       const el = document.getElementById('detail-map');
       if (!el) return;
 
       this.leaflet = await import('leaflet');
 
-      // remove previous map if exists
       if (this.detailMap) {
-        try { this.detailMap.remove(); } catch { /* ignore */ }
+        try { this.detailMap.remove(); } catch { }
         this.detailMap = null;
       }
 
@@ -118,12 +117,10 @@ export class ListingsDetail implements OnInit, OnDestroy {
         center: [lat, lng],
         zoom: 14,
         scrollWheelZoom: false,
-        // Performance improvements
         preferCanvas: true,
         zoomAnimation: false
       });
 
-      // Use an inline SVG DivIcon so we don't rely on external image files
       const svgPin = `
         <svg width="30" height="42" viewBox="0 0 30 42" xmlns="http://www.w3.org/2000/svg">
           <path d="M15 0C9.477 0 5 4.477 5 10c0 7.5 10 22 10 22s10-14.5 10-22c0-5.523-4.477-10-10-10z" fill="#d00"/>
@@ -145,15 +142,11 @@ export class ListingsDetail implements OnInit, OnDestroy {
 
       const marker = this.leaflet.marker([lat, lng], { icon: customIcon }).addTo(this.detailMap);
 
-      // Use data already fetched from listing service instead of making extra API call
       const price = this.listing.pricePerNight ? `<div>${this.listing.pricePerNight} EGP/night</div>` : '';
       const desc = this.listing.description ? `<div style="margin-top:6px;"><small>${this.listing.description}</small></div>` : '';
       const popupHtml = `<b>${this.listing.title}</b>${price}${desc}`;
       marker.bindPopup(popupHtml).openPopup();
-    } catch (err) {
-      // Map initialization failed; keep UI usable. Debug log commented out.
-      // try { console.warn('Detail map init failed', err); } catch {}
-    }
+    } catch (err) { }
   }
 
   nextImage(): void {
@@ -183,22 +176,108 @@ export class ListingsDetail implements OnInit, OnDestroy {
     }
   }
 
-  //Bookings Methods
-  toggleBookingForm(): void {
-    this.showBookingForm = !this.showBookingForm;
-    this.bookingSuccess = false;
+  // Reviews Props and Methods
+  // Reviews Props
+  reviews: ReviewVM[] = [];
+  visibleReviews: ReviewVM[] = [];
+  hasMore = false;
+  loadCount = 3;
+
+  overallRating = 0;
+  ratingCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  totalReviews = 0;
+
+  newReview = {
+    bookingId: 0,
+    rating: 0,
+    comment: ''
+  };
+
+  userBookings: { id: number; listingId: number }[] = []; // current user's bookings for this listing
+
+  // Call after listing is loaded and user bookings fetched
+  initializeReviewForm() {
+    // Pre-fill bookingId if the user has a booking for this listing
+    const booking = this.userBookings.find(b => b.listingId === this.listing?.id);
+    if (booking) {
+      this.newReview.bookingId = booking.id;
+    }
   }
 
-  onBookingCreated(booking: any): void {
-    this.bookingSuccess = true;
-    this.currentBooking = booking;
-    this.showBookingForm = false;
-    // The CreateBooking component will navigate to the payment flow (with payment intent),
-    // so we simply show success state here and avoid duplicating navigation.
+  loadReviews() {
+    if (!this.listing) return;
+
+    this.reviewService.getReviewsByListing(this.listing.id).subscribe({
+next: (res: any) => {
+  if (!res || !Array.isArray(res.data)) {
+    console.error('Invalid reviews response:', res);
+    return;
   }
 
-  onBookingCancelled(): void {
-    this.showBookingForm = false;
+  this.reviews = res.data;
+  this.calculateRatingSummary();
+},
+      error: (err) => console.error('Failed to load reviews', err)
+    });
+  }
+
+  calculateRatingSummary() {
+    this.totalReviews = this.reviews.length;
+    this.ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+    if (this.totalReviews === 0) {
+      this.overallRating = 0;
+      this.visibleReviews = [];
+      this.hasMore = false;
+      return;
+    }
+
+    // Count each rating
+    this.reviews.forEach(r => {
+      const rating = Math.round(r.rating); // ensure integer 1-5
+      if (rating >= 1 && rating <= 5) this.ratingCounts[rating]++;
+    });
+
+    // Average rating
+    const sum = this.reviews.reduce((acc, r) => acc + r.rating, 0);
+    this.overallRating = Number((sum / this.totalReviews).toFixed(1));
+
+    // Visible reviews
+    this.visibleReviews = this.reviews.slice(0, this.loadCount);
+    this.hasMore = this.reviews.length > this.loadCount;
+  }
+
+  loadMore() {
+    if (!this.reviews.length) return;
+    this.visibleReviews = this.reviews.slice(0, this.visibleReviews.length + this.loadCount);
+    this.hasMore = this.visibleReviews.length < this.reviews.length;
+  }
+
+  submitReview() {
+    if (this.newReview.bookingId === 0) {
+      alert('Please select a booking before submitting your review.');
+      return;
+    }
+
+    const model: CreateReviewVM = {
+      bookingId: this.newReview.bookingId,
+      rating: this.newReview.rating,
+      comment: this.newReview.comment
+    };
+
+    this.reviewService.createReview(model).subscribe({
+      next: () => {
+        this.loadReviews(); // refresh after submission
+        this.newReview.rating = 0;
+        this.newReview.comment = '';
+      },
+      error: (err) => console.error('Failed to submit review', err)
+    });
+  }
+
+  // Optional: method to select booking if user has multiple bookings
+  selectBooking(bookingId: number) {
+    this.newReview.bookingId = bookingId;
   }
   onFavoriteChanged(isFavorited: boolean): void {
     this.isFavorited = isFavorited;
@@ -206,3 +285,4 @@ export class ListingsDetail implements OnInit, OnDestroy {
 
 }
 
+}

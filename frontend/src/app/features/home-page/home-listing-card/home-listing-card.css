@@ -1,6 +1,6 @@
 .listing-card {
   width: 220px;
-  background: hsla(48, 27%, 63%, 0.322);
+  background: hsla(45, 57%, 97%, 0.322);
   backdrop-filter: blur(12px);
   overflow: hidden;
   transition: transform 0.2s ease;
@@ -83,8 +83,13 @@
 
 .bi-arrow-up-right-circle-fill {
   font-size: 2em;
-  color: rgb(255, 253, 240, 0.76);
+  color: rgba(0, 0, 0, 0.76);
 }
+
+.bi-arrow-up-right-circle-fill:hover {
+  color: rgba(175, 12, 26, 0.76);
+}
+
 
 /* RTL Support for Arabic */
 [dir="rtl"] .listing-card {

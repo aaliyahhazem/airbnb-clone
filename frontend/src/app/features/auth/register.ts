@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -30,8 +30,9 @@ export class Register {
   constructor(
     private auth: AuthService,
     private router: Router,
-    private translate: TranslateService
-  ) {}
+    private translate: TranslateService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   submit() {
     this.errorMessage = '';
@@ -117,6 +118,48 @@ export class Register {
     });
   }
 
+    this.cdr.detectChanges();
+  }
+
+  signUpWithGoogle() {
+    this.isLoading = true;
+    this.auth.googleLogin().subscribe({
+      next: res => {
+        this.isLoading = false;
+        console.log('Google login response:', res);
+
+        // Navigate after login
+        if (this.auth.isAdmin()) {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/']);
+        }
+      },
+      error: err => {
+        this.isLoading = false;
+        console.error('Google login failed', err);
+        this.errorMessage = this.translate.instant('auth.loginError');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  submit(form?: NgForm) {
+    // Reset previous errors
+    this.errorMessage = '';
+    this.fieldErrors = {};
+
+    // Validate all fields
+    this.validateField('fullname', this.fullname);
+    this.validateField('userName', this.userName);
+    this.validateField('email', this.email);
+    this.validateField('password', this.password);
+    this.validateField('confirmPassword', this.confirmPassword);
+
+    // Check if there are validation errors
+    if (Object.keys(this.fieldErrors).some(key => this.fieldErrors[key])) {
+      return;
+    }
   onFaceCaptureCancelled() {
     this.showFaceRegistrationPrompt = false;
     this.proceedToNextStep();

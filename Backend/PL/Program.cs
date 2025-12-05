@@ -145,29 +145,41 @@ namespace PL
                 });
             }
 
-            // Google auth (optional)
-            var googleId = builder.Configuration["Authentication:Google:ClientId"];
-            var googleSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-            if (!string.IsNullOrWhiteSpace(googleId) && !string.IsNullOrWhiteSpace(googleSecret))
+            // Firebase Admin SDK initialization
+            try
             {
-                authBuilder.AddGoogle(opts =>
+                var firebaseConfig = builder.Configuration.GetSection("Firebase");
+                var serviceAccount = firebaseConfig.GetSection("ServiceAccount");
+
+                var credentialsJson = System.Text.Json.JsonSerializer.Serialize(new
                 {
-                    opts.ClientId = googleId;
-                    opts.ClientSecret = googleSecret;
+                    type = serviceAccount["type"],
+                    project_id = serviceAccount["project_id"],
+                    private_key_id = serviceAccount["private_key_id"],
+                    private_key = serviceAccount["private_key"],
+                    client_email = serviceAccount["client_email"],
+                    client_id = serviceAccount["client_id"],
+                    auth_uri = serviceAccount["auth_uri"],
+                    token_uri = serviceAccount["token_uri"],
+                    auth_provider_x509_cert_url = serviceAccount["auth_provider_x509_cert_url"],
+                    client_x509_cert_url = serviceAccount["client_x509_cert_url"]
                 });
+
+                FirebaseApp.Create(new AppOptions
+                {
+                    Credential = GoogleCredential.FromJson(credentialsJson),
+                    ProjectId = firebaseConfig["ProjectId"]
+                });
+
+                Console.WriteLine("Firebase Admin SDK initialized successfully!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Firebase initialization failed: {ex.Message}");
             }
 
-            // Facebook auth (optional)
-            var fbId = builder.Configuration["Authentication:Facebook:AppId"];
-            var fbSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
-            if (!string.IsNullOrWhiteSpace(fbId) && !string.IsNullOrWhiteSpace(fbSecret))
-            {
-                authBuilder.AddFacebook(opts =>
-                {
-                    opts.AppId = fbId;
-                    opts.AppSecret = fbSecret;
-                });
-            }
+            // Email reminder related service
+            builder.Services.AddHostedService<BookingReminderService>();
 
             // --------------------------------------------------------------------
             // DAL/BLL registrations

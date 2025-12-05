@@ -7,8 +7,10 @@
                     <div class="hero-text">
                         <h1 class="hero-title" [attr.dir]="currentLang">
                             <span class="title-main">{{ 'home.welcomeTo' | translate }}</span>
-                            <span class="title-broker" [class.primary-title]="currentLang === 'en'" [class.secondary-title]="currentLang === 'ar'">The Broker</span>
-                            <span class="title-ar" [class.primary-title]="currentLang === 'ar'" [class.secondary-title]="currentLang === 'en'">السمسارة</span>
+                            <span class="title-broker" [class.primary-title]="currentLang === 'en'"
+                                [class.secondary-title]="currentLang === 'ar'">The Broker</span>
+                            <span class="title-ar" [class.primary-title]="currentLang === 'ar'"
+                                [class.secondary-title]="currentLang === 'en'">السمسارة</span>
                         </h1>
                         <p class="hero-subtitle">
                             {{ 'home.discoverEgypt' | translate }}
@@ -29,7 +31,8 @@
                     </div>
                 </div>
                 <div class="col-lg-6 hero-image">
-                    <div class="broker-character-container" (click)="openChat()" style="cursor: pointer;" title="Chat with The Broker">
+                    <div class="broker-character-container" (click)="openChat()" style="cursor: pointer;"
+                        title="Chat with The Broker">
                         <img src="/3.png" alt="The Broker Character" class="broker-character-main">
                         <div class="broker-speech-bubble">
                             <span>{{ 'home.brokerDialogue' | translate }}</span>
@@ -45,13 +48,55 @@
     <section class="broker-search">
         <div class="container">
             <div class="search-card broker-card">
-                <app-stacked-cards></app-stacked-cards>
+                <div class="services-wrapper d-flex justify-content-center align-items-center">
+
+                    <!-- Left Card -->
+                    <div class="service-card side-card left-card" (click)="scrollToVillas()">
+                        <p class="label">{{ 'home.cards.experiences' | translate }}</p>
+                        <h5>{{ 'home.villas' | translate }}</h5>
+                        <p>{{ 'home.cards.curatedProperties' | translate }}</p>
+
+                        <button class="btn custom-btn">{{ 'home.cards.bookNow' | translate }}</button>
+
+                        <div class="icon-container">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                    </div>
+
+                    <!-- Center Card -->
+                    <div class="service-card side-card main-card" (click)="scrollToFeatured()">
+                        <p class="label">{{ 'home.cards.featured' | translate }}</p>
+                        <h5>{{ 'home.cards.topPicks' | translate }}</h5>
+
+                        <p>{{ 'home.cards.handpickedHomes' | translate }}</p>
+
+                        <button class="btn custom-btn">{{ 'home.cards.explore' | translate }}</button>
+
+                        <div class="icon-container">
+                            <i class="bi bi-heart-fill"></i>
+                        </div>
+                    </div>
+
+                    <!-- Right Card -->
+                    <div class="service-card side-card right-card" (click)="scrollToCairo()">
+                        <p class="label">{{ 'home.cards.popular' | translate }}</p>
+                        <h5>{{ 'home.cards.trendingInCairo' | translate }}</h5>
+                        <p>{{ 'home.cards.mostBooked' | translate }}</p>
+                        <button class="btn custom-btn">{{ 'home.cards.seeMore' | translate }}</button>
+
+                        <div class="icon-container">
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
         </div>
     </section>
 
     <!-- Featured Listings - Top Priority -->
-    <section class="broker-listings">
+    <section class="broker-listings" id="featured-section">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">
@@ -72,17 +117,15 @@
                 {{ error }}
             </div>
 
-            <div class="cards-list" *ngIf="!loading && !error">
-                <app-home-listing-card
-                  *ngFor="let listing of topPriorityListings"
-                  [listing]="listing">
+            <div class="cards-list p-4" *ngIf="!loading && !error">
+                <app-home-listing-card *ngFor="let listing of topPriorityListings" [listing]="listing">
                 </app-home-listing-card>
             </div>
         </div>
     </section>
 
     <!-- Villas Section -->
-    <section class="broker-listings bg-light-section">
+    <section class="broker-listings"  id="villas-section">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">
@@ -95,17 +138,15 @@
                 </a>
             </div>
 
-            <div class="cards-list" *ngIf="!loading && !error">
-                <app-home-listing-card
-                  *ngFor="let listing of villaListings"
-                  [listing]="listing">
+            <div class="cards-list p-4" *ngIf="!loading && !error">
+                <app-home-listing-card *ngFor="let listing of villaListings" [listing]="listing">
                 </app-home-listing-card>
             </div>
         </div>
     </section>
 
     <!-- Popular in Cairo Section -->
-    <section class="broker-listings">
+    <section class="broker-listings" id="cairo-section">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">
@@ -118,10 +159,8 @@
                 </a>
             </div>
 
-            <div class="cards-list" *ngIf="!loading && !error">
-                <app-home-listing-card
-                  *ngFor="let listing of cairoListings"
-                  [listing]="listing">
+            <div class="cards-list p-4" *ngIf="!loading && !error">
+                <app-home-listing-card *ngFor="let listing of cairoListings" [listing]="listing">
                 </app-home-listing-card>
             </div>
         </div>
