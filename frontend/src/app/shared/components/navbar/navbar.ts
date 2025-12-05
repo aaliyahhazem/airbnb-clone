@@ -65,8 +65,6 @@ export class Navbar implements OnInit, OnDestroy {
         this.userFullName = isAuth ? this.auth.getUserFullName() : null;
         console.log('Navbar: Authentication state changed:', isAuth);
         console.log('Navbar: User full name:', this.userFullName);
-        // compute admin flag when authentication changes
-        try { this.isAdmin = this.auth.isAdmin(); } catch { this.isAdmin = false; }
         // Load notifications and messages when user logs in
         if (isAuth) {
           console.log('User authenticated, loading unread notifications and messages');
@@ -146,6 +144,14 @@ export class Navbar implements OnInit, OnDestroy {
 
     this.sub.add(this.messageStore.unreadCount$.subscribe((cnt: number) => {
       Promise.resolve().then(() => { this.unreadMsgCount = cnt; this.cdr.detectChanges(); });
+    }));
+
+    // Subscribe to favorite count
+    this.sub.add(this.favoriteStore.favoriteCount$.subscribe(cnt => {
+      Promise.resolve().then(() => {
+        this.favoriteCount = cnt;
+        this.cdr.detectChanges();
+      });
     }));
 
     // close dropdowns when clicking outside the navbar component

@@ -1,13 +1,13 @@
 export const environment = {
   production: false,
-  apiUrl:'http://localhost:5235/api', //Microsoft Identity backend API  
-  firebaseConfig :{
-  apiKey: "AIzaSyBASLdcU8EYlk5z8P8q9LGElzFEca6Xcbw",
-  authDomain: "airbnb-clone-iti-grad-project.firebaseapp.com",
-  projectId: "airbnb-clone-iti-grad-project",
-  storageBucket: "airbnb-clone-iti-grad-project.firebasestorage.app",
-  messagingSenderId: "181229587395",
-  appId: "1:181229587395:web:63c7dfbec6cd1ed7c4cb76",
-  measurementId: "G-BLEYGDMPFR"
-}
-}
+  apiUrl: 'http://localhost:5235/api',
+  firebaseConfig: {
+    apiKey: "AIzaSyAeyZ11lRJDmV7cB41YJ-gdtj2tkvefWk0",
+    authDomain: "airbnb-clone-b24a1.firebaseapp.com",
+    projectId: "airbnb-clone-b24a1",
+    storageBucket: "airbnb-clone-b24a1.firebasestorage.app",
+    messagingSenderId: "658981284978",
+    appId: "1:658981284978:web:1304f9e796c2610ead26eb",
+    measurementId: "G-E4VYTC8XVV"
+  }
+};

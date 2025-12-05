@@ -1,0 +1,181 @@
+<div class="broker-listings-container">
+  <!-- Hero Search Section with Character -->
+  <div class="broker-search-hero">
+    <div class="container-fluid">
+      <div class="row align-items-center">
+        <!-- Character Section -->
+        <div class="col-md-3 d-flex justify-content-center">
+          <div class="broker-character-container">
+            <img src="/3.png" alt="The Broker Character" class="listings-character" />
+            <div class="listings-accent-circle"></div>
+          </div>
+        </div>
+
+        <!-- Search Controls Section -->
+        <div class="col-md-9">
+          <div class="broker-search-section">
+            <div class="broker-branding-header">
+              <h2 class="broker-title">{{ 'listings.findProperty' | translate }}</h2>
+              <p class="broker-subtitle">{{ 'listings.discoverProperties' | translate }}</p>
+            </div>
+
+            <!-- Search Filters - Two Row Layout -->
+            <div class="broker-search-filters">
+              <!-- First Row: Search + Reset -->
+              <div class="broker-search-row">
+                <!-- Main Search (3/4 width) -->
+                <div class="broker-search-main">
+                  <div class="broker-search-group search-large">
+                    <i class="bi bi-search"></i>
+                    <input class="broker-search-input" type="text"
+                      [placeholder]="'listings.searchPlaceholder' | translate" [ngModel]="search()"
+                      (ngModelChange)="search.set($event); onSearchChange()" />
+                  </div>
+                </div>
+
+                <!-- Reset Button (1/4 width) -->
+                <div class="broker-reset-container">
+                  <button class="btn-broker-reset" (click)="resetFilters()">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>{{ 'listings.reset' | translate }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Second Row: Other 4 Filters -->
+              <div class="broker-filters-row">
+                <!-- Destination Filter -->
+                <div class="broker-search-group">
+                  <i class="bi bi-geo-alt"></i>
+                  <select class="broker-search-select" [ngModel]="destination()"
+                    (ngModelChange)="destination.set($event); onDestinationChange()">
+                    <option value="">{{ 'listings.allLocations' | translate }}</option>
+                    <option *ngFor="let dest of destinations()" [value]="dest">{{ dest }}</option>
+                  </select>
+                </div>
+
+                <!-- Type Filter -->
+                <div class="broker-search-group">
+                  <i class="bi bi-house"></i>
+                  <select class="broker-search-select" [ngModel]="type()"
+                    (ngModelChange)="type.set($event); onTypeChange()">
+                    <option value="">{{ 'listings.allTypes' | translate }}</option>
+                    <option *ngFor="let propertyType of types()" [value]="propertyType">{{ propertyType }}</option>
+                  </select>
+                </div>
+
+                <!-- Price Filter -->
+                <div class="broker-search-group">
+                  <i class="bi bi-currency-dollar"></i>
+                  <input type="number" [placeholder]="'listings.maxPrice' | translate" class="broker-search-input"
+                    [ngModel]="maxPrice()"
+                    (ngModelChange)="maxPrice.set($event === '' ? null : +$event); onPriceChange()" />
+                </div>
+
+                <!-- Rating Filter -->
+                <div class="broker-search-group">
+                  <i class="bi bi-star"></i>
+                  <input type="number" [placeholder]="'listings.minRating' | translate" class="broker-search-input"
+                    min="0" max="5" step="0.5" [ngModel]="minRating()"
+                    (ngModelChange)="minRating.set($event === '' ? null : +$event); onRatingChange()" />
+                </div>
+              </div>
+            </div>
+
+            <!-- View on Map Button -->
+            <div class="broker-view-map-section">
+              <button class="btn-broker-map" (click)="viewOnMap()">
+                <i class="bi bi-map"></i>
+                <span>{{ 'listings.viewOnMap' | translate }}</span>
+              </button>
+              <button class="btn-broker-create" routerLink="/host/create">
+                <i class="bi bi-plus-circle"></i>
+                <span>{{ 'listings.createListing' | translate }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="broker-main-content">
+    <div class="container-fluid">
+      <div class="row">
+
+        <!-- Listings Grid -->
+        <div class="col-lg-9 col-md-8">
+          <div class="broker-listings-grid">
+            <div class="broker-listings-header">
+              <h3 class="listings-count">{{ totalFilteredCount() }} {{ 'listings.propertiesFound' | translate }}</h3>
+              <app-personalization-badge></app-personalization-badge>
+            </div>
+
+            <div class="broker-cards-grid">
+              <app-listing-card *ngFor="let listing of paginatedListings(); trackBy: trackById" [listing]="listing"
+                [isFavorited]="favoriteStore.isFavorited(listing.id)"
+                [relevanceScore]="getRelevanceScore(listing)"
+                (favoriteChanged)="onListingFavoriteChanged($event)">
+              </app-listing-card>
+            </div>
+
+            <!-- Loading State -->
+            <div *ngIf="loading()" class="broker-loading-state">
+              <div class="loading-spinner"></div>
+              <p>{{ 'listings.loading' | translate }}</p>
+            </div>
+
+            <!-- Error State -->
+            <div *ngIf="error()" class="broker-error-state">
+              <i class="bi bi-exclamation-triangle"></i>
+              <p>{{ error() }}</p>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!loading() && !error() && totalFilteredCount() === 0" class="broker-empty-state">
+              <i class="bi bi-house-x"></i>
+              <h4>{{ 'listings.noProperties' | translate }}</h4>
+              <p>{{ 'listings.tryDifferentFilters' | translate }}</p>
+              <button class="btn-broker" (click)="resetFilters()">{{ 'listings.clearFilters' | translate }}</button>
+            </div>
+
+            <!-- Pagination -->
+            <div *ngIf="!loading() && totalPages() > 1" class="pagination-section">
+              <button *ngIf="currentPage() > 1" (click)="prevPage()" class="pagination-btn">Previous</button>
+              <span *ngFor="let page of paginationPages()" class="pagination-number">
+                <button *ngIf="typeof page === 'number'" (click)="goToPage(+page)"
+                  [class.active]="page === currentPage()" class="pagination-page-btn">{{ page }}</button>
+                <span *ngIf="typeof page === 'string'" class="pagination-ellipsis">{{ page }}</span>
+              </span>
+              <button *ngIf="currentPage() < totalPages()" (click)="nextPage()" class="pagination-btn">Next</button>
+              <div class="pagination-info">Page {{ currentPage() }} of {{ totalPages() }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Amenities Sidebar -->
+        <div class="col-lg-3 col-md-4">
+          <div class="broker-sidebar">
+            <div class="broker-amenities-section">
+              <div class="amenities-header">
+                <h4>{{ 'listings.amenities' | translate }}</h4>
+                <i class="bi bi-list-check"></i>
+              </div>
+
+              <div class="amenities-list">
+                <button *ngFor="let amenity of amenitiesList" type="button" class="broker-amenity-btn"
+                  [class.selected]="isAmenitySelected(amenity)" (click)="toggleAmenity(amenity)">
+                  <span class="amenity-text">{{ amenity }}</span>
+                  <i class="bi bi-check-circle-fill" *ngIf="isAmenitySelected(amenity)"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>

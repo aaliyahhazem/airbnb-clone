@@ -1,5 +1,7 @@
 ﻿using BLL.ModelVM.Favorite;
 using BLL.Services.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,55 +15,124 @@ namespace BLL.Services.Impelementation
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly INotificationService _notificationService;
+        private readonly ILogger<FavoriteService> _logger;
 
         public FavoriteService(
             IUnitOfWork uow,
             IMapper mapper,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            ILogger<FavoriteService> logger)
         {
             _uow = uow;
             _mapper = mapper;
             _notificationService = notificationService;
+            _logger = logger;
         }
+
         public async Task<Response<FavoriteVM>> AddFavoriteAsync(Guid userId, int listingId)
         {
+            if (userId == Guid.Empty)
+            {
+                _logger.LogWarning("AddFavoriteAsync called with empty userId");
+                return Response<FavoriteVM>.FailResponse("User is not authenticated.");
+            }
+
             try
             {
-                // Check if listing exists
+                // Verify listing exists first
                 var listing = await _uow.Listings.GetByIdAsync(listingId);
                 if (listing == null)
+                {
+                    _logger.LogWarning("Listing {ListingId} not found when adding favorite for user {UserId}", listingId, userId);
                     return Response<FavoriteVM>.FailResponse("Listing not found");
+                }
 
                 // Check if already favorited
                 var existing = await _uow.Favorites.GetByUserAndListingAsync(userId, listingId);
                 if (existing != null)
+                {
+                    _logger.LogInformation("User {UserId} already favorited listing {ListingId}", userId, listingId);
                     return Response<FavoriteVM>.FailResponse("Listing is already in your favorites");
+                }
 
                 // Create favorite
                 var favorite = Favorite.Create(userId, listingId);
                 await _uow.Favorites.AddAsync(favorite);
-                await _uow.SaveChangesAsync();
 
-                // Increment favorite priority for engagement tracking
-                await _uow.Listings.IncrementFavoritePriorityAsync(listingId);
-                await _uow.SaveChangesAsync();
+                // Save the favorite
+                var savedCount = await _uow.SaveChangesAsync();
+                _logger.LogInformation("Favorite saved for user {UserId}, listing {ListingId}. Rows affected: {Count}", userId, listingId, savedCount);
 
-                //listing details
-                var created = await _uow.Favorites.GetByUserAndListingAsync(userId, listingId);
-                var mappedFavorites = _mapper.Map<FavoriteVM>(created!);
-                // Send notification to host
-                await _notificationService.CreateAsync(new CreateNotificationVM
+                // Increment favorite priority (has its own SaveChanges)
+                var priorityResult = await _uow.Listings.IncrementFavoritePriorityAsync(listingId);
+                if (!priorityResult)
                 {
-                    UserId = listing.UserId,
-                    Title = "New Favorite",
-                    Body = $"Someone added your listing \"{listing.Title}\" to favorites!",
-                    Type = NotificationType.System,
-                    CreatedAt = DateTime.UtcNow
+                    _logger.LogWarning("Failed to increment priority for listing {ListingId}", listingId);
+                }
+
+                // Get the created favorite with listing details
+                var created = await _uow.Favorites.GetByUserAndListingAsync(userId, listingId);
+                if (created == null)
+                {
+                    _logger.LogError("Favorite was saved but could not be retrieved for user {UserId}, listing {ListingId}", userId, listingId);
+                    return Response<FavoriteVM>.FailResponse("Favorite created but could not be retrieved");
+                }
+
+                var mappedFavorites = _mapper.Map<FavoriteVM>(created);
+
+                // Send notification asynchronously (fire and forget)
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _notificationService.CreateAsync(new CreateNotificationVM
+                        {
+                            UserId = listing.UserId,
+                            Title = "New Favorite",
+                            Body = $"Someone added your listing \"{listing.Title}\" to favorites!",
+                            Type = NotificationType.System,
+                            CreatedAt = DateTime.UtcNow
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to send notification for favorite on listing {ListingId}", listingId);
+                    }
                 });
+
                 return Response<FavoriteVM>.SuccessResponse(mappedFavorites);
+            }
+            catch (DbUpdateException dbEx)
+            {
+                _logger.LogError(dbEx, "DbUpdateException adding favorite for user {UserId}, listing {ListingId}. Inner: {Inner}",
+                    userId, listingId, dbEx.InnerException?.Message ?? "No inner exception");
+
+                // Check for specific SQL errors
+                var innerMsg = dbEx.InnerException?.Message ?? dbEx.Message;
+
+                if (innerMsg.Contains("IX_Favorites_UserId_ListingId") || innerMsg.Contains("duplicate"))
+                {
+                    return Response<FavoriteVM>.FailResponse("This listing is already in your favorites.");
+                }
+
+                if (innerMsg.Contains("REFERENCE constraint") || innerMsg.Contains("FOREIGN KEY"))
+                {
+                    if (innerMsg.Contains("FK_Favorites_Listings"))
+                    {
+                        return Response<FavoriteVM>.FailResponse("The listing you're trying to favorite doesn't exist or has been deleted.");
+                    }
+                    if (innerMsg.Contains("FK_Favorites_Users"))
+                    {
+                        return Response<FavoriteVM>.FailResponse("User account issue. Please log out and log in again.");
+                    }
+                    return Response<FavoriteVM>.FailResponse("Invalid reference in database.");
+                }
+
+                return Response<FavoriteVM>.FailResponse($"Database error while adding favorite: {innerMsg}");
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error adding favorite for user {UserId}, listing {ListingId}", userId, listingId);
                 return Response<FavoriteVM>.FailResponse($"Error adding favorite: {ex.Message}");
             }
         }

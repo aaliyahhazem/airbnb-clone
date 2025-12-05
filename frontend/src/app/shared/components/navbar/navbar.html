@@ -42,7 +42,7 @@
 
           <!-- 🔔 NOTIFICATIONS (unchanged logic) -->
           <div class="right notification-bell">
-            <button class="bell-btn" (click)="toggleNotifications()" aria-label="Notifications">
+            <button class="bell-btn" (click)="toggleNotifications()" (dblclick)="openNotifications(); $event.stopPropagation()" aria-label="Notifications">
               <i class="bi bi-bell"></i>
               <span *ngIf="unreadCount > 0" class="badge">{{ unreadCount }}</span>
             </button>
@@ -78,7 +78,7 @@
 
           <!-- 💬 MESSAGES (logic untouched) -->
           <div class="right message-bell">
-            <button class="bell-btn" (click)="toggleMessages()" aria-label="Messages">
+            <button class="bell-btn" (click)="toggleMessages()" (dblclick)="openChat(); $event.stopPropagation()" aria-label="Messages">
               <i class="bi bi-chat-dots"></i>
               <span *ngIf="unreadMsgCount > 0" class="badge">{{ unreadMsgCount }}</span>
             </button>

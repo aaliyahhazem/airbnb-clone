@@ -193,6 +193,11 @@ h3 {
     border-bottom: 1px solid rgba(220, 20, 60, 0.2);
 }
 
+.map-btn{
+    background: rgba(220, 20, 20, 0.50);
+}
+
+
 .btn-back {
     background: rgba(220, 20, 60, 0.1);
     border: 2px solid rgba(220, 20, 60, 0.3);
@@ -260,6 +265,7 @@ textarea {
     resize: vertical;
     min-height: 120px;
 }
+
 
 /* Form row for side-by-side fields */
 .form-row {

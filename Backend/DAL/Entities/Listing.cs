@@ -29,6 +29,7 @@
         public int? MainImageId { get; private set; }
         public ListingImage? MainImage { get; private set; }
 
+        // UNUSED: Tags system replaced by Amenities
         //public List<string> Tags { get; private set; } = new List<string>();
 
         // Approval Workflow
@@ -79,6 +80,7 @@
      string type,
         int numberOfRooms,
         int numberOfBathrooms,
+     // UNUSED: Promotion is admin-only, not set during creation
      //bool isPromoted = false,
      //DateTime? promotionEndDate = null,
 
@@ -98,6 +100,7 @@
                 Type = type,
                 NumberOfRooms = numberOfRooms,
                 NumberOfBathrooms = numberOfBathrooms,
+                // UNUSED: Promotion is admin-only, not set during creation
                 //IsPromoted = isPromoted,
                 //PromotionEndDate = promotionEndDate,
 
@@ -162,6 +165,7 @@
  string type,
     int numberOfRooms,
     int numberOfBathrooms,
+    // UNUSED: Promotion managed separately by admin methods
     //bool isPromoted,
     //DateTime? promotionEndDate,
     IEnumerable<string>? keywordNames = null,
@@ -181,6 +185,7 @@
             Type = type;
             NumberOfRooms = numberOfRooms;
             NumberOfBathrooms = numberOfBathrooms;
+            // UNUSED: Promotion managed separately by admin methods
             //IsPromoted = isPromoted;
             //PromotionEndDate = promotionEndDate;
 
@@ -333,18 +338,7 @@
             UpdatedOn = DateTime.UtcNow;
         }
     
-        // Checks if the promotion has expired and automatically unpromotes if needed.
-        // Should be called when retrieving listings for public display
-        public bool CheckAndExpirePromotion()
-        {
-            if (IsPromoted && PromotionEndDate.HasValue && PromotionEndDate.Value <= DateTime.UtcNow)
-            {
-                IsPromoted = false;
-                PromotionEndDate = null;
-                return true;
-            }
-            return false;
-        }
+        
 
         // Extends the current promotion to a new end date.
         // Validates that listing is currently promoted and new date is valid.
@@ -369,17 +363,66 @@
         }
     
 
-// Set main image for seedings
-public void SetMainImage(int imageId, string performedBy) 
-        { if (IsDeleted)
-                throw new InvalidOperationException("Cannot change main image..."); 
-            if (!Images.Any(img => img.Id == imageId && !img.IsDeleted)) 
-                throw new InvalidOperationException("Image not found in listing"); 
-            MainImageId = imageId;
-            UpdatedBy = performedBy;
-            UpdatedOn = DateTime.UtcNow;
+
+
+
+     
+        internal void IncrementViewPriority()
+        {
+            ViewCount++;
+            Priority += 1;
         }
 
+      
+        internal void IncrementFavoritePriority()
+        {
+            FavoriteCount++;
+            Priority += 2;
+        }
+
+    
+        internal void DecrementFavoritePriority()
+        {
+            if (FavoriteCount > 0)
+                FavoriteCount--;
+            Priority -= 2;
+        }
+
+  
+        internal void IncrementBookingPriority()
+        {
+            BookingCount++;
+            Priority += 3;
+        }
+
+        internal void AdjustPriorityByReviewRating(int rating)
+        {
+            var adjustment = rating switch
+            {
+                5 => 2,
+                4 => 1,
+                3 => 0,
+                2 => -1,
+                1 => -2,
+                _ => 0
+            };
+            Priority += adjustment;
+        }
+
+        // Reverse a previous rating adjustment when updating/deleting reviews
+        internal void ReverseRatingPriorityAdjustment(int oldRating)
+        {
+            var reverseAdjustment = oldRating switch
+            {
+                5 => -2,
+                4 => -1,
+                3 => 0,
+                2 => 1,
+                1 => 2,
+                _ => 0
+            };
+            Priority += reverseAdjustment;
+        }
 
      
         internal void IncrementViewPriority()

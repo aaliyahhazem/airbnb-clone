@@ -6,11 +6,13 @@ import { ListingService } from '../../../core/services/listings/listing.service'
 import { ListingDetailVM } from '../../../core/models/listing.model';
 import { Subscription } from 'rxjs';
 import { CreateBooking } from "../../booking/create-booking/create-booking";
+import { FavoriteStoreService } from '../../../core/services/favoriteService/favorite-store-service';
+import { FavoriteButton } from '../../favorites/favorite-button/favorite-button';
 
 @Component({
   selector: 'app-listings-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslateModule],
+  imports: [CommonModule, RouterLink, TranslateModule,FavoriteButton],
   templateUrl: './listings-detail.html',
   styleUrls: ['./listings-detail.css'],
 })
@@ -21,12 +23,15 @@ export class ListingsDetail implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private platformId = inject(PLATFORM_ID);
   private sub: Subscription | null = null;
+  private favoriteStore = inject(FavoriteStoreService);
 
   listing?: ListingDetailVM;
   loading = true;
   error = '';
   currentImageIndex = 0;
   canEdit = false; // Add edit permission property
+  isFavorited = false;
+
 
   //Bookings Props 
   showBookingForm = false;
@@ -109,9 +114,9 @@ export class ListingsDetail implements OnInit, OnDestroy {
       const lat = Number(this.listing.latitude) || 0;
       const lng = Number(this.listing.longitude) || 0;
 
-      this.detailMap = this.leaflet.map(el, { 
-        center: [lat, lng], 
-        zoom: 14, 
+      this.detailMap = this.leaflet.map(el, {
+        center: [lat, lng],
+        zoom: 14,
         scrollWheelZoom: false,
         // Performance improvements
         preferCanvas: true,
@@ -195,5 +200,9 @@ export class ListingsDetail implements OnInit, OnDestroy {
   onBookingCancelled(): void {
     this.showBookingForm = false;
   }
+  onFavoriteChanged(isFavorited: boolean): void {
+    this.isFavorited = isFavorited;
+  }
+
 }
 

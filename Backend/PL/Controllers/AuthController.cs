@@ -1,4 +1,6 @@
 
+using Microsoft.AspNetCore.Identity;
+
 namespace PL.Controllers
 {
     [Route("api/[controller]")]
@@ -7,11 +9,29 @@ namespace PL.Controllers
     {
         private readonly IIdentityService _identityService;
         private readonly IMessageService _messageService;
+        
+        
 
         public AuthController(IIdentityService identityService, IMessageService messageService)
         {
             _identityService = identityService;
             _messageService = messageService;
+        }
+
+        // Dev helper: return the decoded token payload / user id from claims
+        [Authorize]
+        [HttpGet("me/token-payload")]
+        public IActionResult GetTokenPayload()
+        {
+            var payload = new Dictionary<string, string?>();
+            var possible = new[] { ClaimTypes.NameIdentifier, "sub", JwtRegisteredClaimNames.Sub, "id", "uid" };
+            foreach (var name in possible)
+            {
+                payload[name] = User.FindFirst(name)?.Value;
+            }
+            var nameClaim = User.Identity?.Name;
+            payload["name"] = nameClaim;
+            return Ok(payload);
         }
 
         // Dev helper: return the decoded token payload / user id from claims
@@ -35,13 +55,7 @@ namespace PL.Controllers
         {
             var res = await _identityService.RegisterAsync(vm.Email, vm.Password, vm.FullName, vm.UserName, vm.FirebaseUid, "Guest");
             if (!res.Success) return BadRequest(res);
-            //send welcome message 
             
-            var temp = await _messageService.CreateAsync(
-                new CreateMessageVM { ReceiverUserName = vm.UserName, 
-                    Content="Welcome to our platform! We're excited to have you here. If you have any questions or need assistance, feel free to reach out. Enjoy your experience!" },
-                Guid.Parse("c07c7cc9-55b3-4076-f767-08de2f6a002c")
-                );
             return Ok(res);
         }
 

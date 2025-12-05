@@ -77,19 +77,11 @@ export class FavoriteStoreService {
       tap({
         next: (res) => {
           if (!res.isError && res.result !== undefined) {
-            // Apply server result to our local state; no full reload here to avoid
-            // overwriting optimistic UI changes. The favorites list can be synced
-            // explicitly elsewhere if needed.
             this.updateFavoriteState(listingId, res.result);
-            // If the server indicates the listing is now favorited, refresh
-            // the full favorites list so the favorites Subject contains
-            // the listing objects (required by Favorites page UI).
-            // This keeps the Favorites page in sync after toggles.
-            if (res.result === true) {
-              try { this.loadFavorites(); } catch { /* best-effort */ }
-            }
-            // Consider whether you want to call loadFavorites() here
-            // this.loadFavorites();
+            this.updateFavoriteState(listingId, res.result);
+
+            // Always reload the favorites list after any toggle
+            this.loadFavorites();
           }
         },
         error: (err) => console.error('Failed to toggle favorite', err)

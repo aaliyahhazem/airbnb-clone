@@ -10,28 +10,36 @@ export class MapService {
 
   private normalizeImageUrl(url?: string): string | undefined {
     if (!url) return undefined;
-    const u = String(url);
+    const u = String(url).trim();
     if (u.startsWith('http://') || u.startsWith('https://')) return u;
     if (u.startsWith('/')) return `${this.backendOrigin}${u}`;
-    return `${this.backendOrigin}/${u}`;
+    // If it's just a filename, prepend the listings folder
+    return `${this.backendOrigin}/listings/${u}`;
   }
 
   getProperties(bounds: any) {
     return this.http.get<any>(`${this.apiUrl}/properties`, {
       params: bounds,
     }).pipe(
-      map(response => ({
-        properties: (response.properties || response.Properties || []).map((p: any) => ({
-          id: p.id || p.Id,
-          title: p.title || p.Title,
-          pricePerNight: p.pricePerNight || p.PricePerNight,
-          latitude: p.latitude || p.Latitude,
-          longitude: p.longitude || p.Longitude,
-          mainImageUrl: p.mainImageUrl || p.MainImageUrl,
-          averageRating: p.averageRating || p.AverageRating,
-          reviewCount: p.reviewCount || p.ReviewCount
-        }))
-      }))
+      map(response => {
+        const properties = (response.properties || response.Properties || []).map((p: any) => {
+          const normalizedUrl = this.normalizeImageUrl(p.mainImageUrl || p.MainImageUrl);
+          return {
+            id: p.id || p.Id,
+            title: p.title || p.Title,
+            pricePerNight: p.pricePerNight || p.PricePerNight,
+            latitude: p.latitude || p.Latitude,
+            longitude: p.longitude || p.Longitude,
+            mainImageUrl: normalizedUrl,
+            type: p.type || p.Type || 'Property',
+            bedrooms: p.bedrooms || p.Bedrooms || 0,
+            bathrooms: p.bathrooms || p.Bathrooms || 0,
+            averageRating: p.averageRating || p.AverageRating,
+            reviewCount: p.reviewCount || p.ReviewCount || 0
+          };
+        });
+        return { properties };
+      })
     );
   }
 

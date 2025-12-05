@@ -12,7 +12,9 @@
         Task<Response<bool>> SendPendingNotificationsAsync();
         Task<Response<GetNotificationVM>> GetByIdAsync(int notificationId);
         Task<Response<GetNotificationVM>> MarkAsReadAsync(int notificationId);
-        
+        Task<Response<int>> DeleteOldNotificationsAsync(int days);
+
+
 
 
     }

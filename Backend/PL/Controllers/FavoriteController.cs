@@ -1,20 +1,24 @@
 ﻿using BLL.ModelVM.Favorite;
 using BLL.ModelVM.Response;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace PL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class FavoriteController : Controller
+    public class FavoriteController : BaseController
     {
         private readonly IFavoriteService _favoriteService;
+        private readonly ILogger<FavoriteController> _logger;
 
-        public FavoriteController(IFavoriteService favoriteService)
+        public FavoriteController(IFavoriteService favoriteService, ILogger<FavoriteController> logger)
         {
             _favoriteService = favoriteService;
+            _logger = logger;
         }
+
         //Add New Favorite
         [HttpPost]
         [ProducesResponseType(typeof(Response<FavoriteVM>), StatusCodes.Status200OK)]
@@ -22,14 +26,21 @@ namespace PL.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> AddFavorite([FromBody] AddFavoriteVM model)
         {
-            var userId = GetUserId();
-            var result = await _favoriteService.AddFavoriteAsync(userId, model.ListingId);
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+            {
+                _logger.LogWarning("AddFavorite called but user ID not found in claims");
+                return Unauthorized(new { error = "User not authenticated" });
+            }
+
+            var result = await _favoriteService.AddFavoriteAsync(userId.Value, model.ListingId);
 
             if (!result.Success)
                 return BadRequest(result);
 
             return Ok(result);
         }
+
         //Remove Favorite
         [HttpDelete("{listingId:int}")]
         [ProducesResponseType(typeof(Response<bool>), StatusCodes.Status200OK)]
@@ -38,14 +49,21 @@ namespace PL.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> RemoveFavorite(int listingId)
         {
-            var userId = GetUserId();
-            var result = await _favoriteService.RemoveFavoriteAsync(userId, listingId);
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+            {
+                _logger.LogWarning("RemoveFavorite called but user ID not found in claims");
+                return Unauthorized(new { error = "User not authenticated" });
+            }
+
+            var result = await _favoriteService.RemoveFavoriteAsync(userId.Value, listingId);
 
             if (!result.Success)
                 return BadRequest(result);
 
             return Ok(result);
         }
+
         //Toggle Favorite
         [HttpPost("toggle/{listingId:int}")]
         [ProducesResponseType(typeof(Response<bool>), StatusCodes.Status200OK)]
@@ -53,29 +71,52 @@ namespace PL.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> ToggleFavorite(int listingId)
         {
-            var userId = GetUserId();
-            var result = await _favoriteService.ToggleFavoriteAsync(userId, listingId);
-
-            if (!result.Success)
-                return BadRequest(result);
-
-            return Ok(new
+            try
             {
-                isFavorited = result.result,
-                message = result.result ? "Added to favorites" : "Removed from favorites"
-            });
+                var userId = GetUserIdFromClaims();
+                if (userId == null)
+                {
+                    _logger.LogWarning("ToggleFavorite called but user ID not found in claims");
+                    return Unauthorized(new { error = "User not authenticated" });
+                }
+
+                _logger.LogInformation("Toggle favorite request: UserId={UserId}, ListingId={ListingId}", userId.Value, listingId);
+
+                var result = await _favoriteService.ToggleFavoriteAsync(userId.Value, listingId);
+
+                if (!result.Success)
+                {
+                    _logger.LogWarning("Toggle favorite failed: {Error}", result.errorMessage);
+                    return BadRequest(result);
+                }
+
+                return Ok(new
+                {
+                    isFavorited = result.result,
+                    message = result.result ? "Added to favorites" : "Removed from favorites"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception in ToggleFavorite for listing {ListingId}", listingId);
+                return BadRequest(new { error = ex.Message });
+            }
         }
+
         //Get My Favorites
         [HttpGet("me")]
         [ProducesResponseType(typeof(Response<List<FavoriteVM>>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetMyFavorites()
         {
-            var userId = GetUserId();
-            var result = await _favoriteService.GetUserFavoritesAsync(userId);
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+                return Unauthorized(new { error = "User not authenticated" });
 
+            var result = await _favoriteService.GetUserFavoritesAsync(userId.Value);
             return Ok(result);
         }
+
         //Get My Favorites Paginated
         [HttpGet("me/paginated")]
         [ProducesResponseType(typeof(Response<PaginatedFavoritesVM>), StatusCodes.Status200OK)]
@@ -84,41 +125,56 @@ namespace PL.Controllers
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
         {
-            var userId = GetUserId();
-            var result = await _favoriteService.GetUserFavoritesPaginatedAsync(userId, page, pageSize);
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+                return Unauthorized(new { error = "User not authenticated" });
 
+            var result = await _favoriteService.GetUserFavoritesPaginatedAsync(userId.Value, page, pageSize);
             return Ok(result);
         }
+
         //Check if Listing is Favorited
         [HttpGet("check/{listingId:int}")]
         [ProducesResponseType(typeof(Response<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> CheckIsFavorited(int listingId)
         {
-            var userId = GetUserId();
-            var result = await _favoriteService.IsFavoritedAsync(userId, listingId);
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+                return Unauthorized(new { error = "User not authenticated" });
+
+            var result = await _favoriteService.IsFavoritedAsync(userId.Value, listingId);
             return Ok(result);
         }
+
         //Batch Check Favorites
         [HttpPost("check/batch")]
         [ProducesResponseType(typeof(Response<Dictionary<int, bool>>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> BatchCheckFavorites([FromBody] BatchFavoriteCheckVM model)
         {
-            var userId = GetUserId();
-            var result = await _favoriteService.BatchCheckFavoritesAsync(userId, model.ListingIds);
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+                return Unauthorized(new { error = "User not authenticated" });
+
+            var result = await _favoriteService.BatchCheckFavoritesAsync(userId.Value, model.ListingIds);
             return Ok(result);
         }
+
         //Get My Favorites Count
         [HttpGet("me/count")]
         [ProducesResponseType(typeof(Response<int>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetMyFavoritesCount()
         {
-            var userId = GetUserId();
-            var result = await _favoriteService.GetUserFavoritesCountAsync(userId);
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+                return Unauthorized(new { error = "User not authenticated" });
+
+            var result = await _favoriteService.GetUserFavoritesCountAsync(userId.Value);
             return Ok(result);
         }
+
         //Get Listing Favorites Count
         [HttpGet("listing/{listingId:int}/count")]
         [AllowAnonymous]
@@ -128,6 +184,7 @@ namespace PL.Controllers
             var result = await _favoriteService.GetListingFavoritesCountAsync(listingId);
             return Ok(result);
         }
+
         //Get Trending Listings
         [HttpGet("trending")]
         [AllowAnonymous]
@@ -139,17 +196,21 @@ namespace PL.Controllers
             var result = await _favoriteService.GetMostFavoritedListingsAsync(count);
             return Ok(result);
         }
+
         //Clear All Favorites
         [HttpDelete("me/clear")]
         [ProducesResponseType(typeof(Response<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> ClearAllFavorites()
         {
-            var userId = GetUserId();
-            var result = await _favoriteService.ClearAllFavoritesAsync(userId);
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+                return Unauthorized(new { error = "User not authenticated" });
 
+            var result = await _favoriteService.ClearAllFavoritesAsync(userId.Value);
             return Ok(result);
         }
+
         //Get Favorite Stats (Admin Only)
         [HttpGet("stats")]
         [Authorize(Roles = "Admin")]
@@ -161,29 +222,21 @@ namespace PL.Controllers
             var result = await _favoriteService.GetFavoriteStatsAsync();
             return Ok(result);
         }
-        private Guid GetUserId()
+
+        // Diagnostic endpoint to test authentication
+        [HttpGet("debug/auth")]
+        public IActionResult DebugAuth()
         {
-            var possible = new[]
+            var userId = GetUserIdFromClaims();
+            var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+             
+            return Ok(new
             {
-                ClaimTypes.NameIdentifier,
-                "sub",
-                JwtRegisteredClaimNames.Sub,
-                "id",
-                "uid"
-            };
-
-            foreach (var name in possible)
-            {
-                var claim = User.FindFirst(name)?.Value;
-                if (!string.IsNullOrEmpty(claim) && Guid.TryParse(claim, out var g))
-                    return g;
-            }
-
-            var nameClaim = User.Identity?.Name;
-            if (!string.IsNullOrEmpty(nameClaim) && Guid.TryParse(nameClaim, out var byName))
-                return byName;
-
-            throw new UnauthorizedAccessException("User ID not found in token");
-        }
+                  IsAuthenticated = User.Identity?.IsAuthenticated,
+      UserId = userId,
+             Claims = claims,
+           IdentityName = User.Identity?.Name
+            });
+         }
     }
 }

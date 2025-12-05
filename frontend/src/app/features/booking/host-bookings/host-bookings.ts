@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { BookingService } from '../../../core/services/Booking/booking-service';
 import { BookingStoreService } from '../../../core/services/Booking/booking-store-service';
 import { GetBookingVM } from '../../../core/models/booking';
@@ -11,17 +11,26 @@ import { GetBookingVM } from '../../../core/models/booking';
   styleUrl: './host-bookings.css',
 })
 export class HostBookings implements OnInit {
- private bookingService = inject(BookingService);
+  private bookingService = inject(BookingService);
   private bookingStore = inject(BookingStoreService);
 
   bookings = signal<GetBookingVM[]>([]);
   isLoading = signal(false);
   errorMessage = signal('');
+  filter = signal<'all' | 'confirmed' | 'pending' | 'cancelled'>('all');
+
+  filteredBookings = computed(() => {
+    const f = this.filter();
+    const all = this.bookings();
+    if (f === 'all') return all;
+    return all.filter(b => b.bookingStatus.toLowerCase() === f);
+  });
 
   ngOnInit(): void {
     this.loadHostBookings();
   }
- loadHostBookings(): void {
+  
+  loadHostBookings(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
@@ -42,7 +51,7 @@ export class HostBookings implements OnInit {
       }
     });
   }
-  
+
   getStatusBadgeClass(status: string): string {
     switch (status.toLowerCase()) {
       case 'confirmed':
@@ -55,13 +64,13 @@ export class HostBookings implements OnInit {
         return 'bg-secondary';
     }
   }
-    getTotalRevenue(): number {
+  getTotalRevenue(): number {
     return this.bookings()
-      .filter(booking => booking.bookingStatus === 'confirmed')
+      .filter(booking => booking.bookingStatus.toLocaleLowerCase() === 'confirmed')
       .reduce((sum, booking) => sum + booking.totalPrice, 0);
   }
 
   getConfirmedBookingsCount(): number {
-    return this.bookings().filter(booking => booking.bookingStatus === 'confirmed').length;
+    return this.bookings().filter(booking => booking.bookingStatus.toLocaleLowerCase() === 'confirmed').length;
   }
 }

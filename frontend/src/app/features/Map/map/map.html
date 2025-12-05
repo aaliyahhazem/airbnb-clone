@@ -1,7 +1,208 @@
-<div id="map" class="map-container"></div>
+<div class="broker-map-page">
+  <!-- Egyptian Pattern Overlay -->
+  <div class="egyptian-pattern"></div>
 
-<div class="property-card" *ngIf="selectedProperty">
-    <img [src]="selectedProperty.mainImageUrl" alt="" />
-    <h3>{{ selectedProperty.title }}</h3>
-    <p>{{ selectedProperty.pricePerNight }} EGP/night</p>
+  <!-- Map Header -->
+  <div class="map-header">
+    <div class="header-content">
+      <!-- Broker Character Section -->
+      <div class="map-character-section">
+        <div class="character-avatar">
+          <img src="/3.png" alt="The Broker" class="broker-character">
+          <div class="character-accent-circle"></div>
+        </div>
+        <div class="map-branding">
+          <div class="map-title">
+            <h1 class="egyptian-text">
+              <i class="bi bi-geo-alt-fill"></i>
+              {{ 'map.exploreProperties' | translate }}
+            </h1>
+            <p class="broker-tagline">
+              <i class="bi bi-compass"></i>
+              {{ 'map.discoverProperties' | translate }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced Map Controls -->
+      <div class="map-controls">
+        <div class="controls-title">
+          <i class="bi bi-sliders"></i>
+          <span>{{ 'map.mapControls' | translate }}</span>
+        </div>
+        <div class="control-buttons">
+          <button class="control-btn zoom-in" [title]="'map.zoomIn' | translate" (click)="zoomIn()">
+            <i class="bi bi-zoom-in"></i>
+            <span>{{ 'map.zoomIn' | translate }}</span>
+          </button>
+          <button class="control-btn zoom-out" [title]="'map.zoomOut' | translate" (click)="zoomOut()">
+            <i class="bi bi-zoom-out"></i>
+            <span>{{ 'map.zoomOut' | translate }}</span>
+          </button>
+          <button class="control-btn reset-view" [title]="'map.resetView' | translate" (click)="resetView()">
+            <i class="bi bi-house-heart"></i>
+            <span>{{ 'map.resetView' | translate }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Indicator with Egyptian Theme -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <div class="broker-loading-character">
+        <img src="/3.png" alt="The Broker Loading" class="loading-broker">
+        <div class="loading-ripple"></div>
+      </div>
+      <div class="loading-text">
+        <h3 class="loading-title">{{ 'map.theBrokerSearching' | translate }}</h3>
+        <p class="loading-subtitle">{{ 'map.loadingProperties' | translate }}</p>
+        <div class="egyptian-loading-bar">
+          <div class="loading-progress"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map Container -->
+  <div class="map-wrapper">
+    <div id="map" class="map-container"></div>
+
+    <!-- Enhanced Property Stats -->
+    <div class="property-stats" *ngIf="properties.length > 0">
+      <div class="stats-icon">
+        <i class="bi bi-buildings"></i>
+      </div>
+      <div class="stats-content">
+        <div class="stats-number">{{ properties.length }}</div>
+        <div class="stats-label">
+          <span>{{ 'map.propertiesFound' | translate }}</span>
+        </div>
+      </div>
+      <div class="stats-accent"></div>
+    </div>
+  </div>
+
+  <!-- Enhanced Property Card -->
+  <div class="property-card-container" *ngIf="selectedProperty">
+    <div class="property-card">
+      <!-- Card Header -->
+      <div class="card-header">
+        <div class="broker-mini-avatar">
+          <img src="/3.png" alt="The Broker" class="mini-character">
+        </div>
+        <div class="card-title">
+          <span class="broker-title">{{ 'map.brokerChoice' | translate }}</span>
+        </div>
+        <button class="close-btn" (click)="closePropertyCard()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="property-image">
+        <img [src]="selectedProperty.mainImageUrl || '/assets/images/default-listing.svg'" [alt]="selectedProperty.title" />
+        <div class="property-badge">
+          <i class="bi bi-award"></i>
+          {{ selectedProperty.type }}
+        </div>
+        <div class="egyptian-border"></div>
+      </div>
+
+      <div class="property-content">
+        <h3 class="property-title">{{ selectedProperty.title }}</h3>
+
+        <div class="property-details">
+          <div class="detail-item">
+            <i class="bi bi-bed"></i>
+            <div class="detail-text">
+              <span class="value">{{ selectedProperty.bedrooms }}</span>
+              <span class="label">{{ 'map.bedrooms' | translate }}</span>
+            </div>
+          </div>
+          <div class="detail-item">
+            <i class="bi bi-droplet"></i>
+            <div class="detail-text">
+              <span class="value">{{ selectedProperty.bathrooms }}</span>
+              <span class="label">{{ 'map.bathrooms' | translate }}</span>
+            </div>
+          </div>
+          <div class="detail-item" *ngIf="selectedProperty.averageRating">
+            <i class="bi bi-star-fill"></i>
+            <div class="detail-text">
+              <span class="value">{{ selectedProperty.averageRating | number:'1.1-1' }}</span>
+              <span class="label">{{ 'map.rating' | translate }} ({{ selectedProperty.reviewCount }} {{ 'map.reviews' | translate }})</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="property-price">
+          <div class="price-container">
+            <span class="currency">{{ 'map.currency' | translate }}</span>
+            <span class="price">{{ selectedProperty.pricePerNight }}</span>
+            <div class="price-period">
+              <span class="period">{{ 'map.perNight' | translate }}</span>
+            </div>
+          </div>
+          <div class="egyptian-price-accent"></div>
+        </div>
+
+        <div class="property-actions">
+          <button class="btn-view-details" (click)="viewPropertyDetails(selectedProperty.id)">
+            <i class="bi bi-eye"></i>
+            <span>{{ 'map.viewDetails' | translate }}</span>
+          </button>
+          <app-favorite-button
+            [listingId]="selectedProperty.id"
+            [isFavorited]="isFavorited"
+            (favoriteChanged)="onFavoriteChanged($event)"
+            class="btn-favorite">
+          </app-favorite-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Map Legend -->
+  <div class="map-legend">
+    <div class="legend-header">
+      <div class="legend-character">
+        <img src="/3.png" alt="The Broker" class="legend-broker">
+      </div>
+      <div class="legend-title">
+        <span class="title">{{ 'map.mapLegend' | translate }}</span>
+        <i class="bi bi-compass"></i>
+      </div>
+    </div>
+    <div class="legend-items">
+      <div class="legend-item">
+        <div class="marker-sample available">
+          <i class="bi bi-house-check"></i>
+        </div>
+        <div class="legend-text">
+          <span class="legend-label">{{ 'map.availableProperty' | translate }}</span>
+        </div>
+      </div>
+      <div class="legend-item">
+        <div class="marker-sample premium">
+          <i class="bi bi-gem"></i>
+        </div>
+        <div class="legend-text">
+          <span class="legend-label">{{ 'map.premiumProperty' | translate }}</span>
+        </div>
+      </div>
+      <div class="legend-item">
+        <div class="marker-sample broker-choice">
+          <i class="bi bi-award"></i>
+        </div>
+        <div class="legend-text">
+          <span class="legend-label">{{ 'map.brokerChoice' | translate }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="legend-footer">
+      <div class="egyptian-pattern-small"></div>
+    </div>
+  </div>
 </div>

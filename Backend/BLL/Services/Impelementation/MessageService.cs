@@ -136,5 +136,18 @@ namespace BLL.Services.Impelementation
                 return Response<bool>.FailResponse(ex.Message);
             }
         }
+        public async Task<Response<int>> DeleteOldSeenMessagesAsync(int days)
+        {
+            try
+            {
+                var deletedCount = await _uow.Messages.DeleteSeenOlderThanDaysAsync(days);
+                return Response<int>.SuccessResponse(deletedCount);
+            }
+            catch (Exception ex)
+            {
+                return Response<int>.FailResponse(ex.Message);  
+            }
+        }
+
     }
 }

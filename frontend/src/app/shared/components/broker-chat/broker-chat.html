@@ -1,0 +1,109 @@
+<!-- Floating Chat Button -->
+<button
+  class="broker-chat-toggle"
+  (click)="toggleChat()"
+  [class.open]="isOpen"
+  aria-label="Toggle chat with The Broker">
+  <img src="/3.png" alt="The Broker" class="broker-avatar">
+  <span class="chat-pulse"></span>
+</button>
+
+<!-- Chat Window -->
+<div class="broker-chat-window" [class.open]="isOpen">
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="header-content">
+      <img src="/3.png" alt="The Broker" class="header-avatar">
+      <div class="header-text">
+        <h3>{{ 'chat.theBroker' | translate }}</h3>
+        <p class="status">{{ 'chat.online' | translate }}</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-clear" (click)="clearChat()" title="{{ 'chat.clearChat' | translate }}">
+        <i class="bi bi-trash"></i>
+      </button>
+      <button class="btn-close" (click)="toggleChat()" title="{{ 'common.close' | translate }}">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages Container -->
+  <div class="chat-messages" #messagesContainer>
+    <div *ngFor="let message of messages"
+         class="message-wrapper"
+         [class.user-message]="message.role === 'user'"
+         [class.assistant-message]="message.role === 'assistant'"
+         [class.error-message]="message.error">
+
+      <div class="message-bubble">
+        <div class="message-content">{{ message.content }}</div>
+
+        <!-- Action Buttons -->
+        <div class="message-actions" *ngIf="message.actions && message.actions.length > 0">
+          <button
+            *ngFor="let action of message.actions"
+            class="action-btn"
+            (click)="handleAction(action)">
+            <i class="bi" [ngClass]="{
+              'bi-search': action.type === 'search',
+              'bi-calendar-check': action.type === 'book',
+              'bi-plus-circle': action.type === 'create_listing',
+              'bi-arrow-right': action.type === 'navigate'
+            }"></i>
+            {{ action.label }}
+          </button>
+        </div>
+
+        <div class="message-time">
+          {{ message.timestamp | date:'shortTime' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div class="message-wrapper assistant-message" *ngIf="isTyping">
+      <div class="message-bubble typing-indicator">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div class="chat-error" *ngIf="hasError">
+      <i class="bi bi-exclamation-triangle"></i>
+      <p>{{ 'chat.errorMessage' | translate }}</p>
+      <button class="btn-retry" (click)="sendMessage()">
+        {{ 'chat.retry' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Input Area -->
+  <div class="chat-input-area">
+    <div class="input-wrapper">
+      <textarea
+        [(ngModel)]="userInput"
+        (keypress)="handleKeyPress($event)"
+        [placeholder]="'chat.inputPlaceholder' | translate"
+        rows="1"
+        maxlength="500"
+        class="chat-input"
+        [disabled]="isTyping"></textarea>
+
+      <button
+        class="btn-send"
+        (click)="sendMessage()"
+        [disabled]="!userInput.trim() || isTyping"
+        [attr.aria-label]="'chat.send' | translate">
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </div>
+
+    <div class="input-hint">
+      {{ 'chat.poweredBy' | translate }}
+    </div>
+  </div>
+</div>

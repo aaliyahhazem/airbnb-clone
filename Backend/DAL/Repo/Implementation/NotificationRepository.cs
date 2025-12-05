@@ -112,8 +112,22 @@
             await _context.SaveChangesAsync();
             return notification;
         }
+        public async Task<int> DeleteReadOlderThanDaysAsync(int days)
+        {
+            var cutoffDate = DateTime.UtcNow.AddDays(-days);
 
-       
+            var oldNotifs = await _context.Notifications
+                .Where(n => n.IsRead && n.CreatedAt < cutoffDate)
+                .ToListAsync();
+
+            if (!oldNotifs.Any()) return 0;
+
+            _context.Notifications.RemoveRange(oldNotifs);
+            await _context.SaveChangesAsync();
+            return oldNotifs.Count;
+        }
+
+
     }
 
 }

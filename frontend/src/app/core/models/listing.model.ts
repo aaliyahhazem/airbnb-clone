@@ -1,4 +1,14 @@
 // src/app/models/listing.model.ts
+
+// Restrict property types
+export type PropertyType = 'Apartment' | 'House' | 'Villa' | 'Studio' | 'Penthouse' | 'Cottage' | 'Chalet' | 'Loft' | 'Cabin' | 'Farmhouse';
+
+// Restrict amenities
+export type Amenity =
+  | 'Wi-Fi' | 'Pool' | 'AC' | 'Kitchen' | 'Washer' | 'Dryer' | 'TV'
+  | 'Heating' | 'Parking' | 'Fireplace' | 'Gym' | 'Breakfast'
+  | 'Pets Allowed' | 'Hot Tub' | 'Elevator';
+
 export interface Listing {
   id: number;
   title: string;
@@ -83,6 +93,9 @@ export interface ListingDetailVM {
   type: string;
   bedrooms: number;
   bathrooms: number;
+  // Host Information
+  hostId: string;
+  hostName: string;
 }
 
 export interface ListingOverviewVM {
@@ -105,6 +118,7 @@ export interface ListingOverviewVM {
   viewCount: number;
   favoriteCount: number;
   bookingCount: number;
+  amenities?: string[];
 }
 
 export interface ListingsResponse<T> {
@@ -117,5 +131,5 @@ export interface ListingsPagedResponse<T> {
   data: T[];
   totalCount: number;
   message?: string;
-  isError: boolean;
+  isError: boolean;
 }

@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import {
   Listing,
   ListingCreateVM,
@@ -12,10 +12,12 @@ import {
   ListingsResponse,
   ListingsPagedResponse
 } from '../../models/listing.model';
+import { UserPreferencesService } from '../user-preferences/user-preferences.service';
 
 @Injectable({ providedIn: 'root' })
 export class ListingService {
   private http = inject(HttpClient);
+  private userPreferences = inject(UserPreferencesService);
   private apiUrl = 'http://localhost:5235/api/Listings';
   private backendOrigin = 'http://localhost:5235';
 
@@ -55,6 +57,14 @@ export class ListingService {
             res.data.mainImageUrl = this.normalizeImageUrl(res.data.mainImageUrl);
           }
 
+          // Map host information
+          if (res.data.hostId) {
+            res.data.hostId = res.data.hostId;
+          }
+          if (res.data.hostName) {
+            res.data.hostName = res.data.hostName;
+          }
+
           if (Array.isArray(res.data.images)) {
             res.data.images = res.data.images.map((img: any) => ({
               ...img,
@@ -64,6 +74,34 @@ export class ListingService {
         }
 
         return res;
+      }),
+      tap(response => {
+        // Track user viewing this listing for personalization
+        if (response.data && !response.isError) {
+          const listing = response.data;
+          const overviewVM: ListingOverviewVM = {
+            id: listing.id,
+            title: listing.title,
+            pricePerNight: listing.pricePerNight,
+            location: listing.location,
+            mainImageUrl: listing.mainImageUrl,
+            averageRating: listing.averageRating,
+            reviewCount: listing.reviewCount,
+            isApproved: listing.isApproved,
+            description: listing.description,
+            destination: listing.destination,
+            type: listing.type,
+            bedrooms: listing.bedrooms,
+            bathrooms: listing.bathrooms,
+            createdAt: listing.createdAt,
+            priority: 0,
+            viewCount: 0,
+            favoriteCount: 0,
+            bookingCount: 0,
+            amenities: listing.amenities
+          };
+          this.userPreferences.trackListingInteraction(overviewVM, 1);
+        }
       })
     );
   }
@@ -102,7 +140,13 @@ export class ListingService {
           destination: item.destination ?? item.Destination ?? '',
           type: item.type ?? item.Type ?? '',
           bedrooms: item.bedrooms ?? item.Bedrooms ?? 0,
-          bathrooms: item.bathrooms ?? item.Bathrooms ?? 0
+          bathrooms: item.bathrooms ?? item.Bathrooms ?? 0,
+          createdAt: item.createdAt ?? item.CreatedAt ?? '',
+          priority: item.priority ?? item.Priority ?? 0,
+          viewCount: item.viewCount ?? item.ViewCount ?? 0,
+          favoriteCount: item.favoriteCount ?? item.FavoriteCount ?? 0,
+          bookingCount: item.bookingCount ?? item.BookingCount ?? 0,
+          amenities: this.normalizeAmenities(item.amenities ?? item.Amenities ?? [])
         }));
 
         return {
@@ -343,6 +387,31 @@ export class ListingService {
     if (u.startsWith('http://') || u.startsWith('https://')) return u;
     if (u.startsWith('/')) return `${this.backendOrigin}${u}`;
     return `${this.backendOrigin}/${u}`;
+  }
+
+  private normalizeAmenities(amenities: any): string[] {
+    if (!amenities) return [];
+
+    // If it's already an array of strings, return it
+    if (Array.isArray(amenities)) {
+      // Check if array contains strings
+      if (amenities.length > 0 && typeof amenities[0] === 'string') {
+        return amenities
+          .filter(a => a && typeof a === 'string')
+          .map(a => a.trim())
+          .filter(a => a.length > 0);
+      }
+
+      // Check if array contains objects with Word property (backend Amenity entity format)
+      if (amenities.length > 0 && typeof amenities[0] === 'object') {
+        return amenities
+          .filter(a => a && (a.word || a.Word))
+          .map(a => (a.word ?? a.Word).trim())
+          .filter(a => a.length > 0);
+      }
+    }
+
+    return [];
   }
 
   checkUserHasListings(): Observable<any> {

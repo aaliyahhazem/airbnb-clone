@@ -4,15 +4,18 @@ import { tap, map } from 'rxjs/operators';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
+import { AuthService as NewAuthService } from './auth-service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly cookieName = 'airbnb_token';
   private readonly localStorageKey = 'airbnb_token';
+  private readonly USER_KEY = 'user_data';
   private readonly apiBase = 'http://localhost:5235/api/auth';
   private authSubject: BehaviorSubject<boolean>;
   public isAuthenticated$: Observable<boolean>;
   private isBrowser: boolean;
+  private newAuthService = inject(NewAuthService);
 
   constructor(private http: HttpClient, private router: Router) {
     this.isBrowser = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
@@ -87,7 +90,6 @@ export class AuthService {
     // Try localStorage first (more reliable)
     const token = localStorage.getItem(this.localStorageKey);
     if (token) {
-      console.log('Token found in localStorage:', 'YES (length: ' + token.length + ')');
       return token;
     }
 
@@ -99,11 +101,9 @@ export class AuthService {
       while (c.charAt(0) === ' ') c = c.substring(1, c.length);
       if (c.indexOf(nameEQ) === 0) {
         const cookieToken = decodeURIComponent(c.substring(nameEQ.length, c.length));
-        console.log('Token found in cookie:', cookieToken ? 'YES (length: ' + cookieToken.length + ')' : 'NO');
         return cookieToken;
       }
     }
-    console.log('No token found in localStorage or cookies');
     return null;
   }
 
@@ -125,9 +125,7 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    const hasToken = !!this.getToken();
-    console.log('isAuthenticated check:', hasToken);
-    return hasToken;
+    return !!this.getToken();
   }
 
   // simple JWT payload decoder (no validation) to access claims
@@ -157,12 +155,9 @@ export class AuthService {
   getUserFullName(): string | null {
     const p = this.getPayload();
     if (!p) {
-      console.log('getUserFullName: No payload found');
       return null;
     }
-    console.log('getUserFullName: JWT Payload:', p);
     const fullName = p['name'] || p['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || null;
-    console.log('getUserFullName: Extracted full name:', fullName);
     return fullName;
   }
 
@@ -186,6 +181,25 @@ export class AuthService {
           if (this.isBrowser && isFirstLogin !== undefined) {
             localStorage.setItem('isFirstLogin', isFirstLogin.toString());
             console.log('isFirstLogin flag stored:', isFirstLogin);
+          }
+
+          // Extract user data from token and save to USER_KEY for new AuthService
+          if (this.isBrowser) {
+            const userName = this.getUserFullName();
+            if (userName) {
+              const user = {
+                id: '',
+                email: model.email,
+                userName: userName,
+                fullName: userName,
+                role: 'Guest'
+              };
+              localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+              console.log('✅ User data saved for new AuthService:', user);
+
+              // Trigger the new auth service to reload from storage
+              this.newAuthService['loadUserFromStorage']();
+            }
           }
 
           // Navigation will be handled by Login component based on isFirstLogin
@@ -212,6 +226,25 @@ export class AuthService {
           if (this.isBrowser && isFirstLogin !== undefined) {
             localStorage.setItem('isFirstLogin', isFirstLogin.toString());
             console.log('isFirstLogin flag stored:', isFirstLogin);
+          }
+
+          // Extract user data from token and save to USER_KEY for new AuthService
+          if (this.isBrowser) {
+            const userName = this.getUserFullName();
+            if (userName) {
+              const user = {
+                id: '',
+                email: model.email || '',
+                userName: userName,
+                fullName: userName,
+                role: 'Guest'
+              };
+              localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+              console.log('✅ User data saved for new AuthService:', user);
+
+              // Trigger the new auth service to reload from storage
+              this.newAuthService['loadUserFromStorage']();
+            }
           }
         }
       })

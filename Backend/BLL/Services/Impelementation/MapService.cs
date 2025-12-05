@@ -68,15 +68,21 @@ namespace BLL.Services.Impelementation
                     PricePerNight = p.PricePerNight,
                     Latitude = p.Latitude,
                     Longitude = p.Longitude,
-                    MainImageUrl = p.Images.FirstOrDefault()?.ImageUrl,
-                    Type = string.Empty,
-                    Bedrooms = 0,
-                    Bathrooms = 0,
+                    MainImageUrl = p.Images != null && p.Images.Any() 
+                        ? p.Images.FirstOrDefault()?.ImageUrl 
+                        : null,
+                    Type = p.Type, // Use actual property type
+                    Bedrooms = p.NumberOfRooms, // Use actual room count
+                    Bathrooms = p.NumberOfBathrooms, // Use actual bathroom count
                     AverageRating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : null,
                     ReviewCount = p.Reviews.Count
                 }).ToList();
 
                 _logger.LogInformation($"Found {propertyDtos.Count} properties in bounds");
+                foreach (var prop in propertyDtos)
+                {
+                    _logger.LogInformation($"Property {prop.Id}: {prop.Title}, Image: {prop.MainImageUrl}");
+                }
 
                 return new MapSearchResponseDto
                 {
@@ -105,9 +111,9 @@ namespace BLL.Services.Impelementation
                 Latitude = property.Latitude,
                 Longitude = property.Longitude,
                 MainImageUrl = property.Images.FirstOrDefault()?.ImageUrl,
-                Type = string.Empty,
-                Bedrooms = 0,
-                Bathrooms = 0,
+                Type = property.Type, // Use actual property type
+                Bedrooms = property.NumberOfRooms, // Use actual room count
+                Bathrooms = property.NumberOfBathrooms, // Use actual bathroom count
                 AverageRating = property.Reviews.Any() ? property.Reviews.Average(r => r.Rating) : null,
                 ReviewCount = property.Reviews.Count
             };

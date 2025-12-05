@@ -2,13 +2,14 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { ListingService } from '../../../core/services/listings/listing.service';
 import { ListingOverviewVM } from '../../../core/models/listing.model';
 
 @Component({
   selector: 'app-listings-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, TranslateModule],
   templateUrl: './listing-list.html',
   styleUrls: ['./listing-list.css'],
 })
@@ -20,18 +21,27 @@ export class ListingsList implements OnInit {
   loading = signal<boolean>(false);
   error = signal<string>('');
   currentPage = signal<number>(1);
-  pageSize = 14;
+  pageSize = 6;
   totalCount = signal<number>(0);
 
   // search + filters
   search = signal<string>('');
-  location = signal<string>('');
+  destination = signal<string>('');
+  type = signal<string>('');
   maxPrice = signal<number | null>(null);
   minRating = signal<number | null>(null);
   isApproved = signal<string>(''); // '', approved, not-approved
 
+  // delete confirmation modal
+  showDeleteModal = signal<boolean>(false);
+  listingToDelete = signal<number | null>(null);
+  listingToDeleteTitle = signal<string>('');
+
   // computed
-  totalPages = computed(() => Math.max(1, Math.ceil(this.totalCount() / this.pageSize)));
+  totalPages = computed(() => {
+    const filteredCount = this.filtered().length;
+    return Math.max(1, Math.ceil(filteredCount / this.pageSize));
+  });
 
   paginationPages = computed<(number | string)[]>(() => {
     const total = this.totalPages();
@@ -54,39 +64,28 @@ export class ListingsList implements OnInit {
     return pages;
   });
 
-  locations = computed<string[]>(() => {
-    return [
-      'Cairo',
-      'Giza',
-      'Alexandria',
-      'Luxor',
-      'Aswan',
-      'Sharm El Sheikh',
-      'Hurghada',
-      'Mansoura',
-      'Tanta',
-      'Fayoum',
-      'Ismailia',
-      'Port Said',
-      'Suez',
-      'Zagazig',
-      'Qena',
-      'Sohag',
-      'Assiut',
-      'Bani Suef',
-      'Minya',
-      'Damanhour',
-      'Kafr El Sheikh',
-      'Damietta',
-      'Marsa Matruh',
-      'North Sinai',
-      'South Sinai',
-      'Red Sea',
-      'New Cairo',
-      'Obour',
-      'Sheikh Zayed',
-      '6th of October City'
-    ].sort((a, b) => a.localeCompare(b));
+  destinations = computed<string[]>(() => {
+    const allDestinations = this.listings()
+      .map(l => l.destination)
+      .filter((dest): dest is string => !!dest);
+
+    return [...new Set(allDestinations)].sort((a, b) => a.localeCompare(b));
+  });
+
+  types = computed<string[]>(() => {
+    const allTypes = this.listings()
+      .map(l => l.type)
+      .filter((type): type is string => !!type);
+
+    return [...new Set(allTypes)].sort((a, b) => a.localeCompare(b));
+  });
+
+  // Paginated data for current page
+  paginatedListings = computed<ListingOverviewVM[]>(() => {
+    const filteredData = this.filtered();
+    const startIndex = (this.currentPage() - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    return filteredData.slice(startIndex, endIndex);
   });
 
   private normalize(input?: string): string {
@@ -111,27 +110,33 @@ export class ListingsList implements OnInit {
     if (!data || !Array.isArray(data) || data.length === 0) return [];
 
     const rawQuery = this.search().trim();
-    const rawLoc = this.location().trim();
+    const rawDest = this.destination().trim();
+    const rawType = this.type().trim();
     const approvedFilter = this.isApproved();
     const maxP = this.maxPrice();
     const minR = this.minRating();
 
     const q = this.normalize(rawQuery);
-    const locNormalized = this.normalize(rawLoc);
+    const destNormalized = this.normalize(rawDest);
+    const typeNormalized = this.normalize(rawType);
 
     return data.filter(l => {
       const title = this.normalize(l.title);
-      const locationVal = this.normalize(l.location);
+      const destinationVal = this.normalize(l.destination);
+      const typeVal = this.normalize(l.type);
       const description = this.normalize(l.description ?? '');
 
       const matchesSearch =
         !q ||
         title.includes(q) ||
-        locationVal.includes(q) ||
+        destinationVal.includes(q) ||
         description.includes(q);
 
-      const matchesLocation =
-        !locNormalized || locationVal.includes(locNormalized);
+      const matchesDestination =
+        !destNormalized || destinationVal.includes(destNormalized);
+
+      const matchesType =
+        !typeNormalized || typeVal.includes(typeNormalized);
 
       const matchesApproval =
         approvedFilter === '' ||
@@ -144,23 +149,25 @@ export class ListingsList implements OnInit {
       const ratingOk =
         (minR === null || (l.averageRating ?? 0) >= minR);
 
-      return matchesSearch && matchesLocation && matchesApproval && priceOk && ratingOk;
+      return matchesSearch && matchesDestination && matchesType && matchesApproval && priceOk && ratingOk;
     });
   });
 
   ngOnInit() {
-    this.loadListings();
+    this.loadAllListings();
   }
 
-  loadListings() {
+  loadAllListings() {
     this.loading.set(true);
     this.error.set('');
 
-    this.listingService.getHostListings(this.currentPage(), this.pageSize).subscribe({
+    // Load ALL listings without pagination parameters
+    this.listingService.getHostListings().subscribe({
       next: (response) => {
         if (!response.isError) {
           this.listings.set(response.data || []);
-          this.totalCount.set(response.totalCount || 0);
+          this.totalCount.set(response.data?.length || 0);
+          this.currentPage.set(1); // Reset to first page when data loads
         } else {
           this.error.set(response.message || 'Failed to load your listings');
         }
@@ -174,7 +181,17 @@ export class ListingsList implements OnInit {
   }
 
   onDelete(id: number) {
-    if (!confirm('Delete this listing?')) return;
+    const listing = this.listings().find(l => l.id === id);
+    if (listing) {
+      this.listingToDelete.set(id);
+      this.listingToDeleteTitle.set(listing.title || 'this listing');
+      this.showDeleteModal.set(true);
+    }
+  }
+
+  confirmDelete() {
+    const id = this.listingToDelete();
+    if (!id) return;
 
     this.listingService.delete(id).subscribe({
       next: (response) => {
@@ -183,26 +200,46 @@ export class ListingsList implements OnInit {
         } else {
           this.error.set(response.message || 'Failed to delete listing');
         }
+        this.closeDeleteModal();
       },
       error: (err) => {
         this.error.set('Error deleting listing: ' + (err.message || 'Unknown error'));
+        this.closeDeleteModal();
       }
     });
   }
 
+  closeDeleteModal() {
+    this.showDeleteModal.set(false);
+    this.listingToDelete.set(null);
+    this.listingToDeleteTitle.set('');
+  }
+
   resetFilters() {
     this.search.set('');
-    this.location.set('');
+    this.destination.set('');
+    this.type.set('');
     this.maxPrice.set(null);
     this.minRating.set(null);
     this.isApproved.set('');
-    this.currentPage.set(1);
+    this.currentPage.set(1); // Reset to first page
   }
 
   goToPage(page: number) {
     if (page >= 1 && page <= this.totalPages()) {
       this.currentPage.set(page);
-      this.loadListings();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.update(p => p + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage() > 1) {
+      this.currentPage.update(p => p - 1);
     }
   }
 

@@ -1,3 +1,7 @@
+using Hangfire;
+using Hangfire.SqlServer;
+using PL.Background_Jobs;
+
 using Microsoft.Extensions.FileProviders;
 
 namespace PL
@@ -7,6 +11,17 @@ namespace PL
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Enable detailed logging for development
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+            builder.Logging.AddDebug();
+            
+            if (builder.Environment.IsDevelopment())
+            {
+                builder.Logging.SetMinimumLevel(LogLevel.Information);
+                builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Information);
+            }
 
             // Keep original JWT claim types (don't remap sub/name, etc.)
             JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
@@ -36,6 +51,29 @@ namespace PL
                 });
             });
 
+            //--------------------------------------------------------------------
+            //Background Jobs
+            //---------------------------------------------------------------------
+            // Hangfire storage
+            builder.Services.AddHangfire(config =>
+            {
+                config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                      .UseSimpleAssemblyNameTypeSerializer()
+                      .UseRecommendedSerializerSettings()
+                      .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"),
+                          new SqlServerStorageOptions
+                          {
+                              CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                              SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                              QueuePollInterval = TimeSpan.FromSeconds(15),
+                              UseRecommendedIsolationLevel = true,
+                              DisableGlobalLocks = true
+                          });
+            });
+            builder.Services.AddHangfireServer();
+            // Register jobs
+            builder.Services.AddTransient<MessageCleanupJob>();
+            builder.Services.AddTransient<NotificationCleanupJob>();
             // --------------------------------------------------------------------
             // DbContext
             // --------------------------------------------------------------------
@@ -220,6 +258,24 @@ namespace PL
                 RequestPath = "/Files"
             });
 
+            // Hangfire Dashboard
+            app.UseHangfireDashboard("/hangfire");
+
+            // register recurring jobs reading cron from config
+            var messageCron = builder.Configuration.GetValue<string>("BackgroundJobs:MessageCleanupCron", Cron.Daily());
+            var notifCron = builder.Configuration.GetValue<string>("BackgroundJobs:NotificationCleanupCron", Cron.Daily());
+
+            RecurringJob.AddOrUpdate<MessageCleanupJob>(
+                "cleanup-messages",
+                job => job.ExecuteAsync(),
+                messageCron
+            );
+
+            RecurringJob.AddOrUpdate<NotificationCleanupJob>(
+                "cleanup-notifications",
+                job => job.ExecuteAsync(),
+                notifCron
+            );
             app.MapControllers();
 
             app.MapHub<NotificationHub>("/notificationsHub");

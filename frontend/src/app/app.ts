@@ -2,6 +2,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { Router, RouterOutlet, NavigationStart, NavigationEnd, NavigationError, Event } from '@angular/router';
 import { Navbar } from './shared/components/navbar/navbar';
 import { Footer } from './shared/components/footer/footer';
+import { BrokerChatComponent } from './shared/components/broker-chat/broker-chat';
 import { NotificationHub } from './core/services/notification-hub';
 import { MessageHub } from './core/services/message-hub';
 import { NotificationStoreService } from './core/services/notification-store';
@@ -16,7 +17,7 @@ import { BookingStoreService } from './core/services/Booking/booking-store-servi
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, Navbar, Footer],
+  imports: [RouterOutlet, Navbar, Footer, BrokerChatComponent],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })

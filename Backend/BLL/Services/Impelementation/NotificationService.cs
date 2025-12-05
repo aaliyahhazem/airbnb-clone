@@ -198,5 +198,18 @@ namespace BLL.Services.Impelementation
                 return new Response<List<GetNotificationVM>>(null, ex.Message, true);
             }
         }
+        public async Task<Response<int>> DeleteOldNotificationsAsync(int days)
+        {
+            try
+            {
+                var deletedCount = await _unitOfWork.Notifications.DeleteReadOlderThanDaysAsync(days);
+                return Response<int>.SuccessResponse(deletedCount);
+            }
+            catch (Exception ex)
+            {
+                return Response<int>.FailResponse(ex.Message);
+            }
+        }
+
     }
 }

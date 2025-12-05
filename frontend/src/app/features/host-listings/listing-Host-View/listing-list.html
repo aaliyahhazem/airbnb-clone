@@ -1,0 +1,236 @@
+<div class="broker-listings-container">
+  <!-- Hero Header Section -->
+  <div class="broker-search-hero">
+    <div class="container-fluid">
+      <div class="broker-branding-header text-center">
+        <h2 class="broker-title">{{ 'hostListings.title' | translate }}</h2>
+        <p class="broker-subtitle">{{ 'hostListings.subtitle' | translate }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="broker-main-content">
+    <div class="container-fluid">
+      <div class="row">
+
+        <!-- Listings Grid -->
+        <div class="col-lg-9 col-md-8">
+          <div class="broker-listings-grid">
+            <div class="broker-listings-header">
+              <h3 class="listings-count">{{ filtered().length }} {{ 'hostListings.properties' | translate }}</h3>
+              <button class="btn-broker" [routerLink]="['/host/create']">
+                <i class="bi bi-plus-circle"></i> {{ 'hostListings.addNewListing' | translate }}
+              </button>
+            </div>
+
+            <div class="broker-cards-grid">
+              <div class="broker-listing-card" *ngFor="let l of paginatedListings(); trackBy: trackById">
+                <img [src]="l.mainImageUrl
+                    ? (l.mainImageUrl.indexOf('http') === 0
+                      ? l.mainImageUrl
+                      : 'http://localhost:5235' + l.mainImageUrl)
+                    : 'assets/default-listing.svg'" class="broker-card-image" />
+
+                <div class="broker-card-status">
+                  <span *ngIf="!l.isApproved" class="status-badge status-pending">{{ 'hostListings.statusPending' | translate }}</span>
+                  <span *ngIf="l.isApproved" class="status-badge status-approved">{{ 'hostListings.statusApproved' | translate }}</span>
+                </div>
+
+                <div class="broker-card-content">
+                  <h5 class="broker-card-title">{{ l.title }}</h5>
+
+                  <div class="broker-card-details">
+                    <p class="broker-detail-item">
+                      <i class="bi bi-geo-alt"></i> {{ l.destination }}
+                    </p>
+                    <p class="broker-detail-item">
+                      <i class="bi bi-house"></i> {{ l.type }}
+                    </p>
+                    <p class="broker-detail-item">
+                      <i class="bi bi-door-open"></i> {{ l.bedrooms }} Bed • {{ l.bathrooms }} Bath
+                    </p>
+                    <p class="broker-detail-item">
+                      <i class="bi bi-star-fill"></i> {{ l.averageRating || 0 }} / 5 ({{ l.reviewCount }} reviews)
+                    </p>
+                  </div>
+
+                  <div class="broker-card-footer">
+                    <div class="broker-card-price">
+                      <span class="price-amount">${{ l.pricePerNight }}</span>
+                      <span class="price-period">/{{ 'hostListings.night' | translate }}</span>
+                    </div>
+
+                    <div class="broker-card-actions">
+                      <a class="action-btn action-view" [routerLink]="['/listings', l.id]" title="View">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                      <a class="action-btn action-edit" [routerLink]="['/host', l.id, 'edit']" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                      <button class="action-btn action-delete" (click)="onDelete(l.id)" title="Delete">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Loading State -->
+            <div *ngIf="loading()" class="broker-loading-state">
+              <div class="loading-spinner"></div>
+              <p>{{ 'hostListings.loadingListings' | translate }}</p>
+            </div>
+
+            <!-- Error State -->
+            <div *ngIf="error()" class="broker-error-state">
+              <i class="bi bi-exclamation-triangle"></i>
+              <p>{{ error() }}</p>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!loading() && !error() && filtered().length === 0" class="broker-empty-state">
+              <i class="bi bi-house-x"></i>
+              <h4>{{ 'hostListings.noListingsFound' | translate }}</h4>
+              <p>{{ 'hostListings.noListingsDescription' | translate }}</p>
+              <button class="btn-broker" [routerLink]="['/host/create']">{{ 'hostListings.createFirstListing' | translate }}</button>
+            </div>
+
+            <!-- Pagination -->
+            <div *ngIf="!loading() && !error() && filtered().length > 0 && totalPages() > 1" class="pagination-section">
+              <button *ngIf="currentPage() > 1" (click)="prevPage()" class="pagination-btn">{{ 'hostListings.previous' | translate }}</button>
+              <span *ngFor="let page of paginationPages()" class="pagination-number">
+                <button *ngIf="typeof page === 'number'" (click)="goToPage(+page)"
+                  [class.active]="page === currentPage()" class="pagination-page-btn">{{ page }}</button>
+                <span *ngIf="typeof page === 'string'" class="pagination-ellipsis">{{ page }}</span>
+              </span>
+              <button *ngIf="currentPage() < totalPages()" (click)="nextPage()" class="pagination-btn">{{ 'hostListings.next' | translate }}</button>
+              <div class="pagination-info">{{ 'hostListings.pageOf' | translate : { current: currentPage(), total: totalPages() } }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters Sidebar -->
+        <div class="col-lg-3 col-md-4">
+          <div class="broker-sidebar">
+            <div class="broker-filters-section">
+              <div class="filters-header">
+                <h4>{{ 'hostListings.filters' | translate }}</h4>
+                <i class="bi bi-funnel"></i>
+              </div>
+
+              <!-- Search Filter -->
+              <div class="filter-group">
+                <label class="filter-label">{{ 'hostListings.search' | translate }}</label>
+                <div class="broker-search-group">
+                  <i class="bi bi-search"></i>
+                  <input class="broker-filter-input" type="text" placeholder="Search listings..." [ngModel]="search()"
+                    (ngModelChange)="search.set($event)" />
+                </div>
+              </div>
+
+              <!-- Destination Filter -->
+              <div class="filter-group">
+                <label class="filter-label">Destination</label>
+                <div class="broker-search-group">
+                  <i class="bi bi-geo-alt"></i>
+                  <select class="broker-filter-select" [ngModel]="destination()"
+                    (ngModelChange)="destination.set($event)">
+                    <option value="">All Destinations</option>
+                    <option *ngFor="let dest of destinations()" [value]="dest">{{ dest }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Type Filter -->
+              <div class="filter-group">
+                <label class="filter-label">Type</label>
+                <div class="broker-search-group">
+                  <i class="bi bi-house"></i>
+                  <select class="broker-filter-select" [ngModel]="type()" (ngModelChange)="type.set($event)">
+                    <option value="">All Types</option>
+                    <option *ngFor="let t of types()" [value]="t">{{ t }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Status Filter -->
+              <div class="filter-group">
+                <label class="filter-label">{{ 'hostListings.status' | translate }}</label>
+                <div class="broker-search-group">
+                  <i class="bi bi-check-circle"></i>
+                  <select class="broker-filter-select" [ngModel]="isApproved()"
+                    (ngModelChange)="isApproved.set($event)">
+                    <option value="">All Status</option>
+                    <option value="approved">Approved</option>
+                    <option value="not-approved">Pending</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Max Price Filter -->
+              <div class="filter-group">
+                <label class="filter-label">{{ 'hostListings.maxPrice' | translate }}</label>
+                <div class="broker-search-group">
+                  <i class="bi bi-currency-dollar"></i>
+                  <input type="number" placeholder="Max Price" class="broker-filter-input" [ngModel]="maxPrice()"
+                    (ngModelChange)="maxPrice.set($event === '' ? null : +$event)">
+                </div>
+              </div>
+
+              <!-- Min Rating Filter -->
+              <div class="filter-group">
+                <label class="filter-label">{{ 'hostListings.minRating' | translate }}</label>
+                <div class="broker-search-group">
+                  <i class="bi bi-star"></i>
+                  <input type="number" placeholder="Min Rating" class="broker-filter-input" min="0" max="5" step="0.5"
+                    [ngModel]="minRating()" (ngModelChange)="minRating.set($event === '' ? null : +$event)">
+                </div>
+              </div>
+
+              <div class="filter-results">
+                {{ 'hostListings.filterResults' | translate : { count: filtered().length } }}
+              </div>
+
+              <button class="btn-broker-outline w-100" (click)="resetFilters()">
+                <i class="bi bi-arrow-clockwise"></i> {{ 'hostListings.resetFilters' | translate }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteModal()" class="modal-overlay" (click)="closeDeleteModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ 'common.confirm' | translate }}</h3>
+      <button class="modal-close" (click)="closeDeleteModal()">
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="warning-icon">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <p>{{ 'hostListings.confirmDeleteMessage' | translate }}</p>
+      <p class="listing-title"><strong>"{{ listingToDeleteTitle() }}"</strong></p>
+      <p class="warning-text">{{ 'hostListings.deleteWarning' | translate }}</p>
+    </div>
+    
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="closeDeleteModal()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button class="btn-delete" (click)="confirmDelete()">
+        {{ 'common.delete' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -726,3 +726,161 @@
     justify-content: center;
   }
 }
+
+/* ===== LISTING CARD WRAPPER STYLES ===== */
+
+.listing-card-wrapper {
+  position: relative;
+}
+
+.listing-card-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Remove Favorite Button */
+.remove-favorite-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.95), rgba(139, 0, 0, 0.95));
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);
+  z-index: 100;
+  opacity: 0; /* Hidden by default */
+  transform: scale(0.9);
+  padding: 0;
+}
+
+.remove-favorite-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(220, 20, 60, 0.5);
+  background: linear-gradient(135deg, #8B0000, #600000);
+}
+
+.remove-favorite-btn:active {
+  transform: translateY(0);
+}
+
+.listing-card-wrapper:hover .remove-favorite-btn {
+  opacity: 1;
+}
+
+.remove-favorite-btn .btn-text {
+  font-size: 0.85rem;
+}
+
+.remove-favorite-btn i {
+  font-size: 1rem;
+}
+
+
+@keyframes badgeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.15); }
+}
+
+/* Responsive adjustments for remove button */
+@media (max-width: 768px) {
+  .remove-favorite-btn {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.8rem;
+    border-radius: 8px;
+  }
+
+  .remove-favorite-btn .btn-text {
+    font-size: 0.75rem;
+  }
+
+  .favorite-count-overlay {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .remove-favorite-btn {
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+  }
+
+  .remove-favorite-btn .btn-text {
+    display: none;
+  }
+
+  .remove-favorite-btn i {
+    font-size: 0.9rem;
+  }
+
+  .favorite-count-overlay {
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 16px;
+    font-size: 0.75rem;
+  }
+
+  .listing-card-container:hover .remove-favorite-btn {
+    opacity: 1;
+  }
+}
+/* ===== Favorites Grid Layout ===== */
+.favorites-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  padding: 1rem 2rem;
+}
+
+/* Each card wrapper */
+.listing-card-wrapper {
+  flex: 1 1 calc(25% - 1.5rem); 
+  max-width: calc(25% - 1.5rem);
+  display: flex;
+}
+
+/* Prevent card stretching vertically */
+.listing-card-container {
+  width: 100%;
+  position: relative;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1200px) {
+  .listing-card-wrapper {
+    flex: 1 1 calc(50% - 1.5rem); 
+    max-width: calc(50% - 1.5rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .listing-card-wrapper {
+    flex: 1 1 100%;                 /* 1 in a row */
+    max-width: 100%;
+  }
+}

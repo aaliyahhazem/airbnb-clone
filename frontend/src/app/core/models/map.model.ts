@@ -13,12 +13,19 @@ export interface MapSearchRequest {
 export interface PropertyMap {
   id: number;
   title: string;
+  description?: string;
   pricePerNight: number;
   latitude: number;
   longitude: number;
+  location?: string;
+  destination?: string;
   mainImageUrl?: string;
+  type: string;
+  bedrooms: number;
+  bathrooms: number;
   averageRating?: number;
-  reviewCount: number;
+  reviewCount: number;
+  amenities?: string[];
 }
 
 // GeocodeResponse
